@@ -17,6 +17,7 @@ public class Main extends ApplicationAdapter {
 
     public static final int GRID_ROWS = 20;
     public static final int GRID_COLS = 40;
+    public static final int GRID_SIZE = 50;
 
     @Override
 	public void create () {
@@ -51,11 +52,13 @@ public class Main extends ApplicationAdapter {
 
         shapes.begin(ShapeRenderer.ShapeType.Line);
         shapes.setColor(.88f, .88f, .88f, 1);
+        //Vertical grid lines
         for(int i = 0; i < GRID_COLS; i++){
-            shapes.line(i*50,0,i*50,GRID_ROWS*50);
+            shapes.line(i*GRID_SIZE,0,i*GRID_SIZE,GRID_ROWS*GRID_SIZE);
         }
+        //Horizontal grid lines
         for(int i = 0; i < GRID_ROWS; i++){
-            shapes.line(0,i*50,GRID_COLS*50,i*50);
+            shapes.line(0,i*GRID_SIZE,GRID_COLS*GRID_SIZE,i*GRID_SIZE);
         }
         shapes.end();
 	}
