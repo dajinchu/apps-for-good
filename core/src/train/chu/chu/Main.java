@@ -8,18 +8,20 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
+import com.badlogic.gdx.utils.SnapshotArray;
 
 public class Main extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -31,7 +33,9 @@ public class Main extends ApplicationAdapter {
     public static final int GRID_COLS = 40;
     public static final int GRID_SIZE = 50;
     private Stage stage;
+    private Skin skin;
     private DragAndDrop dragAndDrop;
+    private HorizontalGroup row;
 
     @Override
 	public void create () {
@@ -40,89 +44,91 @@ public class Main extends ApplicationAdapter {
 		img = new Texture("badlogic.jpg");
         camera = new OrthographicCamera();
 
+        //Generate font
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 48;
+        BitmapFont roboto = generator.generateFont(parameter); // font size 12 pixels
+        generator.dispose();
+
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
-        final Skin skin = new Skin();
-        skin.add("default", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        skin = new Skin();
+        skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
         skin.add("badlogic", new Texture("badlogic.jpg"));
+        skin.add("tmp", new Texture("tmp.png"));
 
-        final Image sourceImage = new Image(skin, "badlogic");
-        sourceImage.setBounds(50, 125, 100, 100);
-        stage.addActor(sourceImage);
+        row = new HorizontalGroup();
+        row.setBounds(0,0,300,300);
+        stage.addActor(row);
 
-        Image validTargetImage = new Image(skin, "badlogic");
-        validTargetImage.setBounds(200, 50, 100, 100);
-        stage.addActor(validTargetImage);
 
+        Label first = new Label("X",skin);
+        first.setColor(Color.BLACK);
+        row.addActor(first);
+
+        Label second = new Label("8",skin);
+        second.setColor(Color.BLACK);
+        row.addActor(second);
+
+        Label num = new Label("132",skin);
+        num.setColor(Color.BLACK);
+        row.addActor(num);
 
         dragAndDrop = new DragAndDrop();
-        dragAndDrop.addSource(new Source(sourceImage) {
-            public Payload dragStart (InputEvent event, float x, float y, int pointer) {
-                this.getActor().setVisible(false);
-                Payload payload = new Payload();
-                payload.setObject("Some payload!");
+        SnapshotArray<Actor> children = row.getChildren();
+        for(final Actor actor : children) {
+            dragAndDrop.addSource(new Source(actor) {
+                public Payload dragStart(InputEvent event, float x, float y, int pointer) {
+                    Payload payload = new Payload();
+                    payload.setObject("Some payload!");
 
-                payload.setDragActor(new Image(skin,"badlogic"));
+                    Label draglabel = new Label(((Label)actor).getText(),skin);
+                    draglabel.setColor(0,0,0,1);
+                    payload.setDragActor(draglabel);
+                    dragAndDrop.setDragActorPosition(-(actor.getWidth()/2), actor.getHeight()/2);
 
-                Label validLabel = new Label("Some payload!", skin);
-                validLabel.setColor(0, 1, 0, 1);
-                payload.setValidDragActor(validLabel);
+                    /*Label validLabel = new Label("valid!", skin);
+                    validLabel.setColor(0, 1, 0, 1);
+                    payload.setValidDragActor(validLabel);
 
-                Label invalidLabel = new Label("Some payload!", skin);
-                invalidLabel.setColor(1, 0, 0, 1);
-                payload.setInvalidDragActor(invalidLabel);
-
-                return payload;
-            }
-        });
-        dragAndDrop.addTarget(new Target(validTargetImage) {
-            private boolean beganDrag = false;//Has the dragging process begun?
-            private float initX, initY;
-
-            //Center rect is the detection area for getting out of the way, or merging blocks
-            private Rectangle centerRect = new Rectangle(
-                    getActor().getWidth()*.3f,getActor().getHeight()*.3f,
-                    getActor().getWidth()*.4f,getActor().getHeight()*.4f);
-
-            public boolean drag (Source source, Payload payload, float x, float y, int pointer) {
-                //Something is being dragged over this target
-                if(!beganDrag){
-                    //Haven't begun drag before this, so this is the first received coords in this drag
-                    beganDrag = true;
-                    //Record initx and y so if centerRect is entered, we know which way to move.
-                    initX=x;
-                    initY=y;
+                    Label invalidLabel = new Label("invalid!", skin);
+                    invalidLabel.setColor(1, 0, 0, 1);
+                    payload.setInvalidDragActor(invalidLabel);
+*/
+                    return payload;
                 }
-                System.out.println(Gdx.input.getX()-payload.getValidDragActor().getX());
-                if(centerRect.contains(x,y)){
-                    int absX = (int)Math.abs(initX-x);
-                    int absY = (int)Math.abs(initY-y);
-                    int moveX=0, moveY=0;
-                    if(absX>=absY){
-                        moveX = (int)Math.signum(initX-x);
-                    }else{
-                        moveY = (int)Math.signum(initY-y);
+            });
+            dragAndDrop.addTarget(new Target(actor) {
+                //Center rect is the detection area for getting out of the way, or merging blocks
+                private Rectangle centerRect = new Rectangle(
+                        getActor().getWidth() * .3f, getActor().getHeight() * .3f,
+                        getActor().getWidth() * .4f, getActor().getHeight() * .4f);
+
+                public boolean drag(Source source, Payload payload, float x, float y, int pointer) {
+                    //Something is being dragged over this target
+                    if(source.getActor()==actor){
+                        System.out.println("Same actor");
+                        return false;
                     }
-                    move(payload.getDragActor(),moveX,moveY);
+                    if (centerRect.contains(x, y)) {
+                        System.out.println("contained");
+                        System.out.println(row.swapActor(getActor(), source.getActor()));
+                        row.invalidate();
+                    }
+                    getActor().setColor(Color.GREEN);
+                    return true;
                 }
-                getActor().setColor(Color.GREEN);
-                return true;
-            }
-            private void move(Actor mover, int xdir, int ydir){
-                System.out.println(xdir+","+ydir);
-                //Mover just entered our centerRect, and making room for it.
-                getActor().moveBy(mover.getWidth()*xdir,mover.getHeight()*ydir);
-            }
 
-            public void reset (DragAndDrop.Source source, Payload payload) {
-                getActor().setColor(Color.WHITE);
-                beganDrag = false;
-            }
+                public void reset(DragAndDrop.Source source, Payload payload) {
+                    getActor().setColor(Color.BLACK);
+                }
 
-            public void drop (Source source, Payload payload, float x, float y, int pointer) {
-                System.out.println("Accepted: " + payload.getObject() + " " + x + ", " + y);
-            }
-        });
+                public void drop(Source source, Payload payload, float x, float y, int pointer) {
+                    System.out.println("Accepted: " + payload.getObject() + " " + x + ", " + y);
+                }
+            });
+        }
 	}
 
     @Override
@@ -159,5 +165,6 @@ public class Main extends ApplicationAdapter {
 
     public void dispose () {
         stage.dispose();
+        skin.dispose();
     }
 }
