@@ -10,17 +10,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
 import com.badlogic.gdx.utils.SnapshotArray;
 
 public class Main extends ApplicationAdapter {
@@ -47,7 +42,7 @@ public class Main extends ApplicationAdapter {
         //Generate font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 48;
+        parameter.size = 72;
         BitmapFont roboto = generator.generateFont(parameter); // font size 12 pixels
         generator.dispose();
 
@@ -62,79 +57,39 @@ public class Main extends ApplicationAdapter {
         row.setBounds(0,0,300,300);
         stage.addActor(row);
 
+        dragAndDrop = new DragAndDrop();
 
-        Label first = new Label("X",skin);
+        Label first = new Label("*",skin);
         first.setColor(Color.BLACK);
-        row.addActor(first);
+        Block block = new Block(dragAndDrop, first);
+        block.addActor(first);
+        row.addActor(block);
 
         Label second = new Label("8",skin);
         second.setColor(Color.BLACK);
-        row.addActor(second);
+        block = new Block(dragAndDrop, second);
+        block.addActor(second);
+        row.addActor(block);
 
         Label num = new Label("132",skin);
         num.setColor(Color.BLACK);
-        row.addActor(num);
+        block = new Block(dragAndDrop, num);
+        block.addActor(num);
+        row.addActor(block);
 
-        dragAndDrop = new DragAndDrop();
         SnapshotArray<Actor> children = row.getChildren();
         for(final Actor actor : children) {
-            dragAndDrop.addSource(new Source(actor) {
-                public Payload dragStart(InputEvent event, float x, float y, int pointer) {
-                    Payload payload = new Payload();
-                    payload.setObject("Some payload!");
 
-                    Label draglabel = new Label(((Label)actor).getText(),skin);
-                    draglabel.setColor(0,0,0,1);
-                    payload.setDragActor(draglabel);
-                    dragAndDrop.setDragActorPosition(-(actor.getWidth()/2), actor.getHeight()/2);
-
-                    /*Label validLabel = new Label("valid!", skin);
-                    validLabel.setColor(0, 1, 0, 1);
-                    payload.setValidDragActor(validLabel);
-
-                    Label invalidLabel = new Label("invalid!", skin);
-                    invalidLabel.setColor(1, 0, 0, 1);
-                    payload.setInvalidDragActor(invalidLabel);
-*/
-                    return payload;
-                }
-            });
-            dragAndDrop.addTarget(new Target(actor) {
-                //Center rect is the detection area for getting out of the way, or merging blocks
-                private Rectangle centerRect = new Rectangle(
-                        getActor().getWidth() * .3f, getActor().getHeight() * .3f,
-                        getActor().getWidth() * .4f, getActor().getHeight() * .4f);
-
-                public boolean drag(Source source, Payload payload, float x, float y, int pointer) {
-                    //Something is being dragged over this target
-                    if(source.getActor()==actor){
-                        System.out.println("Same actor");
-                        return false;
-                    }
-                    if (centerRect.contains(x, y)) {
-                        System.out.println("contained");
-                        System.out.println(row.swapActor(getActor(), source.getActor()));
-                        row.invalidate();
-                    }
-                    getActor().setColor(Color.GREEN);
-                    return true;
-                }
-
-                public void reset(DragAndDrop.Source source, Payload payload) {
-                    getActor().setColor(Color.BLACK);
-                }
-
-                public void drop(Source source, Payload payload, float x, float y, int pointer) {
-                    System.out.println("Accepted: " + payload.getObject() + " " + x + ", " + y);
-                }
-            });
         }
 	}
 
     @Override
     public void resize(int width, int height) {
         camera.setToOrtho(false,width,height);
-        stage.getViewport().update(width,height,true);
+        stage.getViewport().update(width,height);
+        OrthographicCamera stageCamera = (OrthographicCamera) stage.getCamera();
+        stageCamera.zoom=.7f;
+        stageCamera.setToOrtho(false,width,height);
     }
 
     @Override
