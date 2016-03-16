@@ -97,7 +97,7 @@ public class Block extends HorizontalGroup {
     public void layout() {
         super.layout();
         centerRect.set(
-                getWidth() * .3f, getHeight() * .3f,
-                getWidth() * .4f, getHeight() * .4f);
+                getWidth() * .3f, 0,
+                getWidth() * .4f, getHeight());
     }
 }
