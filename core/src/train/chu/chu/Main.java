@@ -61,20 +61,21 @@ public class Main extends ApplicationAdapter {
 
         Label first = new Label("*",skin);
         first.setColor(Color.BLACK);
-        Block block = new Block(dragAndDrop, first);
+        Block block = new Block(dragAndDrop);
         block.addActor(first);
         row.addActor(block);
 
+        block = new Block(dragAndDrop);
         Label second = new Label("8",skin);
         second.setColor(Color.BLACK);
-        block = new Block(dragAndDrop, second);
         block.addActor(second);
         row.addActor(block);
 
         Label num = new Label("132",skin);
         num.setColor(Color.BLACK);
-        block = new Block(dragAndDrop, num);
+        block = new Block(dragAndDrop);
         block.addActor(num);
+
         row.addActor(block);
 
         SnapshotArray<Actor> children = row.getChildren();
