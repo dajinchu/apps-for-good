@@ -54,7 +54,6 @@ public class Main extends ApplicationAdapter {
         skin = new Skin();
         skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
         skin.add("badlogic", new Texture("badlogic.jpg"));
-        skin.add("tmp", new Texture("tmp.png"));
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
         //Really, it should be a block too, but all blocks are drag-and-drop-able, and can't be nested
