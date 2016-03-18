@@ -101,6 +101,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.kotcrab.vis:vis-ui:1.0.1"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        compile 'net.objecthunter:exp4j:0.4.5'
     }
 }
 
