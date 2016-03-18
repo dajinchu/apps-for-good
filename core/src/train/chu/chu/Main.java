@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
@@ -21,14 +19,6 @@ import com.badlogic.gdx.utils.StringBuilder;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 public class Main extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-    private OrthographicCamera camera;
-    private ShapeRenderer shapes;
-
-    public static final int GRID_ROWS = 20;
-    public static final int GRID_COLS = 40;
-    public static final int GRID_SIZE = 50;
     private Stage stage;
     private Skin skin;
     private DragAndDrop dragAndDrop;
@@ -37,13 +27,6 @@ public class Main extends ApplicationAdapter {
 
     @Override
 	public void create () {
-        //Instantiate batch+shapes for drawing, camera for transforming, and img for temporary use
-        //note that Stage has its own camera. this one is different
-		batch = new SpriteBatch();
-        shapes = new ShapeRenderer();
-		img = new Texture("badlogic.jpg");
-        camera = new OrthographicCamera();
-
         //Generate bitmap font from TrueType Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -115,7 +98,6 @@ public class Main extends ApplicationAdapter {
         //Handle resize. This is still important on static windows (eg. Android) because it is
         // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
-        camera.setToOrtho(false,width,height);
         //set stage viewport
         stage.getViewport().update(width,height);
         //get stage camera, so we can mess with it a bit
@@ -131,19 +113,13 @@ public class Main extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1,1,1,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        //update the camera. just needs to happen each frame in case camera got moved
-        camera.update();
-
-        //Batch and Shapes need the camera to transform their coordinates accordingly.
-        // ie. drawing at (x,y) can't just happen directly at those pixels, batch/shapes need to
-        // transform (x,y) based on the camera, so that they draw things to appear as if from the perspective of camera
-        batch.setProjectionMatrix(camera.combined);
-        shapes.setProjectionMatrix(camera.combined);
-
+        //Evaluate the expression
+        //Convert the blocks in HorizontalGroup to a string
         StringBuilder sb = new StringBuilder();
         for(Actor a : row.getChildren()){
             sb.append(((Label)((Block)a).getChildren().get(0)).getText());
         }
+        //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
         try{
             result.setColor(Color.BLACK);
             result.setText("="+new ExpressionBuilder(sb.toString()).build().evaluate());
@@ -156,26 +132,10 @@ public class Main extends ApplicationAdapter {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
         stage.setDebugAll(true);
-
-
-        //Draw the grid lines.
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(.88f, .88f, .88f, 1);
-        //Vertical grid lines
-        for(int i = 0; i < GRID_COLS; i++){
-            shapes.line(i*GRID_SIZE,0,i*GRID_SIZE,GRID_ROWS*GRID_SIZE);
-        }
-        //Horizontal grid lines
-        for(int i = 0; i < GRID_ROWS; i++){
-            shapes.line(0,i*GRID_SIZE,GRID_COLS*GRID_SIZE,i*GRID_SIZE);
-        }
-        shapes.end();
 	}
 
     public void dispose () {
         //When the app is destroyed, don't leave any memory leaks behind
-        batch.dispose();
-        shapes.dispose();
         stage.dispose();
         skin.dispose();
     }
