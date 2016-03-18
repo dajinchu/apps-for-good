@@ -144,7 +144,13 @@ public class Main extends ApplicationAdapter {
         for(Actor a : row.getChildren()){
             sb.append(((Label)((Block)a).getChildren().get(0)).getText());
         }
-        result.setText("="+new ExpressionBuilder(sb.toString()).build().evaluate());
+        try{
+            result.setColor(Color.BLACK);
+            result.setText("="+new ExpressionBuilder(sb.toString()).build().evaluate());
+        }catch (IllegalArgumentException error){
+            result.setColor(Color.RED);
+            result.setText("Invalid");
+        }
 
         //Scene2d. Step forward the world and draw the scene
         stage.act(Gdx.graphics.getDeltaTime());
