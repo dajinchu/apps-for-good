@@ -10,11 +10,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.utils.StringBuilder;
+
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 public class Main extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -29,6 +33,7 @@ public class Main extends ApplicationAdapter {
     private Skin skin;
     private DragAndDrop dragAndDrop;
     private HorizontalGroup row;
+    private Label result;
 
     @Override
 	public void create () {
@@ -66,11 +71,7 @@ public class Main extends ApplicationAdapter {
         dragAndDrop = new DragAndDrop();
 
         //Instantiate labels and put them each in a block. Add each block to row
-        Label first = new Label("*",skin);
-        first.setColor(Color.BLACK);
-        Block block = new Block(dragAndDrop);
-        block.addActor(first);
-        row.addActor(block);
+        Block block;
 
         block = new Block(dragAndDrop);
         Label second = new Label("8",skin);
@@ -78,12 +79,35 @@ public class Main extends ApplicationAdapter {
         block.addActor(second);
         row.addActor(block);
 
-        Label num = new Label("132",skin);
+        Label first = new Label("*",skin);
+        first.setColor(Color.BLACK);
+        block = new Block(dragAndDrop);
+        block.addActor(first);
+        row.addActor(block);
+
+        Label num = new Label("5",skin);
+        num.setColor(Color.BLACK);
+        block = new Block(dragAndDrop);
+        block.addActor(num);
+        row.addActor(block);
+
+        first = new Label("+",skin);
+        first.setColor(Color.BLACK);
+        block = new Block(dragAndDrop);
+        block.addActor(first);
+        row.addActor(block);
+
+        num = new Label("3",skin);
         num.setColor(Color.BLACK);
         block = new Block(dragAndDrop);
         block.addActor(num);
 
         row.addActor(block);
+
+        result = new Label("finish",skin);
+        result.setColor(Color.BLACK);
+        result.setPosition(50,0);
+        stage.addActor(result);
 	}
 
     @Override
@@ -115,6 +139,12 @@ public class Main extends ApplicationAdapter {
         // transform (x,y) based on the camera, so that they draw things to appear as if from the perspective of camera
         batch.setProjectionMatrix(camera.combined);
         shapes.setProjectionMatrix(camera.combined);
+
+        StringBuilder sb = new StringBuilder();
+        for(Actor a : row.getChildren()){
+            sb.append(((Label)((Block)a).getChildren().get(0)).getText());
+        }
+        result.setText("="+new ExpressionBuilder(sb.toString()).build().evaluate());
 
         //Scene2d. Step forward the world and draw the scene
         stage.act(Gdx.graphics.getDeltaTime());
