@@ -11,19 +11,17 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.StringBuilder;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import net.objecthunter.exp4j.ExpressionBuilder;
 
@@ -44,7 +42,13 @@ public class Main extends ApplicationAdapter {
         BitmapFont roboto = generator.generateFont(parameter);
         generator.dispose();
 
+        //Load skin with images and styles for use in scene2d ui elements
         Drawable green=new Image(new Texture("green.png")).getDrawable();
+        skin = new Skin();
+        skin.add("default", new Label.LabelStyle(roboto, Color.BLACK));
+        skin.add("badlogic", new Texture("badlogic.jpg"));
+        skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
+
         //Instantiate Stage for scene2d management
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
@@ -52,13 +56,8 @@ public class Main extends ApplicationAdapter {
         //Add a root table.
         rootTable = new Table();
         rootTable.setFillParent(true);
+        rootTable.bottom();
         stage.addActor(rootTable);
-
-        //Load skin with images and styles for use in scene2d ui elements
-        skin = new Skin();
-        skin.add("default", new Label.LabelStyle(roboto, Color.BLACK));
-        skin.add("badlogic", new Texture("badlogic.jpg"));
-        skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
         //Really, it should be a block too, but all blocks are drag-and-drop-able, and can't be nested
@@ -106,20 +105,18 @@ public class Main extends ApplicationAdapter {
         row.addActor(block);
 
 
-
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);
         result.setPosition(50,0);
-        rootTable.add(result).expandY().bottom();
+        rootTable.add(result);
 
-        rootTable.row();
 
         //Table Test Stuff
         Table keypad=new Table();
         for(int i=7; i>=1; i-=3){
             for(int x=i; x<=i+2; x++){
                 TextButton inputButton=new TextButton(""+x, skin);
-                keypad.add(inputButton);
+                keypad.add(inputButton).width(100).height(100);
                 final int finalX = x;
                 inputButton.addListener(new ClickListener(){
                     @Override
@@ -145,13 +142,11 @@ public class Main extends ApplicationAdapter {
         TextButton mem = new TextButton("M", skin);
         */
 
-
-        keypad.setPosition(400,400);
-        keypad.setFillParent(true);
-        rootTable.addActor(keypad);
+        rootTable.row();
+        rootTable.add(keypad);
 
 
-        stage.setViewport(new FitViewport(720,480));
+        stage.setViewport(new ScreenViewport());
 	}
 
     @Override
