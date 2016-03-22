@@ -71,38 +71,7 @@ public class Main extends ApplicationAdapter {
         dragAndDrop = new DragAndDrop();
 
         //Instantiate labels and put them each in a block. Add each block to row
-        Block block;
 
-        block = new Block(dragAndDrop);
-        Label second = new Label("8",skin);
-        second.setColor(Color.BLACK);
-        block.addActor(second);
-        row.addActor(block);
-
-        Label first = new Label("*",skin);
-        first.setColor(Color.BLACK);
-        block = new Block(dragAndDrop);
-        block.addActor(first);
-        row.addActor(block);
-
-        Label num = new Label("5",skin);
-        num.setColor(Color.BLACK);
-        block = new Block(dragAndDrop);
-        block.addActor(num);
-        row.addActor(block);
-
-        first = new Label("+",skin);
-        first.setColor(Color.BLACK);
-        block = new Block(dragAndDrop);
-        block.addActor(first);
-        row.addActor(block);
-
-        num = new Label("3",skin);
-        num.setColor(Color.BLACK);
-        block = new Block(dragAndDrop);
-        block.addActor(num);
-
-        row.addActor(block);
 
 
         result = new Label("finish",skin);
@@ -113,10 +82,108 @@ public class Main extends ApplicationAdapter {
 
         //Table Test Stuff
         Table keypad=new Table();
+
+        Table operations=new Table();
+        TextButton plus = new TextButton("+", skin);
+        operations.add(plus).width(100).height(100);
+        plus.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Block block;
+                block = new Block(dragAndDrop);
+                Label second = new Label("+",skin);
+                block.addActor(second);
+                row.addActor(block);
+            }
+        });
+        operations.row();
+        TextButton minus = new TextButton("-", skin);
+        minus.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Block block;
+                block = new Block(dragAndDrop);
+                Label second = new Label("-",skin);
+                block.addActor(second);
+                row.addActor(block);
+            }
+        });
+        operations.add(minus).width(100).height(100);
+        operations.row();
+        TextButton times = new TextButton("*", skin);
+        operations.add(times).width(100).height(100);
+        times.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Block block;
+                block = new Block(dragAndDrop);
+                Label second = new Label("*",skin);
+                block.addActor(second);
+                row.addActor(block);
+            }
+        });
+        operations.row();
+
+        Table bottomRow=new Table();
+
+        TextButton zero = new TextButton("0", skin);
+        bottomRow.add(zero).width(100).height(100);
+        zero.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Block block;
+                block = new Block(dragAndDrop);
+                Label second = new Label(""+0,skin);
+                block.addActor(second);
+                row.addActor(block);
+            }
+        });
+        TextButton dec = new TextButton(".", skin);
+        bottomRow.add(dec).width(100).height(100);
+        dec.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Block block;
+                block = new Block(dragAndDrop);
+                Label second = new Label(".",skin);
+                block.addActor(second);
+                row.addActor(block);
+            }
+        });
+        TextButton back = new TextButton("<-", skin);
+        back.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                int index=row.getChildren().size-1;
+                if(index>=0) {
+                    row.removeActor(row.getChildren().get(index));
+                }
+            }
+        });
+
+        bottomRow.add(back).width(100).height(100);
+        TextButton div = new TextButton("/", skin);
+        bottomRow.add(div).width(100).height(100);
+        div.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Block block;
+                block = new Block(dragAndDrop);
+                Label second = new Label("/",skin);
+                block.addActor(second);
+                row.addActor(block);
+            }
+        });
+
+
+
+
+
+        Table numpad=new Table();
         for(int i=7; i>=1; i-=3){
             for(int x=i; x<=i+2; x++){
                 TextButton inputButton=new TextButton(""+x, skin);
-                keypad.add(inputButton).width(100).height(100);
+                numpad.add(inputButton).width(100).height(100);
                 final int finalX = x;
                 inputButton.addListener(new ClickListener(){
                     @Override
@@ -129,18 +196,21 @@ public class Main extends ApplicationAdapter {
                     }
                 });
             }
+            numpad.row();
+            Table innerKeypad=new Table();
+            innerKeypad.add(numpad);
+            innerKeypad.add(operations);
+            innerKeypad.row();
+            keypad.add(innerKeypad);
+            keypad.row();
+            keypad.add(bottomRow);
             keypad.row();
         }
 
-        /*
-        TextButton plus = new TextButton("+", skin);
-        TextButton minus = new TextButton("-", skin);
-        TextButton times = new TextButton("*", skin);
-        TextButton div = new TextButton("/", skin);
 
-        TextButton dec = new TextButton(".", skin);
-        TextButton mem = new TextButton("M", skin);
-        */
+
+
+
 
         rootTable.row();
         rootTable.add(keypad);
