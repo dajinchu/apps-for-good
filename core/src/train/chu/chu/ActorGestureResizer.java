@@ -21,8 +21,9 @@ public class ActorGestureResizer extends ActorGestureListener {
 
     private Vector3 previousPointer1= new Vector3(), previousInitial2 = new Vector3(), previousInitial1 = new Vector3(), previousPointer2 = new Vector3();
 
-    public ActorGestureResizer(Camera cam, Actor actor, Vector2 worldSize){
-        this.cam = cam;
+    public ActorGestureResizer(Camera stageCamera, Actor actor, Vector2 worldSize){
+        //Camera is just used for unprojecting touch events
+        this.cam = stageCamera;
         this.actor = actor;
         this.worldSize = worldSize;
         clamp();

@@ -87,6 +87,9 @@ public class Block extends HorizontalGroup {
     }
 
     private float getFirstParentScale(){
+        //Iterate through parents and find first parent that has been scale.
+        // It should find sandbox main container and return its scale
+        // Can't just use this.scale because parents can affect Block's scale but block does not inherit the scale value
         Actor scale = this;
         while(scale.getScaleX()==1&&scale.hasParent()){
             scale=scale.getParent();
@@ -97,8 +100,6 @@ public class Block extends HorizontalGroup {
     private WidgetGroup getDuplicateForDragging(){
         //Create a lookalike of this block, for Payloads
         WidgetGroup g = new HorizontalGroup();
-
-
         g.setScale(getFirstParentScale());
         //Iterate through children and add them to the clone group
         for(Actor a : getChildren()) {
