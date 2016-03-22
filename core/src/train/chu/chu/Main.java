@@ -9,12 +9,19 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -37,6 +44,7 @@ public class Main extends ApplicationAdapter {
         BitmapFont roboto = generator.generateFont(parameter);
         generator.dispose();
 
+        Drawable green=new Image(new Texture("green.png")).getDrawable();
         //Instantiate Stage for scene2d management
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
@@ -48,8 +56,9 @@ public class Main extends ApplicationAdapter {
 
         //Load skin with images and styles for use in scene2d ui elements
         skin = new Skin();
-        skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
+        skin.add("default", new Label.LabelStyle(roboto, Color.BLACK));
         skin.add("badlogic", new Texture("badlogic.jpg"));
+        skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
         //Really, it should be a block too, but all blocks are drag-and-drop-able, and can't be nested
@@ -96,12 +105,51 @@ public class Main extends ApplicationAdapter {
 
         row.addActor(block);
 
-        rootTable.row();
+
 
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);
         result.setPosition(50,0);
         rootTable.add(result).expandY().bottom();
+
+        rootTable.row();
+
+        //Table Test Stuff
+        Table keypad=new Table();
+        for(int i=7; i>=1; i-=3){
+            for(int x=i; x<=i+2; x++){
+                TextButton inputButton=new TextButton(""+x, skin);
+                keypad.add(inputButton);
+                final int finalX = x;
+                inputButton.addListener(new ClickListener(){
+                    @Override
+                    public void clicked(InputEvent event, float z, float y) {
+                        Block block;
+                        block = new Block(dragAndDrop);
+                        Label second = new Label(""+ finalX,skin);
+                        block.addActor(second);
+                        row.addActor(block);
+                    }
+                });
+            }
+            keypad.row();
+        }
+
+        /*
+        TextButton plus = new TextButton("+", skin);
+        TextButton minus = new TextButton("-", skin);
+        TextButton times = new TextButton("*", skin);
+        TextButton div = new TextButton("/", skin);
+
+        TextButton dec = new TextButton(".", skin);
+        TextButton mem = new TextButton("M", skin);
+        */
+
+
+        keypad.setPosition(400,400);
+        keypad.setFillParent(true);
+        rootTable.addActor(keypad);
+
 
         stage.setViewport(new FitViewport(720,480));
 	}
