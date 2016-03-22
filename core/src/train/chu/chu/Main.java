@@ -4,17 +4,19 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.StringBuilder;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import net.objecthunter.exp4j.ExpressionBuilder;
 
@@ -24,6 +26,7 @@ public class Main extends ApplicationAdapter {
     private DragAndDrop dragAndDrop;
     private HorizontalGroup row;
     private Label result;
+    private Table rootTable;
 
     @Override
 	public void create () {
@@ -38,6 +41,11 @@ public class Main extends ApplicationAdapter {
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
 
+        //Add a root table.
+        rootTable = new Table();
+        rootTable.setFillParent(true);
+        stage.addActor(rootTable);
+
         //Load skin with images and styles for use in scene2d ui elements
         skin = new Skin();
         skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
@@ -47,7 +55,8 @@ public class Main extends ApplicationAdapter {
         //Really, it should be a block too, but all blocks are drag-and-drop-able, and can't be nested
         // so that wouldn't work.
         row = new HorizontalGroup();
-        row.setBounds(0,0,300,300);
+        stage.addListener(new ActorGestureResizer(stage.getCamera(),row,new Vector2(1000,1000)));
+        row.setPosition(100,100);
         stage.addActor(row);
 
         //Instantiate the DragAndDrop manager
@@ -87,10 +96,14 @@ public class Main extends ApplicationAdapter {
 
         row.addActor(block);
 
+        rootTable.row();
+
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);
         result.setPosition(50,0);
-        stage.addActor(result);
+        rootTable.add(result).expandY().bottom();
+
+        stage.setViewport(new FitViewport(720,480));
 	}
 
     @Override
@@ -99,12 +112,7 @@ public class Main extends ApplicationAdapter {
         // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
         //set stage viewport
-        stage.getViewport().update(width,height);
-        //get stage camera, so we can mess with it a bit
-        OrthographicCamera stageCamera = (OrthographicCamera) stage.getCamera();
-        //zoom in the camera, and put it where it can see the main row
-        stageCamera.zoom=.7f;
-        stageCamera.setToOrtho(false,width,height);
+        stage.getViewport().update(width,height,true);
     }
 
     @Override

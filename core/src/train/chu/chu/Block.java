@@ -44,7 +44,7 @@ public class Block extends HorizontalGroup {
                 //setDragActorPosition is to offset the dragActor from the pointer location
                 // without this part, the pointer is always dragging the actor by its left edge
                 // instead, this offsets to be held by where it was picked up
-                dad.setDragActorPosition(-x,(dragActor.getPrefHeight()/2-y));
+                dad.setDragActorPosition(-x * getFirstParentScale(),(dragActor.getPrefHeight()/2-y) * getFirstParentScale());
 
                 return payload;
             }
@@ -86,9 +86,20 @@ public class Block extends HorizontalGroup {
         });
     }
 
+    private float getFirstParentScale(){
+        Actor scale = this;
+        while(scale.getScaleX()==1&&scale.hasParent()){
+            scale=scale.getParent();
+        }
+        return scale.getScaleX();
+    }
+
     private WidgetGroup getDuplicateForDragging(){
         //Create a lookalike of this block, for Payloads
         WidgetGroup g = new HorizontalGroup();
+
+
+        g.setScale(getFirstParentScale());
         //Iterate through children and add them to the clone group
         for(Actor a : getChildren()) {
             //TODO extract and improve the duping process into some kind of CloneUtils that would clone Actors
