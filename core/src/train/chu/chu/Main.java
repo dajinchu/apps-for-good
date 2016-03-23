@@ -138,6 +138,7 @@ public class Main extends ApplicationAdapter {
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
         //set stage viewport
         stage.getViewport().update(width,height,true);
+        row.setPosition((width-row.getWidth())/2,(height-row.getHeight())/2);
     }
 
     @Override
