@@ -46,7 +46,7 @@ public class Main extends ApplicationAdapter {
         Drawable green=new Image(new Texture("green.png")).getDrawable();
         skin = new Skin();
         skin.add("default", new Label.LabelStyle(roboto, Color.BLACK));
-        skin.add("badlogic", new Texture("badlogic.jpg"));
+        skin.add("delete", new Texture("delete.png"));
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         //Instantiate Stage for scene2d management
@@ -56,7 +56,6 @@ public class Main extends ApplicationAdapter {
         //Add a root table.
         rootTable = new Table();
         rootTable.setFillParent(true);
-        rootTable.bottom();
         stage.addActor(rootTable);
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
@@ -71,13 +70,12 @@ public class Main extends ApplicationAdapter {
         dragAndDrop = new DragAndDrop();
 
         //Instantiate labels and put them each in a block. Add each block to row
-
-
+        TrashCan trashCan = new TrashCan(dragAndDrop);
+        trashCan.setDrawable(skin,"delete");
 
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);
         result.setPosition(50,0);
-        rootTable.add(result);
 
 
         //Table Test Stuff
@@ -208,12 +206,12 @@ public class Main extends ApplicationAdapter {
         }
 
 
-
-
-
-
+        //Populate rootTable
+        rootTable.add(trashCan).expand().left().top();
         rootTable.row();
-        rootTable.add(keypad);
+        rootTable.add(result).expandX().right();
+        rootTable.row();
+        rootTable.add(keypad).expandX().right();
 
 
         stage.setViewport(new ScreenViewport());
