@@ -46,7 +46,7 @@ public class Main extends ApplicationAdapter {
         Drawable green=new Image(new Texture("green.png")).getDrawable();
         skin = new Skin();
         skin.add("default", new Label.LabelStyle(roboto, Color.BLACK));
-        skin.add("delete", new Texture("delete.png"));
+        skin.add("badlogic", new Texture("badlogic.jpg"));
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         //Instantiate Stage for scene2d management
@@ -56,6 +56,7 @@ public class Main extends ApplicationAdapter {
         //Add a root table.
         rootTable = new Table();
         rootTable.setFillParent(true);
+        rootTable.bottom();
         stage.addActor(rootTable);
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
@@ -70,148 +71,60 @@ public class Main extends ApplicationAdapter {
         dragAndDrop = new DragAndDrop();
 
         //Instantiate labels and put them each in a block. Add each block to row
-        TrashCan trashCan = new TrashCan(dragAndDrop);
-        trashCan.setDrawable(skin,"delete");
+
+
 
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);
         result.setPosition(50,0);
+        rootTable.add(result);
 
-
-        //Table Test Stuff
+        //KeyPad
         Table keypad=new Table();
+        String[][] keys = new String[][]{
+                {"7","8","9","+"},
+                {"4","5","6","-"},
+                {"1","2","3","*"},
+                {"0", "0", ".","/"}
 
-        Table operations=new Table();
-        TextButton plus = new TextButton("+", skin);
-        operations.add(plus).width(100).height(100);
-        plus.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                Block block;
-                block = new Block(dragAndDrop);
-                Label second = new Label("+",skin);
-                block.addActor(second);
-                row.addActor(block);
-            }
-        });
-        operations.row();
-        TextButton minus = new TextButton("-", skin);
-        minus.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                Block block;
-                block = new Block(dragAndDrop);
-                Label second = new Label("-",skin);
-                block.addActor(second);
-                row.addActor(block);
-            }
-        });
-        operations.add(minus).width(100).height(100);
-        operations.row();
-        TextButton times = new TextButton("*", skin);
-        operations.add(times).width(100).height(100);
-        times.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                Block block;
-                block = new Block(dragAndDrop);
-                Label second = new Label("*",skin);
-                block.addActor(second);
-                row.addActor(block);
-            }
-        });
-        operations.row();
+        };
 
-        Table bottomRow=new Table();
+        //Keypad generator
+        for(int x=0; x<keys.length; x++){
+            for(int y=0; y<keys[0].length; y++){
+                final String buttonTxt=keys[x][y];
 
-        TextButton zero = new TextButton("0", skin);
-        bottomRow.add(zero).width(100).height(100);
-        zero.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                Block block;
-                block = new Block(dragAndDrop);
-                Label second = new Label(""+0,skin);
-                block.addActor(second);
-                row.addActor(block);
-            }
-        });
-        TextButton dec = new TextButton(".", skin);
-        bottomRow.add(dec).width(100).height(100);
-        dec.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                Block block;
-                block = new Block(dragAndDrop);
-                Label second = new Label(".",skin);
-                block.addActor(second);
-                row.addActor(block);
-            }
-        });
-        TextButton back = new TextButton("<-", skin);
-        back.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                int index=row.getChildren().size-1;
-                if(index>=0) {
-                    row.removeActor(row.getChildren().get(index));
+                //Used to keep track of col-span.
+                int i=1;
+                //Look for repeated keys
+                while(y<keys[0].length-1&&buttonTxt.equals(keys[x][y+i])){
+                    i++;
+
                 }
-            }
-        });
 
-        bottomRow.add(back).width(100).height(100);
-        TextButton div = new TextButton("/", skin);
-        bottomRow.add(div).width(100).height(100);
-        div.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float z, float y) {
-                Block block;
-                block = new Block(dragAndDrop);
-                Label second = new Label("/",skin);
-                block.addActor(second);
-                row.addActor(block);
-            }
-        });
+                //Skip forward to avoid repetition
+                y+=i-1;
+                //Make Button, create block at end of row if clicked.
 
-
-
-
-
-        Table numpad=new Table();
-        for(int i=7; i>=1; i-=3){
-            for(int x=i; x<=i+2; x++){
-                TextButton inputButton=new TextButton(""+x, skin);
-                numpad.add(inputButton).width(100).height(100);
-                final int finalX = x;
+                TextButton inputButton=new TextButton(buttonTxt, skin);
+                keypad.add(inputButton).width(i*100).height(100).colspan(i);
                 inputButton.addListener(new ClickListener(){
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
                         Block block;
                         block = new Block(dragAndDrop);
-                        Label second = new Label(""+ finalX,skin);
+                        Label second = new Label(buttonTxt,skin);
                         block.addActor(second);
                         row.addActor(block);
                     }
                 });
             }
-            numpad.row();
-            Table innerKeypad=new Table();
-            innerKeypad.add(numpad);
-            innerKeypad.add(operations);
-            innerKeypad.row();
-            keypad.add(innerKeypad);
-            keypad.row();
-            keypad.add(bottomRow);
             keypad.row();
         }
+        keypad.row();
 
-
-        //Populate rootTable
-        rootTable.add(trashCan).expand().left().top();
         rootTable.row();
-        rootTable.add(result).expandX().right();
-        rootTable.row();
-        rootTable.add(keypad).expandX().right();
+        rootTable.add(keypad);
 
 
         stage.setViewport(new ScreenViewport());
@@ -224,7 +137,6 @@ public class Main extends ApplicationAdapter {
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
         //set stage viewport
         stage.getViewport().update(width,height,true);
-        row.setPosition((width-row.getWidth())/2,(height-row.getHeight())/2);
     }
 
     @Override
