@@ -69,8 +69,10 @@ public class Block extends HorizontalGroup {
                     // To the user this looks this block is getting out of the way of what's being dragged
                     // It's a little different in code because the payload is just sort of 'representing'
                     // the source Block.
-                    getParent().swapActor(getActor(), source.getActor());//TODO this probably really shouldn't be a swap: it looks weird when you go around other blocks to place one far away. shouldn't be swap, it should remove source, and insert it here, but it'll have to decide which side of this block to put it on
-                    ((WidgetGroup) getParent()).invalidate();
+                    Command cmd=new MoveCommand(getActor(), source.getActor());
+                    cmd.execute();
+                    //getParent().swapActor(getActor(), source.getActor());//TODO this probably really shouldn't be a swap: it looks weird when you go around other blocks to place one far away. shouldn't be swap, it should remove source, and insert it here, but it'll have to decide which side of this block to put it on
+
                 }
                 getActor().setColor(Color.GREEN);
                 return true;

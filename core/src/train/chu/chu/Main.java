@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
@@ -113,15 +114,37 @@ public class Main extends ApplicationAdapter {
                         block = new Block(dragAndDrop);
                         Label second = new Label(buttonTxt,skin);
                         block.addActor(second);
-                        row.addActor(block);
+
+                        Command cmd=new AddCommand(block, row);
+                        //row.addActor(block);
+                        cmd.execute();
                     }
                 });
             }
             keypad.row();
         }
 
+
+        TextButton redo = new TextButton("R", skin);
+            redo.addListener(new ClickListener(){
+                        @Override
+                        public void clicked(InputEvent event, float z, float y) {
+                            Command.redo();
+                        }
+                 });
+
+        TextButton undo = new TextButton("U", skin);
+            undo.addListener(new ClickListener(){
+                @Override
+                public void clicked(InputEvent event, float z, float y) {
+                            Command.undo();
+                }
+            });
+
         //Populate rootTable
-        rootTable.add(trashCan).expand().left().top();
+        rootTable.add(trashCan).expandY().left().top();
+        rootTable.add(undo).expandY().right().top().width(100).height(100);
+        rootTable.add(redo).expandY().right().top().width(100).height(100);
         rootTable.row();
         rootTable.add(result).expandX().right();
         rootTable.row();
