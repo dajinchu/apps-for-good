@@ -16,6 +16,7 @@ public class Block extends HorizontalGroup {
 
     //Center rect is the detection area for getting out of the way, or merging blocks
     private Rectangle centerRect = new Rectangle();
+    private Rectangle leftRect = new Rectangle();
 
     public Block(final DragAndDrop dad){
         //DragAndDrop has Source, Payload, and Target
@@ -64,15 +65,18 @@ public class Block extends HorizontalGroup {
                     return false;
                 }
 
-                if (centerRect.contains(x, y)) {
+                if (x<getWidth()*.3f) {
                     //The centerRect has been entered, go swap with payload's source.
                     // To the user this looks this block is getting out of the way of what's being dragged
                     // It's a little different in code because the payload is just sort of 'representing'
                     // the source Block.
-                    Command cmd=new MoveCommand(getActor(), source.getActor());
+                    Command cmd=new MoveCommand(getActor(), source.getActor(), true);
                     cmd.execute();
                     //getParent().swapActor(getActor(), source.getActor());//TODO this probably really shouldn't be a swap: it looks weird when you go around other blocks to place one far away. shouldn't be swap, it should remove source, and insert it here, but it'll have to decide which side of this block to put it on
 
+                }else if(x>getWidth()*.7f){
+                    Command cmd=new MoveCommand(getActor(), source.getActor(), false);
+                    cmd.execute();
                 }
                 getActor().setColor(Color.GREEN);
                 return true;
