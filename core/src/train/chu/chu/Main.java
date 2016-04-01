@@ -71,8 +71,17 @@ public class Main extends ApplicationAdapter {
         dragAndDrop = new DragAndDrop();
 
         //Instantiate labels and put them each in a block. Add each block to row
-        TrashCan trashCan = new TrashCan(dragAndDrop);
+        final TrashCan trashCan = new TrashCan(dragAndDrop);
         trashCan.setDrawable(skin,"delete");
+        trashCan.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+
+                //Command cmd=new clearChildrenCommand(row);
+                //row.addActor(block);
+                //cmd.execute();
+            }
+        });
 
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);

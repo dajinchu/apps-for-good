@@ -22,23 +22,26 @@ public class MoveCommand extends Command {
     }
 
     @Override
+    /**
+     * Undoes last  move action
+     */
     protected void negativeAction() {
        act1.getParent().addActorAt(index, act2);
 
     }
 
     @Override
+    /**
+     * Moves actor to new location. Moves to the left or right.
+     */
     protected void positiveAction() {
-        if(left){
 
+        if(left){
             act1.getParent().addActorBefore(act1, act2);
 
         }else{
             act1.getParent().addActorAfter(act1, act2);
         }
-        /*
-        act1.getParent().swapActor(act1, act2);
-        ((WidgetGroup) act1.getParent()).invalidate();
-        */
+
     }
 }

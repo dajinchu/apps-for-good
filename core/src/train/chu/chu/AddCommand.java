@@ -17,11 +17,17 @@ public class AddCommand extends Command {
     }
 
     @Override
+    /**
+     * Adds an actor to the end of the group
+     */
     protected void positiveAction() {
         name.addActor(newActor);
     }
 
     @Override
+    /**
+     * Removes actor at specifed index
+     */
     protected void negativeAction() {
         int index=name.getChildren().indexOf(newActor, true);
 

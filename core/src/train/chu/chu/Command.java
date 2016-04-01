@@ -7,17 +7,31 @@ import java.util.Stack;
  */
 public abstract class Command {
 
+    /**
+     * Boolean that checks to see if the last action was redo or undo.
+     */
     private boolean redoing=false;
 
+    /**
+     * Execute a given command.
+     */
     public void execute(){
+
+        //Clear Redo stack
         if(!redoing) {
             redoCommands.clear();
         }
+
+        //Execute the postive action and adds command to undo stack
         positiveAction();
         undoCommands.push(this);
     }
 
+    /**
+     * Unexecute a given command (Undo)
+     */
     public void unexecute(){
+        //Undoes command and pushes it to the redo stack
         negativeAction();
         redoCommands.push(this);
     }
@@ -26,6 +40,9 @@ public abstract class Command {
 
     protected abstract void positiveAction();
 
+    /**
+     * Undoes last action, removes from undo stack.
+     */
     public static void undo(){
         if(!undoCommands.empty()){
             undoCommands.pop().unexecute();
@@ -33,6 +50,9 @@ public abstract class Command {
 
     }
 
+    /**
+     * Redoes last undo, removes from redo stack.
+     */
     public static void redo(){
 
         if(!redoCommands.empty()){
