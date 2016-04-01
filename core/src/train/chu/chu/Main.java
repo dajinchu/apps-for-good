@@ -77,9 +77,8 @@ public class Main extends ApplicationAdapter {
             @Override
             public void clicked(InputEvent event, float z, float y) {
 
-                //Command cmd=new clearChildrenCommand(row);
-                //row.addActor(block);
-                //cmd.execute();
+                Command cmd=new ClearChildren(row);
+                cmd.execute();
             }
         });
 
