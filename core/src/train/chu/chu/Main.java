@@ -32,7 +32,6 @@ public class Main extends ApplicationAdapter {
 
     @Override
 	public void create () {
-        Gdx.app.log("Main","hi");
         //Generate bitmap font from TrueType Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();

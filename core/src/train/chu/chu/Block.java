@@ -1,6 +1,5 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -116,7 +115,6 @@ public class Block extends HorizontalGroup {
             }
 
             public void drop(Source source, Payload payload, float x, float y, int pointer) {
-                System.out.println("Accepted: " + payload.getObject() + " " + x + ", " + y);
             }
         };
     }
@@ -175,7 +173,6 @@ public class Block extends HorizontalGroup {
     }
 
     public void setDraggable(boolean draggable) {
-        Gdx.app.log("Block","drag  "+draggable+" on block "+getChildrenString());
         if (draggable) {
             dad.addTarget(target);
             dad.addSource(source);
@@ -201,8 +198,7 @@ public class Block extends HorizontalGroup {
     }
 
     public void setSelected(){
-        Gdx.app.log("BLock", "setting selected block to "+getChildrenString());
-        //TODO set old selected children undraggable
+        //Set this block as the selected one
         if(selectedBlock != null) {
             for (Actor child : selectedBlock.getChildren()) {
                 ((Block) child).setDraggable(false);
