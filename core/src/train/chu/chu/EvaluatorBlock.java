@@ -8,6 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 public class EvaluatorBlock extends Block{
     public EvaluatorBlock(DragAndDrop dad) {
         super(dad);
-        setSelectedBlock(this);
+        setSelected();
     }
 }

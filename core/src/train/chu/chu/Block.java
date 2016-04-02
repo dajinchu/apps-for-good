@@ -27,34 +27,34 @@ public class Block extends HorizontalGroup {
     private Source source;
     private Target target;
 
+    //There can only be one block selected at a time
     private static Block selectedBlock;
-    public boolean selected;
 
     public Block(final DragAndDrop dad) {
         this.dad = dad;
+
         //Block becomes 'selected' when clicked, allowing its children to be dragged or clicked as well
         ClickListener selectionListener = new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-
-                System.out.println("block click");
-                Block block = (Block) event.getListenerActor();
-
-                if (getParent() instanceof Block && ((Block)getParent()).selected && block.getChildren().size>1) {
-                    Gdx.app.log("Block", "parent of click is "+((Block)getParent()).getChildrenString());
-                    //This block can only become selected if its parent was already selected
-                    setSelectedBlock(Block.this);
+                //This block can only become selected if its parent was already selected
+                if (getParent() instanceof Block && ((Block)getParent()).isSelected() && getChildren().size>1) {
+                    //Stop the event so that the listener on stage doesn't get triggered and reset the selection to the outer levels
                     event.stop();
+                    //Return TRUE so that the successive touchUp event will be received
+                    return true;
                 }
-                return true;
+                return false;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-
+                //IMPORTANT: This code will only be reached if touchDown return true, ie. this block is "selectable"
+                setSelected();
             }
         };
         addListener(selectionListener);
+
         //DragAndDrop has Source, Payload, and Target
         //Source is what we drag from.
         //Payload is the thing getting dragged.
@@ -170,34 +170,9 @@ public class Block extends HorizontalGroup {
     public void addActor(Actor actor) {
         super.addActor(actor);
         if(actor instanceof Block) {
-            ((Block) actor).setDraggable(selected);
+            ((Block) actor).setDraggable(isSelected());
         }
     }
-/*
-    public void setChildrenFocus(boolean childrenFocus) {
-        this.childrenFocus = childrenFocus;
-        for (Actor a : getChildren()) {
-            setFocus(a);
-        }
-    }
-
-    private void setFocus(Actor a) {
-        if (a.getClass() == Block.class) {
-            final Block blockA = ((Block) a);
-            blockA.setDraggable(childrenFocus);
-
-            for(Actor child : blockA.getChildren()){
-                if(child.getClass()==Label.class) {
-                    if(childrenFocus) {
-                        child.setColor(Color.BLUE);
-                        System.out.println("Green");
-                    } else {
-                        child.setColor(Color.BLACK);
-                    }
-                }
-            }
-        }
-    }*/
 
     public void setDraggable(boolean draggable) {
         Gdx.app.log("Block","drag  "+draggable+" on block "+getChildrenString());
@@ -211,6 +186,8 @@ public class Block extends HorizontalGroup {
     }
 
     public String getChildrenString(){
+        //Recursive function goes through Block children and asks for their strings too
+        // getText for Label children
         StringBuilder sb = new StringBuilder();
         for(Actor a : getChildren()){
             if(a.getClass() == Block.class){
@@ -223,18 +200,22 @@ public class Block extends HorizontalGroup {
         return sb.toString();
     }
 
-    public static void setSelectedBlock(Block b){
-        Gdx.app.log("BLock", "setting selected block to "+b.getChildrenString());
+    public void setSelected(){
+        Gdx.app.log("BLock", "setting selected block to "+getChildrenString());
         //TODO set old selected children undraggable
         if(selectedBlock != null) {
             for (Actor child : selectedBlock.getChildren()) {
                 ((Block) child).setDraggable(false);
             }
         }
-        selectedBlock = b;
-        b.selected = true;
+        selectedBlock = this;
         for(Actor child: selectedBlock.getChildren()){
             ((Block) child).setDraggable(true);
         }
+    }
+
+    public boolean isSelected(){
+        //It is possible to instead use a selected flag in each Block, but it would be prone to failure
+        return this.equals(Block.selectedBlock);
     }
 }

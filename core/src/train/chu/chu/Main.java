@@ -72,8 +72,7 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("stage down");
-                if(event.isHandled())System.out.println("already handled");
+                //track touch down location.. TODO maybe change this to also track time?
                 this.x = x;
                 this.y = y;
                 return true;
@@ -81,10 +80,9 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("stage up");
+                //Set selected on the Up event, but NOT if the click location has moved too much
                 if(Math.abs(this.x-x)<10 && Math.abs(this.y-y)<10) {
-                    Block.setSelectedBlock(row);
-                    System.out.println("stage confirm");
+                    row.setSelected();
                 }
             }
         });
