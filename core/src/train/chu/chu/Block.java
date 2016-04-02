@@ -40,6 +40,7 @@ public class Block extends HorizontalGroup {
         ClickListener selectionListener = new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                Gdx.app.log("Block","Clicked on "+getChildrenString());
                 //This block can only become selected if its parent was already selected
                 if (getParent() instanceof Block && ((Block)getParent()).isSelected() && getChildren().size>1) {
                     //Stop the event so that the listener on stage doesn't get triggered and reset the selection to the outer levels
@@ -212,7 +213,11 @@ public class Block extends HorizontalGroup {
     public void addActor(Actor actor) {
         super.addActor(actor);
         if(actor instanceof Block) {
-            ((Block) actor).setDraggable(isSelected());
+            ((Block) actor).setAsChildOfSelected(isSelected());
+        }
+        if(getChildren().size>1){
+            this.pad(5);
+            //TODO Display the group connection graphically
         }
     }
 
@@ -223,6 +228,17 @@ public class Block extends HorizontalGroup {
         } else {
             dad.removeTarget(target);
             dad.removeSource(source);
+        }
+    }
+
+    public void setNestedColors(Color color){
+        //Recursive function that works the same way as getChildrenString, but with color setting
+        for(Actor a : getChildren()) {
+            if (a instanceof Block) {
+                ((Block) a).setNestedColors(color);
+            } else {
+                a.setColor(color);
+            }
         }
     }
 
@@ -245,12 +261,24 @@ public class Block extends HorizontalGroup {
         //Set this block as the selected one
         if(selectedBlock != null) {
             for (Actor child : selectedBlock.getChildren()) {
-                ((Block) child).setDraggable(false);
+                ((Block) child).setAsChildOfSelected(false);
             }
         }
         selectedBlock = this;
         for(Actor child: selectedBlock.getChildren()){
-            ((Block) child).setDraggable(true);
+            ((Block) child).setAsChildOfSelected(true);
+        }
+    }
+
+    private void setAsChildOfSelected(boolean childOf){
+        //Private convenience method to switch a block on/off as the child of the selected block
+        // Needed because this needs to happen in setSelected, but also in addActor to apply the
+        // childOfSelected behavior to newly added blocks too
+        setDraggable(childOf);
+        if(childOf) {
+            setNestedColors(Color.valueOf("3F51B5"));
+        } else {
+            setNestedColors(Color.BLACK);
         }
     }
 
