@@ -1,5 +1,6 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -22,6 +23,9 @@ public class Block extends HorizontalGroup {
     private DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
     private Rectangle centerRect = new Rectangle();
+    private Rectangle leftRect = new Rectangle();
+    private final double timeInBlock=0.085;
+
 
     private Source source;
     private Target target;
@@ -90,31 +94,71 @@ public class Block extends HorizontalGroup {
                 Block.this.setVisible(true);
             }
         };
-        this.target = new Target(this) {
-            public boolean drag(Source source, Payload payload, float x, float y, int pointer) {
+
+        target = new DragAndDrop.Target(this) {
+
+
+            double timeLeft=0;
+            double timeRight=0;
+
+
+
+            public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                 //Something is being dragged over this target
                 if (source.getActor() == Block.this) {
                     //This probably won't happen. But to be sure, this prevents dragging over itself
                     return false;
                 }
 
-                if (centerRect.contains(x, y)) {
-                    //The centerRect has been entered, go swap with payload's source.
-                    // To the user this looks this block is getting out of the way of what's being dragged
-                    // It's a little different in code because the payload is just sort of 'representing'
-                    // the source Block.
-                    getParent().swapActor(getActor(), source.getActor());//TODO this probably really shouldn't be a swap: it looks weird when you go around other blocks to place one far away. shouldn't be swap, it should remove source, and insert it here, but it'll have to decide which side of this block to put it on
-                    ((WidgetGroup) getParent()).invalidate();
+
+
+                    if (x < getWidth() * .3f) {
+                        //The centerRect has been entered, go swap with payload's source.
+                        // To the user this looks this block is getting out of the way of what's being dragged
+                        // It's a little different in code because the payload is just sort of 'representing'
+                        // the source Block.
+                        timeLeft+= Gdx.graphics.getDeltaTime();
+                        //System.out.println(Gdx.graphics.getDeltaTime());
+
+                    } else if (x > getWidth() * .7f) {
+                        timeRight+=Gdx.graphics.getDeltaTime();
+                        //System.out.println(Gdx.graphics.getDeltaTime());
+                    }else{
+                        timeLeft=0;
+                        timeRight=0;
+                    }
+
+                System.out.println(timeLeft);
+                System.out.println(timeRight);
+                if(timeLeft>=timeInBlock) {
+                    Command cmd = new MoveCommand(getActor(), source.getActor(), true);
+                    cmd.execute();
+                    timeLeft=0;
+                    timeRight=0;
+                }else if(timeRight>=timeInBlock){
+                    Command cmd = new MoveCommand(getActor(), source.getActor(), false);
+                    cmd.execute();
+                    timeLeft=0;
+                    timeRight=0;
                 }
+
+
+
+
+
                 getActor().setColor(Color.GREEN);
                 return true;
             }
 
             public void reset(Source source, Payload payload) {
                 getActor().setColor(Color.BLACK);
+                timeLeft=0;
+                timeRight=0;
             }
 
-            public void drop(Source source, Payload payload, float x, float y, int pointer) {
+            public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+                timeLeft=0;
+                timeRight=0;
             }
         };
     }
