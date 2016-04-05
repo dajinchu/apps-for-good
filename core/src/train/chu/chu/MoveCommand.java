@@ -1,24 +1,32 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.badlogic.gdx.scenes.scene2d.Group;
 
 /**
  * Created by Arun on 3/29/2016.
  */
 public class MoveCommand extends Command {
 
-    private Actor act1;
-    private Actor act2;
-    private boolean left;
-    private int index=0;
+    private Actor targetActor;
+    private Actor sourceActor;
+    private Group targetParent, oldSourceParent;
+    private int oldSourceIndex = 0, oldTargetIndex = 0;
+    private Side side;
 
-    public MoveCommand(Actor act1, Actor act2, boolean left) {
-        this.act1=act1;
-        index=act2.getParent().getChildren().indexOf(act2,true);
-        this.act2=act2;
-        this.left=left;
+    //only for move-in
+    private Block groupBlock;
 
+    public enum Side {LEFT, RIGHT, IN};
+
+    public MoveCommand(Actor targetActor, Actor sourceActor, Side side) {
+        this.targetActor = targetActor;
+        this.sourceActor = sourceActor;
+        this.targetParent = targetActor.getParent();
+        this.oldSourceParent = sourceActor.getParent();
+        this.oldTargetIndex = targetParent.getChildren().indexOf(targetActor, true);
+        this.oldSourceIndex = oldSourceParent.getChildren().indexOf(sourceActor, true);
+        this.side=side;
     }
 
     @Override
@@ -26,22 +34,32 @@ public class MoveCommand extends Command {
      * Undoes last  move action
      */
     protected void negativeAction() {
-       act1.getParent().addActorAt(index, act2);
+        oldSourceParent.addActorAt(oldSourceIndex, sourceActor);
 
+        //Needed for move-in
+        if(side == Side.IN) {
+            targetParent.addActorAt(oldTargetIndex, targetActor);
+            groupBlock.remove();
+        }
     }
 
     @Override
     /**
-     * Moves actor to new location. Moves to the left or right.
+     * Moves actor to new location. Moves according to side enum.
      */
     protected void positiveAction() {
-
-        if(left){
-            act1.getParent().addActorBefore(act1, act2);
-
-        }else{
-            act1.getParent().addActorAfter(act1, act2);
+        switch(side) {
+            case LEFT: targetParent.addActorBefore(targetActor, sourceActor); break;
+            case RIGHT: targetParent.addActorAfter(targetActor, sourceActor); break;
+            case IN:
         }
-
+        if(targetActor instanceof Block && ((Block) targetActor).getChildren().size>1){
+            groupBlock = (Block) targetActor;
+        } else {
+            groupBlock = new Block();
+            groupBlock.addActor(targetActor);
+        }
+            groupBlock.addActor(sourceActor);
+            targetParent.addActorAt(oldTargetIndex, groupBlock);
+        }
     }
-}

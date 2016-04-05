@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -27,10 +25,11 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 public class Main extends ApplicationAdapter {
     private Stage stage;
     private Skin skin;
-    private DragAndDrop dragAndDrop;
     private Block row;
     private Label result;
     private Table rootTable;
+
+    public static DragAndDrop dragAndDrop = new DragAndDrop();
 
     @Override
 	public void create () {
@@ -60,13 +59,10 @@ public class Main extends ApplicationAdapter {
         //row is the outermost ui element for the sandbox, it holds all the blocks
         //Really, it should be a block too, but all blocks are drag-and-drop-able, and can't be nested
         // so that wouldn't work.
-        row = new EvaluatorBlock(dragAndDrop);
+        row = new EvaluatorBlock();
         stage.addListener(new ActorGestureResizer(stage.getCamera(),row,new Vector2(1000,1000)));
         row.setPosition(100,100);
         stage.addActor(row);
-
-        //Instantiate the DragAndDrop manager
-        dragAndDrop = new DragAndDrop();
 
         stage.addListener(new ClickListener(){
             public float x, y;
@@ -89,18 +85,18 @@ public class Main extends ApplicationAdapter {
         });
 
         Block parent;
-        parent = new Block(dragAndDrop);
+        parent = new Block();
 
         Block block;
         Label l;
 
-        block = new Block(dragAndDrop);
+        block = new Block();
         l = new Label("6",skin);
         l.setColor(Color.BLACK);
         block.addActor(l);
         parent.addActor(block);
 
-        block = new Block(dragAndDrop);
+        block = new Block();
         l = new Label("+",skin);
         l.setColor(Color.BLACK);
         block.addActor(l);
@@ -109,7 +105,7 @@ public class Main extends ApplicationAdapter {
         row.addActor(parent);
 
         //Instantiate labels and put them each in a block. Add each block to row
-        final TrashCan trashCan = new TrashCan(dragAndDrop);
+        final TrashCan trashCan = new TrashCan();
         trashCan.setDrawable(skin,"delete");
         trashCan.addListener(new ClickListener(){
             @Override
@@ -157,7 +153,7 @@ public class Main extends ApplicationAdapter {
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
                         Block block;
-                        block = new Block(dragAndDrop);
+                        block = new Block();
                         Label second = new Label(buttonTxt,skin);
                         second.setColor(Color.BLACK);
                         block.addActor(second);

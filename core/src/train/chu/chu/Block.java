@@ -33,14 +33,13 @@ public class Block extends HorizontalGroup {
     //There can only be one block selected at a time
     private static Block selectedBlock;
 
-    public Block(final DragAndDrop dad) {
-        this.dad = dad;
+    public Block() {
+        this.dad = Main.dragAndDrop;
 
         //Block becomes 'selected' when clicked, allowing its children to be dragged or clicked as well
         ClickListener selectionListener = new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                Gdx.app.log("Block","Clicked on "+getChildrenString());
                 //This block can only become selected if its parent was already selected
                 if (getParent() instanceof Block && ((Block)getParent()).isSelected() && getChildren().size>1) {
                     //Stop the event so that the listener on stage doesn't get triggered and reset the selection to the outer levels
@@ -54,6 +53,8 @@ public class Block extends HorizontalGroup {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //IMPORTANT: This code will only be reached if touchDown return true, ie. this block is "selectable"
+                if(dad.isDragging())return; //Doesn't count as a click if it's the start of drag
+                Gdx.app.log("Block","Touch up on "+getChildrenString());
                 setSelected();
             }
         };
@@ -98,11 +99,9 @@ public class Block extends HorizontalGroup {
 
         target = new DragAndDrop.Target(this) {
 
-
+            float timeCenter;
             double timeLeft=0;
             double timeRight=0;
-
-
 
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                 //Something is being dragged over this target
@@ -127,25 +126,26 @@ public class Block extends HorizontalGroup {
                     }else{
                         timeLeft=0;
                         timeRight=0;
+
+                        timeCenter+=Gdx.graphics.getDeltaTime();
                     }
 
                 System.out.println(timeLeft);
                 System.out.println(timeRight);
                 if(timeLeft>=timeInBlock) {
-                    Command cmd = new MoveCommand(getActor(), source.getActor(), true);
+                    Command cmd = new MoveCommand(getActor(), source.getActor(), MoveCommand.Side.LEFT);
                     cmd.execute();
                     timeLeft=0;
                     timeRight=0;
                 }else if(timeRight>=timeInBlock){
-                    Command cmd = new MoveCommand(getActor(), source.getActor(), false);
+                    Command cmd = new MoveCommand(getActor(), source.getActor(), MoveCommand.Side.RIGHT);
                     cmd.execute();
                     timeLeft=0;
                     timeRight=0;
+                }else if(timeCenter>=timeInBlock*4){
+                    timeCenter=0;
+                    new MoveCommand(getActor(),source.getActor(), MoveCommand.Side.IN).execute();
                 }
-
-
-
-
 
                 getActor().setColor(Color.GREEN);
                 return true;
@@ -178,13 +178,17 @@ public class Block extends HorizontalGroup {
     private WidgetGroup getDuplicateForDragging() {
         //Create a lookalike of this block, for Payloads
         WidgetGroup g = new HorizontalGroup();
-        g.setScale(getFirstParentScale());
+        float firstParentScale = getFirstParentScale();
+        Gdx.app.log("Blockscale", firstParentScale+"");
+        g.setScale(firstParentScale);
         //Iterate through children and add them to the clone group
         for (Actor a : getChildren()) {
             //TODO extract and improve the duping process into some kind of CloneUtils that would clone Actors
             if (a.getClass() == Block.class) {
                 //If the child is a block class, ask that nested block to duplicate too
-                g.addActor(((Block) a).getDuplicateForDragging());
+                WidgetGroup childDupe = ((Block) a).getDuplicateForDragging();
+                childDupe.setScale(1f);
+                g.addActor(childDupe);
             } else {
                 //Otherwise, it's a label, so cast it and get access to text and style
                 Label aLabel = (Label) a;

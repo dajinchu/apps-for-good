@@ -7,7 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
  * Created by Da-Jin on 3/23/2016.
  */
 public class TrashCan extends Image {
-    public TrashCan(DragAndDrop dad){
+    public TrashCan(){
+        DragAndDrop dad = Main.dragAndDrop;
         //Trashcan Actor is really simple. It's just an Image that registers itself with drag and drop
         dad.addTarget(new DragAndDrop.Target(this){
             @Override
