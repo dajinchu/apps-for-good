@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -33,6 +34,8 @@ public class Main extends ApplicationAdapter {
     private HorizontalGroup row;
     private Label result;
     private Table rootTable;
+    private ImageButton redo;
+    private ImageButton undo;
 
     @Override
 	public void create () {
@@ -45,6 +48,8 @@ public class Main extends ApplicationAdapter {
 
         //Load skin with images and styles for use in scene2d ui elements
         Drawable green=new Image(new Texture("green.png")).getDrawable();
+        Drawable undoImg=new Image(new Texture("undo.png")).getDrawable();
+        Drawable redoImg=new Image(new Texture("redo.png")).getDrawable();
         skin = new Skin();
         skin.add("default", new Label.LabelStyle(roboto, Color.BLACK));
         skin.add("delete", new Texture("delete.png"));
@@ -82,6 +87,33 @@ public class Main extends ApplicationAdapter {
             }
         });
 
+
+        redo = new ImageButton(redoImg);
+        redo.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Command.redo();
+            }
+        });
+
+
+        undo = new ImageButton(undoImg);
+
+        undo.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Command.undo();
+            }
+        });
+
+        Group toolbar=new HorizontalGroup();
+        //toolbar.addActor(trashCan);
+        toolbar.addActor(undo);
+        toolbar.addActor(redo);
+
+
+
+
         result = new Label("finish",skin);
         result.setColor(Color.BLACK);
         result.setPosition(50,0);
@@ -90,7 +122,7 @@ public class Main extends ApplicationAdapter {
         Table keypad=new Table();
         String[][] keys = new String[][]{
                 {"7","8","9","+"},
-                {"4","5","6","-"},
+                 {"4","5","6","-"},
                 {"1","2","3","*"},
                 {"0", "0", ".","/"}
 
@@ -133,30 +165,15 @@ public class Main extends ApplicationAdapter {
         }
 
 
-        TextButton redo = new TextButton("R", skin);
-            redo.addListener(new ClickListener(){
-                        @Override
-                        public void clicked(InputEvent event, float z, float y) {
-                            Command.redo();
-                        }
-                 });
 
-        TextButton undo = new TextButton("U", skin);
-            undo.addListener(new ClickListener(){
-                @Override
-                public void clicked(InputEvent event, float z, float y) {
-                            Command.undo();
-                }
-            });
 
         //Populate rootTable
-        rootTable.add(trashCan).expandY().left().top();
-        rootTable.add(undo).expandY().right().top().width(100).height(100);
-        rootTable.add(redo).expandY().right().top().width(100).height(100);
+        rootTable.add(trashCan).left().top();
+        rootTable.add(toolbar).right().top();
         rootTable.row();
-        rootTable.add(result).expandX().right();
+        rootTable.add(result).expandX().right().colspan(2);
         rootTable.row();
-        rootTable.add(keypad).expandX().right();
+        rootTable.add(keypad).expandX().right().colspan(2);
 
 
         stage.setViewport(new ScreenViewport());
@@ -193,6 +210,17 @@ public class Main extends ApplicationAdapter {
             result.setText("Invalid");
         }
 
+        if(Command.redoCommands.isEmpty()){
+            redo.getImage().setColor(Color.GRAY);
+        }else{
+            redo.getImage().setColor(Color.BLACK);
+        }
+
+        if(Command.undoCommands.isEmpty()){
+            undo.getImage().setColor(Color.GRAY);
+        }else{
+            undo.getImage().setColor(Color.BLACK);
+        }
         //Scene2d. Step forward the world and draw the scene
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
