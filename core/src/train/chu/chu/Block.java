@@ -54,7 +54,6 @@ public class Block extends HorizontalGroup {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //IMPORTANT: This code will only be reached if touchDown return true, ie. this block is "selectable"
                 if(dad.isDragging())return; //Doesn't count as a click if it's the start of drag
-                Gdx.app.log("Block","Touch up on "+getChildrenString());
                 setSelected();
             }
         };
@@ -130,8 +129,6 @@ public class Block extends HorizontalGroup {
                         timeCenter+=Gdx.graphics.getDeltaTime();
                     }
 
-                System.out.println(timeLeft);
-                System.out.println(timeRight);
                 if(timeLeft>=timeInBlock) {
                     Command cmd = new MoveCommand(getActor(), source.getActor(), MoveCommand.Side.LEFT);
                     cmd.execute();
@@ -179,7 +176,6 @@ public class Block extends HorizontalGroup {
         //Create a lookalike of this block, for Payloads
         WidgetGroup g = new HorizontalGroup();
         float firstParentScale = getFirstParentScale();
-        Gdx.app.log("Blockscale", firstParentScale+"");
         g.setScale(firstParentScale);
         //Iterate through children and add them to the clone group
         for (Actor a : getChildren()) {
@@ -211,14 +207,13 @@ public class Block extends HorizontalGroup {
         centerRect.set(
                 getWidth() * .3f, 0,
                 getWidth() * .4f, getHeight());
+
     }
 
     @Override
-    public void addActor(Actor actor) {
-        super.addActor(actor);
-        if(actor instanceof Block) {
-            ((Block) actor).setAsChildOfSelected(isSelected());
-        }
+    protected void childrenChanged() {
+        super.childrenChanged();
+        setAllChildrenSelect(isSelected());
         if(getChildren().size>1){
             this.pad(5);
             //TODO Display the group connection graphically
@@ -226,12 +221,11 @@ public class Block extends HorizontalGroup {
     }
 
     public void setDraggable(boolean draggable) {
+        dad.removeTarget(target);
+        dad.removeSource(source);
         if (draggable) {
             dad.addTarget(target);
             dad.addSource(source);
-        } else {
-            dad.removeTarget(target);
-            dad.removeSource(source);
         }
     }
 
@@ -250,6 +244,7 @@ public class Block extends HorizontalGroup {
         //Recursive function goes through Block children and asks for their strings too
         // getText for Label children
         StringBuilder sb = new StringBuilder();
+        sb.append("(");
         for(Actor a : getChildren()){
             if(a.getClass() == Block.class){
                 sb.append(((Block)a).getChildrenString());
@@ -258,19 +253,25 @@ public class Block extends HorizontalGroup {
                 sb.append(((Label)a).getText());
             }
         }
+        sb.append(")");
         return sb.toString();
     }
 
     public void setSelected(){
         //Set this block as the selected one
-        if(selectedBlock != null) {
-            for (Actor child : selectedBlock.getChildren()) {
-                ((Block) child).setAsChildOfSelected(false);
-            }
-        }
+        Block oldSelected = selectedBlock;
         selectedBlock = this;
-        for(Actor child: selectedBlock.getChildren()){
-            ((Block) child).setAsChildOfSelected(true);
+        if(oldSelected != null) {
+            oldSelected.setAllChildrenSelect(false);
+        }
+        setAllChildrenSelect(true);
+    }
+
+    private void setAllChildrenSelect(boolean select){
+        for(Actor child: getChildren()){
+            if(child instanceof Block) {
+                ((Block) child).setAsChildOfSelected(select);
+            }
         }
     }
 
@@ -288,6 +289,6 @@ public class Block extends HorizontalGroup {
 
     public boolean isSelected(){
         //It is possible to instead use a selected flag in each Block, but it would be prone to failure
-        return this.equals(Block.selectedBlock);
+        return this == Block.selectedBlock;
     }
 }
