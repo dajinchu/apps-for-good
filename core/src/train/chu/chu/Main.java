@@ -8,8 +8,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -31,6 +33,8 @@ public class Main extends ApplicationAdapter {
     private Table rootTable;
     private ImageButton redo;
     private ImageButton undo;
+    private Table keypad;
+    private Table keyPadTabs;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
 
@@ -153,52 +157,10 @@ public class Main extends ApplicationAdapter {
         result.setPosition(50,0);
 
         //KeyPad
-        Table keypad=new Table();
-        String[][] keys = new String[][]{
-                {"7","8","9","+"},
-                 {"4","5","6","-"},
-                {"1","2","3","*"},
-                {"0", "0", ".","/"}
 
-        };
 
-        //Keypad generator
-        for(int x=0; x<keys.length; x++){
-            for(int y=0; y<keys[0].length; y++){
-                final String buttonTxt=keys[x][y];
 
-                //Used to keep track of col-span.
-                int i=1;
-                //Look for repeated keys
-                while(y<keys[0].length-1&&buttonTxt.equals(keys[x][y+i])){
-                    i++;
-
-                }
-
-                //Skip forward to avoid repetition
-                y+=i-1;
-                //Make Button, create block at end of row if clicked.
-
-                TextButton inputButton=new TextButton(buttonTxt, skin);
-                keypad.add(inputButton).width(i*100).height(100).colspan(i);
-                inputButton.addListener(new ClickListener(){
-                    @Override
-                    public void clicked(InputEvent event, float z, float y) {
-                        Block block;
-                        block = new Block();
-                        Label second = new Label(buttonTxt,skin);
-                        second.setColor(Color.BLACK);
-                        block.addActor(second);
-
-                        Command cmd=new AddCommand(block, row);
-                        //row.addActor(block);
-                        cmd.execute();
-                    }
-                });
-            }
-            keypad.row();
-        }
-
+        keyPadGenerator();
 
 
 
@@ -207,6 +169,8 @@ public class Main extends ApplicationAdapter {
         rootTable.add(toolbar).right().top();
         rootTable.row();
         rootTable.add(result).expandX().right().colspan(2);
+        rootTable.row();
+        rootTable.add(keyPadTabs).expandX().right().colspan(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
 
@@ -263,5 +227,76 @@ public class Main extends ApplicationAdapter {
         //When the app is destroyed, don't leave any memory leaks behind
         stage.dispose();
         skin.dispose();
+    }
+
+    public void keyPadGenerator(){
+        final int[] tabNum = {0};
+        //KeyPad tab generator
+        keyPadTabs=new Table();
+        for(int i=1; i<=10; i++){
+            TextButton inputButton=new TextButton("T", skin);
+            keyPadTabs.add(inputButton).width(50).height(50).colspan(i);
+            final int valueof=i;
+            inputButton.addListener(new ClickListener(){
+                @Override
+                public void clicked(InputEvent event, float z, float y) {
+                    tabNum[0] =valueof;
+                }
+            });
+        }
+        keyPadTabs.row();
+
+
+
+
+
+        //KeyPad
+        keypad=new Table();
+
+        String[][] keys = new String[][]{
+                {"7","8","9","+", "N"},
+                {"4","5","6","-", "N"},
+                {"1","2","3","*", "N"},
+                {"0", "0", ".","/", "N"}
+
+        };
+
+
+        //Keypad generator
+        for(int x=0; x<keys.length; x++){
+            for(int y=0; y<keys[0].length; y++){
+                final String buttonTxt=keys[x][y];
+
+                //Used to keep track of col-span.
+                int i=1;
+                //Look for repeated keys
+                while(y<keys[0].length-1&&buttonTxt.equals(keys[x][y+i])){
+                    i++;
+
+                }
+
+                //Skip forward to avoid repetition
+                y+=i-1;
+                //Make Button, create block at end of row if clicked.
+
+
+                TextButton inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
+                keypad.add(inputButton).width(i*100).height(100).colspan(i);
+                inputButton.addListener(new ClickListener(){
+                    @Override
+                    public void clicked(InputEvent event, float z, float y) {
+
+
+                        Command cmd=new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
+                        //row.addActor(block);
+                        cmd.execute();
+                    }
+                });
+
+
+            }
+            keypad.row();
+        }
+
     }
 }
