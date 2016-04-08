@@ -33,6 +33,10 @@ public class Main extends ApplicationAdapter {
     private Table rootTable;
     private ImageButton redo;
     private ImageButton undo;
+    private Table keypad;
+    private Table keyPadTabs;
+    private int tabNum;
+    private int prevtabNum;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
 
@@ -155,53 +159,24 @@ public class Main extends ApplicationAdapter {
         result.setPosition(50,0);
 
         //KeyPad
-        Table keypad=new Table();
-        String[][] keys = new String[][]{
-                {"7","8","9","+"},
-                 {"4","5","6","-"},
-                {"1","2","3","*"},
-                {"0", "0", ".","/"}
 
-        };
-
-        //Keypad generator
-        for(int x=0; x<keys.length; x++){
-            for(int y=0; y<keys[0].length; y++){
-                final String buttonTxt=keys[x][y];
-
-                //Used to keep track of col-span.
-                int i=1;
-                //Look for repeated keys
-                while(y<keys[0].length-1&&buttonTxt.equals(keys[x][y+i])){
-                    i++;
-
+        //KeyPad tab generator
+        keyPadTabs=new Table();
+        for(int i=1; i<=10; i++){
+            TextButton inputButton=new TextButton("T", skin);
+            keyPadTabs.add(inputButton).width(50).height(50).colspan(i);
+            final int valueof=i;
+            inputButton.addListener(new ClickListener(){
+                @Override
+                public void clicked(InputEvent event, float z, float y) {
+                    tabNum=valueof;
                 }
-
-                //Skip forward to avoid repetition
-                y+=i-1;
-                //Make Button, create block at end of row if clicked.
-
-                TextButton inputButton=new TextButton(buttonTxt, skin);
-                keypad.add(inputButton).width(i*100).height(100).colspan(i);
-                inputButton.addListener(new ClickListener(){
-                    @Override
-                    public void clicked(InputEvent event, float z, float y) {
-                        Block block;
-                        block = new Block();
-                        Label second = new Label(buttonTxt,skin);
-                        second.setColor(Color.BLACK);
-                        block.addActor(second);
-
-                        Command cmd=new AddCommand(block, row);
-                        //row.addActor(block);
-                        cmd.execute();
-                    }
-                });
-            }
-            keypad.row();
+            });
         }
-
-
+        keyPadTabs.row();
+        prevtabNum=tabNum;
+        keypad=new Table();
+        tabChooser();
 
 
         //Populate rootTable
@@ -209,6 +184,8 @@ public class Main extends ApplicationAdapter {
         rootTable.add(toolbar).right().top();
         rootTable.row();
         rootTable.add(result).expandX().right().colspan(2);
+        rootTable.row();
+        rootTable.add(keyPadTabs).expandX().right().colspan(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
 
@@ -232,6 +209,13 @@ public class Main extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1,1,1,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        if(prevtabNum==tabNum){
+
+        }else {
+            tabChooser();
+
+            prevtabNum=tabNum;
+        }
         //Evaluate the expression
         //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
         try{
@@ -259,11 +243,159 @@ public class Main extends ApplicationAdapter {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
         stage.setDebugAll(true);
+
+
+
 	}
 
     public void dispose () {
         //When the app is destroyed, don't leave any memory leaks behind
         stage.dispose();
         skin.dispose();
+    }
+
+    public void tabChooser(){
+
+        System.out.println(tabNum);
+        String[][] keys;
+        switch (tabNum){
+            case 1:keys = new String[][]{
+                    {"7","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 2:keys = new String[][]{
+                    {"2","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 3:keys = new String[][]{
+                    {"3","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 4:keys = new String[][]{
+                    {"4","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 5:keys = new String[][]{
+                    {"5","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 6:keys = new String[][]{
+                    {"6","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 7:keys = new String[][]{
+                    {"7","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 8:keys = new String[][]{
+                    {"8","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 9:keys = new String[][]{
+                    {"9","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 10:keys = new String[][]{
+                    {"10","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            default: keys = new String[][]{
+                    {"9","8","9","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+        }
+
+
+        keyPadGenerator(keys);
+    }
+
+
+    public void keyPadGenerator(String[][] keys){
+
+        //KeyPad
+        keypad.clear();
+
+
+
+
+        //Keypad generator
+        for(int x=0; x<keys.length; x++){
+            for(int y=0; y<keys[0].length; y++){
+                final String buttonTxt=keys[x][y];
+
+                //Used to keep track of col-span.
+                int i=1;
+                //Look for repeated keys
+                while(y<keys[0].length-1&&buttonTxt.equals(keys[x][y+i])){
+                    i++;
+
+                }
+
+                //Skip forward to avoid repetition
+                y+=i-1;
+                //Make Button, create block at end of row if clicked.
+
+
+                TextButton inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
+                keypad.add(inputButton).width(i*100).height(100).colspan(i);
+                inputButton.addListener(new ClickListener(){
+                    @Override
+                    public void clicked(InputEvent event, float z, float y) {
+
+
+                        Command cmd=new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
+                        //row.addActor(block);
+                        cmd.execute();
+                    }
+                });
+
+
+            }
+            keypad.row();
+        }
+
     }
 }
