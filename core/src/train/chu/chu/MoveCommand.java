@@ -17,7 +17,9 @@ public class MoveCommand extends Command {
     //only for move-in
     private Block groupBlock;
 
-    public enum Side {LEFT, RIGHT, IN};
+    public enum Side {LEFT, RIGHT, IN}
+
+    ;
 
     public MoveCommand(Actor targetActor, Actor sourceActor, Side side) {
         this.targetActor = targetActor;
@@ -26,7 +28,7 @@ public class MoveCommand extends Command {
         this.oldSourceParent = sourceActor.getParent();
         this.oldTargetIndex = targetParent.getChildren().indexOf(targetActor, true);
         this.oldSourceIndex = oldSourceParent.getChildren().indexOf(sourceActor, true);
-        this.side=side;
+        this.side = side;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class MoveCommand extends Command {
         oldSourceParent.addActorAt(oldSourceIndex, sourceActor);
 
         //Needed for move-in
-        if(side == Side.IN) {
+        if (side == Side.IN) {
             targetParent.addActorAt(oldTargetIndex, targetActor);
             groupBlock.remove();
         }
@@ -48,18 +50,24 @@ public class MoveCommand extends Command {
      * Moves actor to new location. Moves according to side enum.
      */
     protected void positiveAction() {
-        switch(side) {
-            case LEFT: targetParent.addActorBefore(targetActor, sourceActor); break;
-            case RIGHT: targetParent.addActorAfter(targetActor, sourceActor); break;
+        switch (side) {
+            case LEFT:
+                targetParent.addActorBefore(targetActor, sourceActor);
+                break;
+            case RIGHT:
+                targetParent.addActorAfter(targetActor, sourceActor);
+                break;
             case IN:
+                if (targetActor instanceof Block && ((Block) targetActor).getChildren().size > 1) {
+                    groupBlock = (Block) targetActor;
+                } else {
+                    groupBlock = new Block();
+                    groupBlock.addActor(targetActor);
+                }
+                groupBlock.setSelected();
+                targetParent.addActorAt(oldTargetIndex, groupBlock);
+                break;
         }
-        if(targetActor instanceof Block && ((Block) targetActor).getChildren().size>1){
-            groupBlock = (Block) targetActor;
-        } else {
-            groupBlock = new Block();
-            groupBlock.addActor(targetActor);
-        }
-            groupBlock.addActor(sourceActor);
-            targetParent.addActorAt(oldTargetIndex, groupBlock);
-        }
+
     }
+}
