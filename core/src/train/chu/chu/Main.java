@@ -96,26 +96,6 @@ public class Main extends ApplicationAdapter {
             }
         });
 
-        Block parent;
-        parent = new Block();
-
-        Block block;
-        Label l;
-
-        block = new Block();
-        l = new Label("6",skin);
-        l.setColor(Color.BLACK);
-        block.addActor(l);
-        parent.addActor(block);
-
-        block = new Block();
-        l = new Label("+",skin);
-        l.setColor(Color.BLACK);
-        block.addActor(l);
-        parent.addActor(block);
-
-        row.addActor(parent);
-
         //Instantiate labels and put them each in a block. Add each block to row
         final TrashCan trashCan = new TrashCan();
         trashCan.setDrawable(skin,"delete");
