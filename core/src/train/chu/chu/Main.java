@@ -39,6 +39,7 @@ public class Main extends ApplicationAdapter {
     private int prevtabNum;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
+    private Label debug;
 
     @Override
 	public void create () {
@@ -178,10 +179,16 @@ public class Main extends ApplicationAdapter {
         keypad=new Table();
         tabChooser();
 
+        debug = new Label("",skin);
+        debug.setPosition(20,40);
+        debug.setFontScale(.6f);
+        debug.setColor(Color.GRAY);
+
+        stage.addActor(debug);
 
         //Populate rootTable
-        rootTable.add(trashCan).left().top();
-        rootTable.add(toolbar).right().top();
+        rootTable.add(trashCan).expandX().left().top();
+        rootTable.add(toolbar).expandX().right().top();
         rootTable.row();
         rootTable.add(result).expandX().right().colspan(2);
         rootTable.row();
@@ -216,17 +223,20 @@ public class Main extends ApplicationAdapter {
 
             prevtabNum=tabNum;
         }
+
+        result.setColor(Color.BLACK);
+        //Convert the blocks in HorizontalGroup to a string
+        String s = row.getChildrenString();
         //Evaluate the expression
         //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
         try{
-            result.setColor(Color.BLACK);
-            //Convert the blocks in HorizontalGroup to a string
-            String s = row.getChildrenString();
             result.setText("="+new ExpressionBuilder(s).build().evaluate());
         }catch (IllegalArgumentException error){
             result.setColor(Color.RED);
             result.setText("Invalid");
         }
+
+        debug.setText(s);
 
         if(Command.redoCommands.isEmpty()){
             redo.getImage().setColor(Color.GRAY);
@@ -242,7 +252,7 @@ public class Main extends ApplicationAdapter {
         //Scene2d. Step forward the world and draw the scene
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
-        stage.setDebugAll(true);
+        //stage.setDebugAll(true);
 
 
 
