@@ -28,7 +28,7 @@ public class ClearChildren extends Command {
         for(int i=0; i<row.getChildren().size;i++){
             children.add(i, row.getChildren().get(i));
         }
-        row.getChildren().clear();
+        row.clearChildren();
 
     }
 }

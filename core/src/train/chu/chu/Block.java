@@ -2,12 +2,12 @@ package train.chu.chu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
@@ -78,12 +78,13 @@ public class Block extends HorizontalGroup {
                 // Duplication does NOT create a Block, merely a WidgetGroup lookalike. Making it a block
                 // might be problematic, as then the payload Block would have all the functions of a placed Block.
                 // It just needs to look the same.
-                WidgetGroup dragActor = getDuplicateForDragging();
+                PayloadBlock dragActor = new PayloadBlock(Block.this);
                 payload.setDragActor(dragActor);
                 //setDragActorPosition is to offset the dragActor from the pointer location
                 // without this part, the pointer is always dragging the actor by its left edge
                 // instead, this offsets to be held by where it was picked up
-                dad.setDragActorPosition(-x * getFirstParentScale(), (dragActor.getPrefHeight() / 2 - y) * getFirstParentScale());
+                float scale = ScaleUtils.getTrueScale(Block.this);
+                dad.setDragActorPosition(-x * scale, (dragActor.getPrefHeight() / 2 - y) * scale);
 
                 return payload;
             }
@@ -161,43 +162,6 @@ public class Block extends HorizontalGroup {
         };
     }
 
-    private float getFirstParentScale() {
-        //Iterate through parents and find first parent that has been scale.
-        // It should find sandbox main container and return its scale
-        // Can't just use this.scale because parents can affect Block's scale but block does not inherit the scale value
-        Actor scale = this;
-        while (scale.getScaleX() == 1 && scale.hasParent()) {
-            scale = scale.getParent();
-        }
-        return scale.getScaleX();
-    }
-
-    private WidgetGroup getDuplicateForDragging() {
-        //Create a lookalike of this block, for Payloads
-        WidgetGroup g = new HorizontalGroup();
-        float firstParentScale = getFirstParentScale();
-        g.setScale(firstParentScale);
-        //Iterate through children and add them to the clone group
-        for (Actor a : getChildren()) {
-            //TODO extract and improve the duping process into some kind of CloneUtils that would clone Actors
-            if (a.getClass() == Block.class) {
-                //If the child is a block class, ask that nested block to duplicate too
-                WidgetGroup childDupe = ((Block) a).getDuplicateForDragging();
-                childDupe.setScale(1f);
-                g.addActor(childDupe);
-            } else {
-                //Otherwise, it's a label, so cast it and get access to text and style
-                Label aLabel = (Label) a;
-                //Create a new Label instance, and give it the same properties as the old one
-                Label dupe = new Label(aLabel.getText(), aLabel.getStyle());
-                dupe.setColor(aLabel.getColor());
-                //And add it to the clone group, of course
-                g.addActor(dupe);
-            }
-        }
-        return g;
-    }
-
     @Override
     public void layout() {
         super.layout();
@@ -207,7 +171,8 @@ public class Block extends HorizontalGroup {
         centerRect.set(
                 getWidth() * .3f, 0,
                 getWidth() * .4f, getHeight());
-
+        Gdx.app.log(getChildrenString(),"Layout");
+        pack();
     }
 
     @Override
@@ -244,7 +209,7 @@ public class Block extends HorizontalGroup {
         //Recursive function goes through Block children and asks for their strings too
         // getText for Label children
         StringBuilder sb = new StringBuilder();
-        sb.append("(");
+        if(getChildren().size>1)sb.append("(");
         for(Actor a : getChildren()){
             if(a.getClass() == Block.class){
                 sb.append(((Block)a).getChildrenString());
@@ -253,7 +218,7 @@ public class Block extends HorizontalGroup {
                 sb.append(((Label)a).getText());
             }
         }
-        sb.append(")");
+        if(getChildren().size>1) sb.append(")");
         return sb.toString();
     }
 
@@ -290,5 +255,17 @@ public class Block extends HorizontalGroup {
     public boolean isSelected(){
         //It is possible to instead use a selected flag in each Block, but it would be prone to failure
         return this == Block.selectedBlock;
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        super.draw(batch, parentAlpha);
+        if(getChildren().size==0 || (getChildren().size==1 && getChildren().get(0) instanceof Label)) return;
+
+        if (isTransform()) applyTransform(batch, computeTransform());
+        batch.setColor(Color.BLACK);
+        BatchShapeUtils.drawDashedRectangle(batch, 0, 0, getWidth(), getHeight(), 2);
+        if (isTransform()) resetTransform(batch);
+
     }
 }
