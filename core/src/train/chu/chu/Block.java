@@ -179,10 +179,9 @@ public class Block extends HorizontalGroup {
     protected void childrenChanged() {
         super.childrenChanged();
         setAllChildrenSelect(isSelected());
-        if(getChildren().size>1){
-            this.pad(5);
-            //TODO Display the group connection graphically
-        }
+        if(getChildren().size==0 || (getChildren().size==1 && getChildren().get(0) instanceof Label)) return;
+        this.pad(5);
+
     }
 
     public void setDraggable(boolean draggable) {
@@ -227,6 +226,7 @@ public class Block extends HorizontalGroup {
         Block oldSelected = selectedBlock;
         selectedBlock = this;
         if(oldSelected != null) {
+            oldSelected.setColor(Color.BLACK);
             oldSelected.setAllChildrenSelect(false);
         }
         setAllChildrenSelect(true);
@@ -245,10 +245,16 @@ public class Block extends HorizontalGroup {
         // Needed because this needs to happen in setSelected, but also in addActor to apply the
         // childOfSelected behavior to newly added blocks too
         setDraggable(childOf);
+        Color set = Color.BLACK;
         if(childOf) {
-            setNestedColors(Color.valueOf("3F51B5"));
-        } else {
-            setNestedColors(Color.BLACK);
+            set = Color.valueOf("3F51B5");
+        }
+        if((getChildren().size==1 && getChildren().get(0) instanceof Label)){
+            //This is a block with just a label inside, it has no outline, so color the label
+            getChildren().get(0).setColor(set);
+        }else{
+            //This is a group-block, color the outline, NOT the label children
+            this.setColor(set);
         }
     }
 
@@ -260,10 +266,11 @@ public class Block extends HorizontalGroup {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
-        if(getChildren().size==0 || (getChildren().size==1 && getChildren().get(0) instanceof Label)) return;
 
+        //Dashed-line border
+        if(getChildren().size==0 || (getChildren().size==1 && getChildren().get(0) instanceof Label)) return;//TODO This set of ifs is repeatedly needed
         if (isTransform()) applyTransform(batch, computeTransform());
-        batch.setColor(Color.BLACK);
+        batch.setColor(getColor());
         BatchShapeUtils.drawDashedRectangle(batch, 0, 0, getWidth(), getHeight(), 2);
         if (isTransform()) resetTransform(batch);
 
