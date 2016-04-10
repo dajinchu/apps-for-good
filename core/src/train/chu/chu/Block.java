@@ -84,7 +84,7 @@ public class Block extends HorizontalGroup {
                 // without this part, the pointer is always dragging the actor by its left edge
                 // instead, this offsets to be held by where it was picked up
                 float scale = ScaleUtils.getTrueScale(Block.this);
-                dad.setDragActorPosition(-x * scale, (dragActor.getPrefHeight() / 2 - y) * scale);
+                dad.setDragActorPosition(-x * scale, (dragActor.getPrefHeight() - y) * scale);
 
                 return payload;
             }
