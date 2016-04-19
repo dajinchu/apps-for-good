@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -181,12 +182,18 @@ public class Block extends HorizontalGroup {
     }
 
     public void setDraggable(boolean draggable) {
-        dad.removeTarget(target);
         dad.removeSource(source);
         if (draggable) {
-            dad.addTarget(target);
             dad.addSource(source);
         }
+    }
+
+    public void setTargetable(boolean targetable){
+        dad.removeTarget(target);
+        if(targetable){
+            dad.addTarget(target);
+        }
+        Gdx.app.log(getChildrenString(),"targetable to " + targetable);
     }
 
     public void setNestedColors(Color color){
@@ -219,6 +226,7 @@ public class Block extends HorizontalGroup {
 
     public void setSelected(){
         //Set this block as the selected one
+        Gdx.app.log(getChildrenString(),"setselected");
         Block oldSelected = selectedBlock;
         selectedBlock = this;
         if(oldSelected != null) {
@@ -226,12 +234,31 @@ public class Block extends HorizontalGroup {
             oldSelected.setAllChildrenSelect(false);
         }
         setAllChildrenSelect(true);
+
     }
 
     private void setAllChildrenSelect(boolean select){
+        //setTargetable(!select);
         for(Actor child: getChildren()){
             if(child instanceof Block) {
                 ((Block) child).setAsChildOfSelected(select);
+            }
+        }
+        if(select){
+            Group parent = getParent();
+            Block childContainingSelected = this;
+            while(parent instanceof Block){
+                for(Actor child : parent.getChildren()){
+                    if(child instanceof Block && child!=childContainingSelected){
+                        ((Block) child).setTargetable(true);
+                    }//TODO Else set untargetable?
+                }
+                if(parent.hasParent()){
+                    childContainingSelected = (Block) parent;
+                    parent = parent.getParent();
+                } else {
+                    break;
+                }
             }
         }
     }
@@ -241,6 +268,8 @@ public class Block extends HorizontalGroup {
         // Needed because this needs to happen in setSelected, but also in addActor to apply the
         // childOfSelected behavior to newly added blocks too
         setDraggable(childOf);
+        setTargetable(childOf);
+
         Color set = Color.BLACK;
         if(childOf) {
             set = Color.valueOf("3F51B5");

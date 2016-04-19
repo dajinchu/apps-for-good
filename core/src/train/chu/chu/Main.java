@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -40,6 +41,7 @@ public class Main extends ApplicationAdapter {
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
+    private VerticalGroup calcZone;
 
     @Override
 	public void create () {
@@ -69,12 +71,15 @@ public class Main extends ApplicationAdapter {
         stage.addActor(rootTable);
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
-        //Really, it should be a block too, but all blocks are drag-and-drop-able, and can't be nested
-        // so that wouldn't work.
         row = new EvaluatorBlock();
-        stage.addListener(new ActorGestureResizer(stage.getCamera(),row,new Vector2(1000,1000)));
-        row.setPosition(100,100);
-        stage.addActor(row);
+
+        result = new Label("",skin);
+
+        calcZone = new VerticalGroup();
+        calcZone.addActor(row);
+        calcZone.addActor(result);
+        stage.addListener(new ActorGestureResizer(stage.getCamera(),calcZone,new Vector2(1000,1000)));
+        stage.addActor(calcZone);
 
         stage.addListener(new ClickListener(){
             public float x, y;
@@ -133,12 +138,6 @@ public class Main extends ApplicationAdapter {
         toolbar.addActor(redo);
 
 
-
-
-        result = new Label("finish",skin);
-        result.setColor(Color.BLACK);
-        result.setPosition(50,0);
-
         //KeyPad
 
         //KeyPad tab generator
@@ -170,8 +169,6 @@ public class Main extends ApplicationAdapter {
         rootTable.add(trashCan).expandX().left().top();
         rootTable.add(toolbar).expandX().right().top();
         rootTable.row();
-        rootTable.add(result).expandX().right().colspan(2);
-        rootTable.row();
         rootTable.add(keyPadTabs).expandX().right().colspan(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
@@ -187,7 +184,7 @@ public class Main extends ApplicationAdapter {
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
         //set stage viewport
         stage.getViewport().update(width,height,true);
-        row.setPosition((width-row.getWidth())/2,(height-row.getHeight())/2);
+        calcZone.setPosition((width-calcZone.getWidth())/2,(height-calcZone.getHeight())/2);
     }
 
     @Override
@@ -199,21 +196,25 @@ public class Main extends ApplicationAdapter {
         if(prevtabNum==tabNum){
 
         }else {
-            tabChooser();
+            tabChooser();//TODO OH GOD WHY IS THIS IN RENDER
 
             prevtabNum=tabNum;
         }
 
-        result.setColor(Color.BLACK);
+        result.setColor(Color.DARK_GRAY);
         //Convert the blocks in HorizontalGroup to a string
         String s = row.getChildrenString();
         //Evaluate the expression
         //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
-        try{
-            result.setText("="+new ExpressionBuilder(s).build().evaluate());
-        }catch (IllegalArgumentException error){
-            result.setColor(Color.RED);
-            result.setText("Invalid");
+        if(s.isEmpty()){
+            result.setText("");
+        }else {
+            try {
+                result.setText("=" + new ExpressionBuilder(s).build().evaluate());
+            } catch (IllegalArgumentException error) {
+                result.setColor(Color.RED);
+                result.setText("false");
+            }
         }
 
         debug.setText(s);
