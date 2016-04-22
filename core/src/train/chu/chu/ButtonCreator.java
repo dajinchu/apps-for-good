@@ -17,10 +17,15 @@ public class ButtonCreator {
 
 
     static Button inputButton;
-
     private static boolean txt;
 
 
+    /**
+     * Creates a Button
+     * @param str takes the string for the button
+     * @param skin the skin for the Skin
+     * @return an ImageButton or TextButton
+     */
     public static Button ButtonCreator(String str, Skin skin){
 
         String orig=str;
@@ -36,6 +41,12 @@ public class ButtonCreator {
 
 
     }
+
+    /**
+     * Takes the given string and outputs actual string
+     * @param str the given string id
+     * @return the string to be displayed
+     */
     public static String generateString(String str){
         String returnThis;
         //All the special cases
@@ -47,6 +58,11 @@ public class ButtonCreator {
         return returnThis;
     }
 
+    /**
+     * Takes the string and returns the appropriate image.
+     * @param str the string id
+     * @return the image for the ImageButton
+     */
     public static Button imageButtonCreator(String str){
         Button button;
         Drawable pic;

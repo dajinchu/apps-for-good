@@ -21,6 +21,12 @@ public class MoveCommand extends Command {
 
     ;
 
+    /**
+     * Moves actor to new location
+     * @param targetActor the Actor the current actor will be placed next to
+     * @param sourceActor the Actor that is being moved
+     * @param side left or right of the targetActor
+     */
     public MoveCommand(Actor targetActor, Actor sourceActor, Side side) {
         this.targetActor = targetActor;
         this.sourceActor = sourceActor;

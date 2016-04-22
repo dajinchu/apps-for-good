@@ -21,7 +21,7 @@ public class Block extends HorizontalGroup {
 
     private DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
-    private static final double HOVER_TIME =.5;
+    private static final double HOVER_TIME =.11;
 
 
     private Source source;

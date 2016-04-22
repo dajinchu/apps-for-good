@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -56,7 +57,11 @@ public class Main extends ApplicationAdapter {
     @Override
 	public void create () {
         //Generate bitmap font from TrueType Font
-        BitmapFont roboto=new BitmapFont(new FileHandle("roboto.fnt"),new FileHandle("roboto.png"),false);
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 72;
+        BitmapFont roboto = generator.generateFont(parameter);
+        generator.dispose();
         //Load skin with images and styles for use in scene2d ui elements
         Drawable green=new Image(new Texture("green.png")).getDrawable();
         Drawable undoImg=new Image(new Texture("undo.png")).getDrawable();

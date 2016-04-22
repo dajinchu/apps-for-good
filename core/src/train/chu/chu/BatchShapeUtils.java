@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 
 /**
  * Created by Da-Jin on 4/9/2016.
+ * For Drawing shapes more efficiently.
  */
 public class BatchShapeUtils {
 
