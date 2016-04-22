@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -23,12 +24,16 @@ public class Block extends HorizontalGroup {
     private DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
     private Rectangle centerRect = new Rectangle();
-    private Rectangle leftRect = new Rectangle();
-    private final double timeInBlock=0.085;
+    private static final double HOVER_TIME =.5;
 
 
     private Source source;
     private Target target;
+    private Actor hoverActor;
+
+    private enum TargetState{LEFT,CENTER,RIGHT,NOT};
+    private TargetState targetState = TargetState.NOT;
+    private double targetHoverCount = 0;
 
     //There can only be one block selected at a time
     private static Block selectedBlock;
@@ -99,10 +104,6 @@ public class Block extends HorizontalGroup {
 
         target = new DragAndDrop.Target(this) {
 
-            float timeCenter;
-            double timeLeft=0;
-            double timeRight=0;
-
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                 //Something is being dragged over this target
                 if (source.getActor() == Block.this) {
@@ -110,56 +111,52 @@ public class Block extends HorizontalGroup {
                     return false;
                 }
 
+                if (x < getWidth() * .3f) {
+                    //The centerRect has been entered, go swap with payload's source.
+                    // To the user this looks this block is getting out of the way of what's being dragged
+                    // It's a little different in code because the payload is just sort of 'representing'
+                    // the source Block.
+                    targetState = TargetState.LEFT;
+                    //System.out.println(Gdx.graphics.getDeltaTime());
 
-
-                    if (x < getWidth() * .3f) {
-                        //The centerRect has been entered, go swap with payload's source.
-                        // To the user this looks this block is getting out of the way of what's being dragged
-                        // It's a little different in code because the payload is just sort of 'representing'
-                        // the source Block.
-                        timeLeft+= Gdx.graphics.getDeltaTime();
-                        //System.out.println(Gdx.graphics.getDeltaTime());
-
-                    } else if (x > getWidth() * .7f) {
-                        timeRight+=Gdx.graphics.getDeltaTime();
-                        //System.out.println(Gdx.graphics.getDeltaTime());
-                    }else{
-                        timeLeft=0;
-                        timeRight=0;
-
-                        timeCenter+=Gdx.graphics.getDeltaTime();
-                    }
-
-                if(timeLeft>=timeInBlock) {
-                    Command cmd = new MoveCommand(getActor(), source.getActor(), MoveCommand.Side.LEFT);
-                    cmd.execute();
-                    timeLeft=0;
-                    timeRight=0;
-                }else if(timeRight>=timeInBlock){
-                    Command cmd = new MoveCommand(getActor(), source.getActor(), MoveCommand.Side.RIGHT);
-                    cmd.execute();
-                    timeLeft=0;
-                    timeRight=0;
-                }else if(timeCenter>=timeInBlock*4){
-                    timeCenter=0;
-                    new MoveCommand(getActor(),source.getActor(), MoveCommand.Side.IN).execute();
+                } else if (x > getWidth() * .7f) {
+                    targetState = TargetState.RIGHT;
+                    //System.out.println(Gdx.graphics.getDeltaTime());
+                } else {
+                    targetState = TargetState.CENTER;
                 }
-
-                getActor().setColor(Color.GREEN);
+                hoverActor = source.getActor();
                 return true;
             }
 
             public void reset(Source source, Payload payload) {
                 getActor().setColor(Color.BLACK);
-                timeLeft=0;
-                timeRight=0;
+                targetState = TargetState.NOT;
+                targetHoverCount = 0;
             }
 
             public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                timeLeft=0;
-                timeRight=0;
+                targetState = TargetState.NOT;
+                targetHoverCount = 0;
             }
         };
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if(targetState != TargetState.NOT){
+            targetHoverCount += delta;
+        }
+        if(targetHoverCount> HOVER_TIME){
+            switch (targetState){
+                case LEFT:new MoveCommand(this, hoverActor, MoveCommand.Side.LEFT).execute();break;
+                case RIGHT:new MoveCommand(this, hoverActor, MoveCommand.Side.RIGHT).execute();break;
+                case CENTER:new MoveCommand(this, hoverActor, MoveCommand.Side.IN).execute();break;
+            }
+            targetState = TargetState.NOT;
+            targetHoverCount = 0;
+        }
     }
 
     @Override
@@ -185,12 +182,18 @@ public class Block extends HorizontalGroup {
     }
 
     public void setDraggable(boolean draggable) {
-        dad.removeTarget(target);
         dad.removeSource(source);
         if (draggable) {
-            dad.addTarget(target);
             dad.addSource(source);
         }
+    }
+
+    public void setTargetable(boolean targetable){
+        dad.removeTarget(target);
+        if(targetable){
+            dad.addTarget(target);
+        }
+        Gdx.app.log(getChildrenString(),"targetable to " + targetable);
     }
 
     public void setNestedColors(Color color){
@@ -223,6 +226,7 @@ public class Block extends HorizontalGroup {
 
     public void setSelected(){
         //Set this block as the selected one
+        Gdx.app.log(getChildrenString(),"setselected");
         Block oldSelected = selectedBlock;
         selectedBlock = this;
         if(oldSelected != null) {
@@ -230,12 +234,31 @@ public class Block extends HorizontalGroup {
             oldSelected.setAllChildrenSelect(false);
         }
         setAllChildrenSelect(true);
+
     }
 
     private void setAllChildrenSelect(boolean select){
+        //setTargetable(!select);
         for(Actor child: getChildren()){
             if(child instanceof Block) {
                 ((Block) child).setAsChildOfSelected(select);
+            }
+        }
+        if(select){
+            Group parent = getParent();
+            Block childContainingSelected = this;
+            while(parent instanceof Block){
+                for(Actor child : parent.getChildren()){
+                    if(child instanceof Block && child!=childContainingSelected){
+                        ((Block) child).setTargetable(true);
+                    }//TODO Else set untargetable?
+                }
+                if(parent.hasParent()){
+                    childContainingSelected = (Block) parent;
+                    parent = parent.getParent();
+                } else {
+                    break;
+                }
             }
         }
     }
@@ -245,6 +268,8 @@ public class Block extends HorizontalGroup {
         // Needed because this needs to happen in setSelected, but also in addActor to apply the
         // childOfSelected behavior to newly added blocks too
         setDraggable(childOf);
+        setTargetable(childOf);
+
         Color set = Color.BLACK;
         if(childOf) {
             set = Color.valueOf("3F51B5");

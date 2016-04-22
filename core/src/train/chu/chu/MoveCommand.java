@@ -64,8 +64,8 @@ public class MoveCommand extends Command {
                     groupBlock = new Block();
                     groupBlock.addActor(targetActor);
                 }
-                groupBlock.setSelected();
                 targetParent.addActorAt(oldTargetIndex, groupBlock);
+                groupBlock.setSelected();
                 break;
         }
 
