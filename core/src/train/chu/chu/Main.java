@@ -2,15 +2,19 @@ package train.chu.chu;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -18,12 +22,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import net.objecthunter.exp4j.ExpressionBuilder;
+
+import javafx.scene.shape.MoveTo;
 
 public class Main extends ApplicationAdapter {
     private Stage stage;
@@ -37,6 +44,7 @@ public class Main extends ApplicationAdapter {
     private Table keyPadTabs;
     private int tabNum;
     private int prevtabNum;
+    private int keyToggle;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
@@ -44,12 +52,7 @@ public class Main extends ApplicationAdapter {
     @Override
 	public void create () {
         //Generate bitmap font from TrueType Font
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 72;
-        BitmapFont roboto = generator.generateFont(parameter);
-        generator.dispose();
-
+        BitmapFont roboto=new BitmapFont(new FileHandle("roboto.fnt"),new FileHandle("roboto.png"),false);
         //Load skin with images and styles for use in scene2d ui elements
         Drawable green=new Image(new Texture("green.png")).getDrawable();
         Drawable undoImg=new Image(new Texture("undo.png")).getDrawable();
@@ -127,8 +130,41 @@ public class Main extends ApplicationAdapter {
             }
         });
 
+        //Key Pad toggle button
+        final Drawable keytogsDown=new Image(new Texture("upArrow.png")).getDrawable();
+        final Drawable keytogsUp=new Image(new Texture("downArrow.png")).getDrawable();
+        final ImageButton keyPadToggle=new ImageButton(keytogsUp,keytogsDown,keytogsDown);
+
+
+       keyPadToggle.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+
+                if(keyToggle==0){
+                    //Hide KeyPad, set to up arrow
+                    keyToggle=1;
+                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),-100, 0.5f, Interpolation.swingIn));
+                    keypad.addAction(Actions.moveTo(keypad.getX(),-500, 0.5f,Interpolation.swingIn));
+
+                    keyPadToggle.setChecked(true);
+
+
+                }else{
+                    //Bring up keypad, set to down arrow
+                    keyToggle=0;
+                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),400, 0.5f,Interpolation.swingOut));
+                    keypad.addAction(Actions.moveTo(keypad.getX(),0, 0.5f,Interpolation.swingOut));
+
+                    keyPadTabs.setVisible(true);
+                    keypad.setVisible(true);
+                    keyPadToggle.setChecked(false);
+                }
+            }
+        });
+
         Group toolbar=new HorizontalGroup();
         //toolbar.addActor(trashCan);
+        toolbar.addActor(keyPadToggle);
         toolbar.addActor(undo);
         toolbar.addActor(redo);
 
@@ -140,7 +176,7 @@ public class Main extends ApplicationAdapter {
         result.setPosition(50,0);
 
         //KeyPad
-
+        tabNum=1;
         //KeyPad tab generator
         keyPadTabs=new Table();
         for(int i=1; i<=10; i++){
@@ -151,6 +187,7 @@ public class Main extends ApplicationAdapter {
                 @Override
                 public void clicked(InputEvent event, float z, float y) {
                     tabNum=valueof;
+                    tabChooser();
                 }
             });
         }
@@ -167,8 +204,9 @@ public class Main extends ApplicationAdapter {
         stage.addActor(debug);
 
         //Populate rootTable
-        rootTable.add(trashCan).expandX().left().top();
-        rootTable.add(toolbar).expandX().right().top();
+
+        rootTable.add(trashCan).expandX().left().top().expandY().top();
+        rootTable.add(toolbar).expandX().right().top().expandY().top();
         rootTable.row();
         rootTable.add(result).expandX().right().colspan(2);
         rootTable.row();
@@ -196,13 +234,7 @@ public class Main extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1,1,1,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if(prevtabNum==tabNum){
 
-        }else {
-            tabChooser();
-
-            prevtabNum=tabNum;
-        }
 
         result.setColor(Color.BLACK);
         //Convert the blocks in HorizontalGroup to a string
@@ -250,9 +282,9 @@ public class Main extends ApplicationAdapter {
         String[][] keys;
         switch (tabNum){
             case 1:keys = new String[][]{
-                    {"7","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
+                    {"7","8","9","+", "sqrt"},
+                    {"4","5","6","-", "square"},
+                    {"1","2","3","*", ""},
                     {"0", "0", ".","/", "N"}
 
             };
@@ -369,13 +401,11 @@ public class Main extends ApplicationAdapter {
                 //Make Button, create block at end of row if clicked.
 
 
-                TextButton inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
+                Actor inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
                 keypad.add(inputButton).width(i*100).height(100).colspan(i);
                 inputButton.addListener(new ClickListener(){
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
-
-
                         Command cmd=new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
                         //row.addActor(block);
                         cmd.execute();
