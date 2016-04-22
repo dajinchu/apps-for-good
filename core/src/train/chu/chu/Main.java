@@ -103,7 +103,7 @@ public class Main extends ApplicationAdapter {
             }
         });
 
-        //Instantiate labels and put them each in a block. Add each block to row
+        //Creates the trash can
         final TrashCan trashCan = new TrashCan();
         trashCan.setDrawable(skin,"delete");
         trashCan.addListener(new ClickListener(){
@@ -116,6 +116,7 @@ public class Main extends ApplicationAdapter {
         });
 
 
+        //Creates the redo button
         redo = new ImageButton(redoImg);
         redo.addListener(new ClickListener(){
             @Override
@@ -124,9 +125,8 @@ public class Main extends ApplicationAdapter {
             }
         });
 
-
+        //creates the undo button
         undo = new ImageButton(undoImg);
-
         undo.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -140,6 +140,7 @@ public class Main extends ApplicationAdapter {
         final ImageButton keyPadToggle=new ImageButton(keytogsUp,keytogsDown,keytogsDown);
 
 
+        //Toggle the keypad on and off
        keyPadToggle.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -149,7 +150,6 @@ public class Main extends ApplicationAdapter {
                     keyToggle=1;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),-100, 0.5f, Interpolation.swingIn));
                     keypad.addAction(Actions.moveTo(keypad.getX(),-500, 0.5f,Interpolation.swingIn));
-
                     keyPadToggle.setChecked(true);
 
 
@@ -158,16 +158,13 @@ public class Main extends ApplicationAdapter {
                     keyToggle=0;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),400, 0.5f,Interpolation.swingOut));
                     keypad.addAction(Actions.moveTo(keypad.getX(),0, 0.5f,Interpolation.swingOut));
-
-                    keyPadTabs.setVisible(true);
-                    keypad.setVisible(true);
                     keyPadToggle.setChecked(false);
                 }
             }
         });
 
+        //Create the toolbar, keypad toggle, undo/redo buttons
         Group toolbar=new HorizontalGroup();
-        //toolbar.addActor(trashCan);
         toolbar.addActor(keyPadToggle);
         toolbar.addActor(undo);
         toolbar.addActor(redo);
@@ -175,10 +172,13 @@ public class Main extends ApplicationAdapter {
 
         //KeyPad
         tabNum=1;
-        //KeyPad tab generator
+
+        //KeyPad tab generator, generates 10 different tabs
         keyPadTabs=new Table();
         for(int i=1; i<=10; i++){
-            TextButton inputButton=new TextButton("T", skin);
+
+            TextButton inputButton=new TextButton(""+i, skin);
+            inputButton.getLabel().setFontScale(0.5f);
             keyPadTabs.add(inputButton).width(50).height(50).colspan(i);
             final int valueof=i;
             inputButton.addListener(new ClickListener(){
@@ -194,6 +194,7 @@ public class Main extends ApplicationAdapter {
         keypad=new Table();
         tabChooser();
 
+        //Debugger
         debug = new Label("",skin);
         debug.setPosition(20,40);
         debug.setFontScale(.6f);
@@ -202,15 +203,12 @@ public class Main extends ApplicationAdapter {
         stage.addActor(debug);
 
         //Populate rootTable
-
         rootTable.add(trashCan).expandX().left().top().expandY().top();
         rootTable.add(toolbar).expandX().right().top().expandY().top();
         rootTable.row();
         rootTable.add(keyPadTabs).expandX().right().colspan(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
-
-
         stage.setViewport(new ScreenViewport());
 	}
 
@@ -250,6 +248,8 @@ public class Main extends ApplicationAdapter {
 
         debug.setText(s);
 
+
+        //Change the color of the redo/undo button to gray if stack is empty.
         if(Command.redoCommands.isEmpty()){
             redo.getImage().setColor(Color.GRAY);
         }else{
@@ -261,6 +261,7 @@ public class Main extends ApplicationAdapter {
         }else{
             undo.getImage().setColor(Color.BLACK);
         }
+
         //Scene2d. Step forward the world and draw the scene
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -278,58 +279,13 @@ public class Main extends ApplicationAdapter {
 
     public void tabChooser(){
 
+        //Choose between the 10 different tabs
         System.out.println(tabNum);
         String[][] keys;
+
+        //The arrays for the 10 different tabs (Only the first tab is real right now, N is a placeholder).
         switch (tabNum){
             case 1:keys = new String[][]{
-                    {"7","8","9","+", "sqrt"},
-                    {"4","5","6","-", "square"},
-                    {"1","2","3","*", ""},
-                    {"0", "0", ".","/", "N"}
-
-            };
-                break;
-            case 2:keys = new String[][]{
-                    {"2","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
-
-            };
-                break;
-            case 3:keys = new String[][]{
-                    {"3","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
-
-            };
-                break;
-            case 4:keys = new String[][]{
-                    {"4","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
-
-            };
-                break;
-            case 5:keys = new String[][]{
-                    {"5","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
-
-            };
-                break;
-            case 6:keys = new String[][]{
-                    {"6","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
-
-            };
-                break;
-            case 7:keys = new String[][]{
                     {"7","8","9","+", "N"},
                     {"4","5","6","-", "N"},
                     {"1","2","3","*", "N"},
@@ -337,8 +293,56 @@ public class Main extends ApplicationAdapter {
 
             };
                 break;
+            case 2:keys = new String[][]{
+                    {"2","2","2","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 3:keys = new String[][]{
+                    {"3","3","3","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 4:keys = new String[][]{
+                    {"4","4","4","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 5:keys = new String[][]{
+                    {"5","5","5","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 6:keys = new String[][]{
+                    {"6","6","6","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
+            case 7:keys = new String[][]{
+                    {"7","7","7","+", "N"},
+                    {"4","5","6","-", "N"},
+                    {"1","2","3","*", "N"},
+                    {"0", "0", ".","/", "N"}
+
+            };
+                break;
             case 8:keys = new String[][]{
-                    {"8","8","9","+", "N"},
+                    {"8","8","8","+", "N"},
                     {"4","5","6","-", "N"},
                     {"1","2","3","*", "N"},
                     {"0", "0", ".","/", "N"}
@@ -346,7 +350,7 @@ public class Main extends ApplicationAdapter {
             };
                 break;
             case 9:keys = new String[][]{
-                    {"9","8","9","+", "N"},
+                    {"9","9","9","+", "N"},
                     {"4","5","6","-", "N"},
                     {"1","2","3","*", "N"},
                     {"0", "0", ".","/", "N"}
@@ -354,7 +358,7 @@ public class Main extends ApplicationAdapter {
             };
                 break;
             case 10:keys = new String[][]{
-                    {"10","8","9","+", "N"},
+                    {"10","10","10","+", "N"},
                     {"4","5","6","-", "N"},
                     {"1","2","3","*", "N"},
                     {"0", "0", ".","/", "N"}
@@ -362,7 +366,7 @@ public class Main extends ApplicationAdapter {
             };
                 break;
             default: keys = new String[][]{
-                    {"9","8","9","+", "N"},
+                    {"7","8","9","+", "N"},
                     {"4","5","6","-", "N"},
                     {"1","2","3","*", "N"},
                     {"0", "0", ".","/", "N"}
@@ -370,18 +374,15 @@ public class Main extends ApplicationAdapter {
             };
         }
 
-
+        //Generate the keypad
         keyPadGenerator(keys);
     }
 
 
     public void keyPadGenerator(String[][] keys){
 
-        //KeyPad
+        //Clear the existing keypad
         keypad.clear();
-
-
-
 
         //Keypad generator
         for(int x=0; x<keys.length; x++){
@@ -398,9 +399,8 @@ public class Main extends ApplicationAdapter {
 
                 //Skip forward to avoid repetition
                 y+=i-1;
+
                 //Make Button, create block at end of row if clicked.
-
-
                 Actor inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
                 keypad.add(inputButton).width(i*100).height(100).colspan(i);
                 inputButton.addListener(new ClickListener(){

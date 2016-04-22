@@ -17,6 +17,9 @@ public class ClearChildren extends Command {
         this.row=row;
     }
     @Override
+    /*
+    Removes all Children
+     */
     protected void negativeAction() {
         for(int i=0; i<children.size();i++){
             row.addActorAt(i, children.get(i));
@@ -24,6 +27,9 @@ public class ClearChildren extends Command {
     }
 
     @Override
+    /*
+    Adds back all children
+     */
     protected void positiveAction() {
         for(int i=0; i<row.getChildren().size;i++){
             children.add(i, row.getChildren().get(i));

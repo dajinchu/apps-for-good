@@ -38,6 +38,7 @@ public class ButtonCreator {
     }
     public static String generateString(String str){
         String returnThis;
+        //All the special cases
         switch (str){
             case "sqrt":returnThis="img";
                 break;
@@ -49,6 +50,7 @@ public class ButtonCreator {
     public static Button imageButtonCreator(String str){
         Button button;
         Drawable pic;
+        //All the special cases that return an image.
         switch (str){
             case "sqrt":
                 pic=new Image(new Texture("delete.png")).getDrawable();
