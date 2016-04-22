@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -23,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -30,7 +30,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import net.objecthunter.exp4j.ExpressionBuilder;
 
-import javafx.scene.shape.MoveTo;
+import java.util.ArrayList;
 
 public class Main extends ApplicationAdapter {
     private Stage stage;
@@ -49,6 +49,9 @@ public class Main extends ApplicationAdapter {
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
     private VerticalGroup calcZone;
+
+    private ArrayList<Float[]> circle = new ArrayList<>();
+    private Float[] p1, p2;
 
     @Override
 	public void create () {
@@ -100,6 +103,52 @@ public class Main extends ApplicationAdapter {
                 if(Math.abs(this.x-x)<10 && Math.abs(this.y-y)<10) {
                     row.setSelected();
                 }
+            }
+        });
+        stage.addListener(new ActorGestureListener(){
+            float minx, maxx, miny, maxy;
+            boolean drawing = false;
+            @Override
+            public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if(stage.hit(x,y,true)!=null){
+                    return;
+                }
+                drawing = true;
+                minx = x;
+                maxx = x;
+                miny = y;
+                maxy = y;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if(!drawing)return;
+                float avgy = (miny+maxy)/2;
+                Actor left = stage.hit(minx,avgy,true);
+                Actor right = stage.hit(maxx,avgy,true);
+                if(left!=null && right!= null) {
+                    new ParenthesisCommand(left, right, skin).execute();
+                }
+                drawing = false;
+                circle.clear();
+            }
+
+            @Override
+            public void pan(InputEvent event, float x, float y, float deltaX, float deltaY) {
+                if(!drawing)return;
+                if(x<minx){
+                    minx = x;
+                }
+                if(x>maxx){
+                    maxx = x;
+                }
+                if(y<miny){
+                    miny = y;
+                }
+                if(y>maxy){
+                    maxy = y;
+                }
+                circle.add(new Float[]{x,y});
             }
         });
 
@@ -267,7 +316,14 @@ public class Main extends ApplicationAdapter {
         stage.draw();
         //stage.setDebugAll(true);
 
-
+        stage.getBatch().begin();
+        stage.getBatch().setColor(Color.BLACK);
+        for(int i = 0; i < circle.size()-1; i++){
+            p1 = circle.get(i);
+            p2 = circle.get(i+1);
+            BatchShapeUtils.drawLine(stage.getBatch(), p1[0],p1[1],p2[0],p2[1],2);
+        }
+        stage.getBatch().end();
 
 	}
 

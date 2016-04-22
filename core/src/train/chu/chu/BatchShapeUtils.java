@@ -33,6 +33,12 @@ public class BatchShapeUtils {
         }
     }
 
-
+    public static void drawLine(Batch batch, float x1, float y1, float x2, float y2, int thickness){
+        float dx = x2-x1;
+        float dy = y2-y1;
+        float dist = (float)Math.sqrt(dx*dx + dy*dy);
+        float rad = (float)Math.atan2(dy, dx);
+        batch.draw(dot, x1, y1, 0,0, dist, thickness, 1, 1, (float) Math.toDegrees(rad));
+    }
 
 }

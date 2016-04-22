@@ -1,15 +1,9 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
 /**
  * Created by Arun on 4/6/2016.
@@ -22,7 +16,9 @@ public class BlockCreator {
 
         Block block;
         block = new Block();
+        block.setTouchable(Touchable.enabled);
         Label second = new Label(name,skin);
+        second.setTouchable(Touchable.disabled);
         second.setColor(Color.BLACK);
         block.addActor(second);
 

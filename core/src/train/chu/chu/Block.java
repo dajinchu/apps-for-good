@@ -3,13 +3,11 @@ package train.chu.chu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
@@ -23,7 +21,6 @@ public class Block extends HorizontalGroup {
 
     private DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
-    private Rectangle centerRect = new Rectangle();
     private static final double HOVER_TIME =.5;
 
 
@@ -31,7 +28,7 @@ public class Block extends HorizontalGroup {
     private Target target;
     private Actor hoverActor;
 
-    private enum TargetState{LEFT,CENTER,RIGHT,NOT};
+    private enum TargetState{LEFT,RIGHT,NOT};
     private TargetState targetState = TargetState.NOT;
     private double targetHoverCount = 0;
 
@@ -40,29 +37,6 @@ public class Block extends HorizontalGroup {
 
     public Block() {
         this.dad = Main.dragAndDrop;
-
-        //Block becomes 'selected' when clicked, allowing its children to be dragged or clicked as well
-        ClickListener selectionListener = new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                //This block can only become selected if its parent was already selected
-                if (getParent() instanceof Block && ((Block)getParent()).isSelected() && getChildren().size>1) {
-                    //Stop the event so that the listener on stage doesn't get triggered and reset the selection to the outer levels
-                    event.stop();
-                    //Return TRUE so that the successive touchUp event will be received
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                //IMPORTANT: This code will only be reached if touchDown return true, ie. this block is "selectable"
-                if(dad.isDragging())return; //Doesn't count as a click if it's the start of drag
-                setSelected();
-            }
-        };
-        addListener(selectionListener);
 
         //DragAndDrop has Source, Payload, and Target
         //Source is what we drag from.
@@ -123,7 +97,8 @@ public class Block extends HorizontalGroup {
                     targetState = TargetState.RIGHT;
                     //System.out.println(Gdx.graphics.getDeltaTime());
                 } else {
-                    targetState = TargetState.CENTER;
+                    targetState = TargetState.NOT;
+                    targetHoverCount = 0;
                 }
                 hoverActor = source.getActor();
                 return true;
@@ -152,7 +127,6 @@ public class Block extends HorizontalGroup {
             switch (targetState){
                 case LEFT:new MoveCommand(this, hoverActor, MoveCommand.Side.LEFT).execute();break;
                 case RIGHT:new MoveCommand(this, hoverActor, MoveCommand.Side.RIGHT).execute();break;
-                case CENTER:new MoveCommand(this, hoverActor, MoveCommand.Side.IN).execute();break;
             }
             targetState = TargetState.NOT;
             targetHoverCount = 0;
@@ -165,9 +139,6 @@ public class Block extends HorizontalGroup {
         //When this block's layout has to be recalculated (see super.layout()), we can also recalculate the centerRect.
         //This can't be done just once on creation, because the children might not have been added,
         // and the block's children could change. This is the best place to calculate centerRect.
-        centerRect.set(
-                getWidth() * .3f, 0,
-                getWidth() * .4f, getHeight());
         Gdx.app.log(getChildrenString(),"Layout");
         pack();
     }

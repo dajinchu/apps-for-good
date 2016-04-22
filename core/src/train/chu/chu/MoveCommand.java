@@ -17,7 +17,7 @@ public class MoveCommand extends Command {
     //only for move-in
     private Block groupBlock;
 
-    public enum Side {LEFT, RIGHT, IN}
+    public enum Side {LEFT, RIGHT}
 
     ;
 
@@ -37,12 +37,6 @@ public class MoveCommand extends Command {
      */
     protected void negativeAction() {
         oldSourceParent.addActorAt(oldSourceIndex, sourceActor);
-
-        //Needed for move-in
-        if (side == Side.IN) {
-            targetParent.addActorAt(oldTargetIndex, targetActor);
-            groupBlock.remove();
-        }
     }
 
     @Override
@@ -56,16 +50,6 @@ public class MoveCommand extends Command {
                 break;
             case RIGHT:
                 targetParent.addActorAfter(targetActor, sourceActor);
-                break;
-            case IN:
-                if (targetActor instanceof Block && ((Block) targetActor).getChildren().size > 1) {
-                    groupBlock = (Block) targetActor;
-                } else {
-                    groupBlock = new Block();
-                    groupBlock.addActor(targetActor);
-                }
-                targetParent.addActorAt(oldTargetIndex, groupBlock);
-                groupBlock.setSelected();
                 break;
         }
 
