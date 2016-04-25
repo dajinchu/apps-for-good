@@ -2,13 +2,17 @@ package train.chu.chu;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -27,11 +31,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.SnapshotArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends ApplicationAdapter {
     private Stage stage;
@@ -53,9 +62,17 @@ public class Main extends ApplicationAdapter {
 
     private ArrayList<Float[]> circle = new ArrayList<>();
     private Float[] p1, p2;
+    private short[] triangleIndices;
+    private float[] boundVertices;
+    private PolygonSpriteBatch psg ;
+    TextureRegion poly;
+    private Polygon wholebound;
+    private Array<Polygon> bounds;
 
     @Override
 	public void create () {
+        psg = new PolygonSpriteBatch();
+        poly = new TextureRegion(new Texture("green.png"));
         //Generate bitmap font from TrueType Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -111,7 +128,6 @@ public class Main extends ApplicationAdapter {
             }
         });
         stage.addListener(new ActorGestureListener(){
-            float minx, maxx, miny, maxy;
             boolean drawing = false;
             @Override
             public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -119,20 +135,117 @@ public class Main extends ApplicationAdapter {
                     return;
                 }
                 drawing = true;
-                minx = x;
-                maxx = x;
-                miny = y;
-                maxy = y;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(!drawing)return;
-                float avgy = (miny+maxy)/2;
-                Actor left = stage.hit(minx,avgy,true);
-                Actor right = stage.hit(maxx,avgy,true);
-                if(left!=null && right!= null) {
-                    new ParenthesisCommand(left, right, skin).execute();
+                if(!drawing || circle.size()<3)return;
+
+                Gdx.app.log("Touch up", "points "+circle.size());
+                Float[] first = circle.get(0);
+                Float[] last = circle.get(circle.size()-1);
+                //Check if they've come close enough to closing the polygon
+                if(Vector2.dst2(first[0],first[1],last[0],last[1])<10000) {
+                    //Convert the arraylist of 2 element float[] into a single float[] to be compatible with Polygon
+                    boundVertices = new float[circle.size() * 2];
+                    for (int i = 0; i < circle.size(); i ++) {
+                        Float[] point = circle.get(i);
+                        boundVertices[2*i] = point[0];
+                        boundVertices[2*i + 1] = point[1];
+                    }
+                    triangleIndices = new DelaunayTriangulator().computeTriangles(boundVertices, false).toArray();
+                    float[] trianglefloats = new float[triangleIndices.length*2];
+                    Gdx.app.log("touchup", "Triangle shorts"+Arrays.toString(triangleIndices));
+                    for(int i = 0; i < triangleIndices.length; i++){
+                        trianglefloats[2*i]=boundVertices[2*triangleIndices[i]];
+                        trianglefloats[2*i+1]=boundVertices[2*triangleIndices[i]+1];
+                    }
+                    wholebound = new Polygon(boundVertices);
+                    Gdx.app.log("touchup", "Triangle float values"+Arrays.toString(trianglefloats));
+                    bounds = new Array<Polygon>();
+                    for(int i = 0; i < trianglefloats.length; i+=6){
+                        bounds.add(new Polygon(Arrays.copyOfRange(trianglefloats, i,i+6)));
+                    }
+                    Polygon blockPoly = new Polygon(), overlap = new Polygon();
+                    HashMap<Block, Float> overlaps = new HashMap<>();
+
+                   /* Gdx.app.log("Touch up","Bounds area is "+bounds.area());
+
+                    Polygon test1 = new Polygon(new float[]{1,0,4,0,4,3,1,3});
+                    Polygon test2 = new Polygon(new float[]{0,1,0,2,5,2,5,1});
+
+                    Gdx.app.log("test","contains "+test1.contains(2,2)+" overlap? "+ Intersector.intersectPolygons(test1,test2,overlap)+" area "+overlap.area());
+*/
+                    Vector2 v1,v2,v3,v4;
+                    float area;
+                    //Put the overlap areas into a hash map, associating area with blocks
+                    for (Actor actor : row.getChildren()) {
+                        if (actor instanceof Block) {//We know they will be blocks, but make sure
+                            v1 = actor.localToStageCoordinates(new Vector2(0,0));
+                            v2 = actor.localToStageCoordinates(new Vector2(actor.getWidth(),0));
+                            v3 = actor.localToStageCoordinates(new Vector2(actor.getWidth(),actor.getHeight()));
+                            v4 = actor.localToStageCoordinates(new Vector2(0,actor.getHeight()));
+                            blockPoly.setVertices(new float[]{v1.x,v1.y, v2.x,v2.y, v3.x,v3.y, v4.x,v4.y});
+                            area = 0;
+                            for(Polygon p : bounds) {
+                                Gdx.app.log("Touch up", ((Block) actor).getChildrenString() + " bound " + p.getBoundingRectangle() + " block " + blockPoly.getBoundingRectangle());
+                                try {
+                                    if (Intersector.intersectPolygons(blockPoly, p, overlap)) {
+                                        Gdx.app.log("Touch up", " overlap area: " + overlap.area());
+                                        area+=overlap.area();
+                                    }
+                                }catch(IllegalArgumentException e){
+
+                                }
+                            }
+                            if(area>blockPoly.area()*.4f) {
+                                overlaps.put((Block) actor, area);
+                            }
+                        }
+                    }
+                    if(overlaps.size()>1) {
+                        HashMap<Block, Float> parentAreas = new HashMap<>();
+                        Block parent;
+                        for (Map.Entry<Block, Float> entry : overlaps.entrySet()) {
+                            if (entry.getKey().getParent() instanceof Block) {
+                                parent = (Block) entry.getKey().getParent();
+                                if (!parentAreas.containsKey(parent)) {
+                                    //Add this parent if it isn't already in there, and give it area of the current entry
+                                    parentAreas.put(parent, entry.getValue());
+                                } else {
+                                    //add area of current entry to parent's area sum
+                                    parentAreas.put(parent, parentAreas.get(parent) + entry.getValue());
+                                }
+                            }
+                        }
+                        //Get parent with max area
+                        Float max = 0f;
+                        Block parentWithLargestArea = null;
+                        for (Map.Entry<Block, Float> entry : parentAreas.entrySet()) {
+                            if (entry.getValue() > max) {
+                                max = entry.getValue();
+                                parentWithLargestArea = entry.getKey();
+                            }
+                        }
+                        if (parentWithLargestArea != null) {
+                            Gdx.app.log("Touch up", parentWithLargestArea.getChildrenString());
+                            SnapshotArray<Actor> childrenList = parentWithLargestArea.getChildren();
+                            int leftmost = childrenList.size - 1, rightmost = 0, tmp;
+                            Block left = null, right = null;
+                            for (Block b : overlaps.keySet()) {
+                                tmp = childrenList.indexOf(b, true);
+                                if (tmp < leftmost) {
+                                    leftmost = tmp;
+                                    left = b;
+                                }
+                                if (tmp > rightmost) {
+                                    rightmost = tmp;
+                                    right = b;
+                                }
+                            }
+                            new ParenthesisCommand(left, right, skin).execute();
+                        }
+                    }
                 }
                 drawing = false;
                 circle.clear();
@@ -141,18 +254,6 @@ public class Main extends ApplicationAdapter {
             @Override
             public void pan(InputEvent event, float x, float y, float deltaX, float deltaY) {
                 if(!drawing)return;
-                if(x<minx){
-                    minx = x;
-                }
-                if(x>maxx){
-                    maxx = x;
-                }
-                if(y<miny){
-                    miny = y;
-                }
-                if(y>maxy){
-                    maxy = y;
-                }
                 circle.add(new Float[]{x,y});
             }
         });
@@ -329,7 +430,19 @@ public class Main extends ApplicationAdapter {
             BatchShapeUtils.drawLine(stage.getBatch(), p1[0],p1[1],p2[0],p2[1],2);
         }
         stage.getBatch().end();
-
+        /*BatchShapeUtils.drawDashedRectangle(stage.getBatch(), 1260.0f,595.5f,40.0f,88.0f,3);
+        if(boundVertices!=null) {
+            psg.begin();
+            psg.setTransformMatrix(stage.getBatch().getTransformMatrix());
+            for(Polygon p : bounds) {
+                psg.draw(new PolygonRegion(poly, p.getVertices(), new short[]{0,1,2}), 0, 0);
+            }
+            psg.end();
+            stage.getBatch().begin();
+            stage.getBatch().setColor(Color.BLUE);
+            stage.getBatch().draw(poly, wholebound.getBoundingRectangle().getX(),wholebound.getBoundingRectangle().getY(),wholebound.getBoundingRectangle().width,wholebound.getBoundingRectangle().height);
+            stage.getBatch().end();
+        }*/
 	}
 
     public void dispose () {
