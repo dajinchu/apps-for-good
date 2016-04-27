@@ -1,6 +1,5 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -34,6 +33,9 @@ public class Block extends HorizontalGroup {
 
     //There can only be one block selected at a time
     private static Block selectedBlock;
+
+    private String childrenString = "";
+    private StringBuilder sb = new StringBuilder();
 
     public Block() {
         this.dad = Main.dragAndDrop;
@@ -139,17 +141,39 @@ public class Block extends HorizontalGroup {
         //When this block's layout has to be recalculated (see super.layout()), we can also recalculate the centerRect.
         //This can't be done just once on creation, because the children might not have been added,
         // and the block's children could change. This is the best place to calculate centerRect.
-        Gdx.app.log(getChildrenString(),"Layout");
+       // Gdx.app.log(getChildrenString(),"Layout");
         pack();
     }
 
     @Override
     protected void childrenChanged() {
         super.childrenChanged();
+        updateChildrenString();
         setAllChildrenSelect(isSelected());
         if(getChildren().size==0 || (getChildren().size==1 && getChildren().get(0) instanceof Label)) return;
         this.pad(5);
 
+    }
+
+    private void updateChildrenString() {
+        //Recursive function goes through Block children and asks for their strings too
+        // getText for Label children
+        sb.setLength(0);
+        if (getChildren().size > 1) sb.append("(");
+        for (Actor a : getChildren()) {
+            if (a.getClass() == Block.class) {
+                sb.append(((Block) a).getChildrenString());
+            }
+            if (a.getClass() == Label.class) {
+                sb.append(((Label) a).getText());
+            }
+        }
+        if (getChildren().size > 1) sb.append(")");
+        childrenString = sb.toString();
+    }
+
+    public String getChildrenString() {
+        return childrenString;
     }
 
     public void setDraggable(boolean draggable) {
@@ -164,7 +188,7 @@ public class Block extends HorizontalGroup {
         if(targetable){
             dad.addTarget(target);
         }
-        Gdx.app.log(getChildrenString(),"targetable to " + targetable);
+        //Gdx.app.log(getChildrenString(),"targetable to " + targetable);
     }
 
     public void setNestedColors(Color color){
@@ -178,26 +202,9 @@ public class Block extends HorizontalGroup {
         }
     }
 
-    public String getChildrenString(){
-        //Recursive function goes through Block children and asks for their strings too
-        // getText for Label children
-        StringBuilder sb = new StringBuilder();
-        if(getChildren().size>1)sb.append("(");
-        for(Actor a : getChildren()){
-            if(a.getClass() == Block.class){
-                sb.append(((Block)a).getChildrenString());
-            }
-            if(a.getClass() == Label.class){
-                sb.append(((Label)a).getText());
-            }
-        }
-        if(getChildren().size>1) sb.append(")");
-        return sb.toString();
-    }
-
     public void setSelected(){
         //Set this block as the selected one
-        Gdx.app.log(getChildrenString(),"setselected");
+        //Gdx.app.log(getChildrenString(),"setselected");
         Block oldSelected = selectedBlock;
         selectedBlock = this;
         if(oldSelected != null) {

@@ -1,10 +1,9 @@
 package train.chu.chu;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.TimeUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -21,11 +20,12 @@ public class Bench {
     }
     public static long end(String tag){
         tmp = TimeUtils.timeSinceMillis(starts.get(tag));
-        starts.remove(tag);
+        starts.remove(tag);/*
         if(fpsFile==null){
             fpsFile = Gdx.files.external(new SimpleDateFormat("'Logfrog/'MM-dd-yyyy'/fps 'hh-mm a'.txt'").format(new Date()));
         }
-        fpsFile.writeString(tag+": "+tmp+"\n", true);
+        fpsFile.writeString(tag+": "+tmp+"\n", true);*/
+        Gdx.app.log("Bench", tag+ " took "+tmp+" ms");
         return tmp;
     }
 }

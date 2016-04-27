@@ -19,7 +19,10 @@ public class ActorGestureResizer extends ActorGestureListener {
     Vector3 delta = new Vector3();
     float previousDistance, previousInitial;
 
+    //Save RAM by instantiating all Vectors as fields and setting them, rather than instantiating new ones
     private Vector3 previousPointer1= new Vector3(), previousInitial2 = new Vector3(), previousInitial1 = new Vector3(), previousPointer2 = new Vector3();
+    private Vector3 initialPointer1=new Vector3(), initialPointer2=new Vector3(),pointer1=new Vector3(),pointer2=new Vector3();
+    private Vector3 tmp1 =  new Vector3(), tmp2 = new Vector3();
 
     public ActorGestureResizer(Camera stageCamera, Actor actor, Vector2 worldSize){
         //Camera is just used for unprojecting touch events
@@ -38,12 +41,12 @@ public class ActorGestureResizer extends ActorGestureListener {
         }
         actor.setScale(actor.getScaleX()*distance/previousDistance);
         clamp();
-        Gdx.app.log("Zoom", initialDistance+" "+distance);
         //Set previous, as this frame has ended
         previousDistance = distance;
         previousInitial = initialDistance;
     }
     public void panCam(float deltaX, float deltaY) {
+        Gdx.app.log("Controller",deltaX+", "+deltaY);
         actor.moveBy(-deltaX, deltaY);
         clamp();
     }
@@ -53,18 +56,15 @@ public class ActorGestureResizer extends ActorGestureListener {
         //Vectors are using world coordinates from stage, they need to be in screen coordinates.
         // Cam transformations should act the same no matter how zoomed in or transformed the cam is already,
         // so we use absolute screen coords to keep it independent of transforms.
-        Vector3 initialPointer1 = new Vector3(i1,0);
-        Vector3 initialPointer2 = new Vector3(i2,0);
-        Vector3 pointer1 = new Vector3(f1,0);
-        Vector3 pointer2 = new Vector3(f2,0);
+        initialPointer1.set(i1,0);
+        initialPointer2.set(i2,0);
+        pointer1.set(f1,0);
+        pointer2.set(f2,0);
         //unproject using cam to get the screen coordinates.
         cam.unproject(initialPointer1);
         cam.unproject(initialPointer2);
         cam.unproject(pointer1);
         cam.unproject(pointer2);
-        try{
-            Gdx.app.log("Pinch before",initialPointer1+" "+initialPointer2+" "+ previousPointer1+" "+previousPointer2+" "+pointer1+" "+pointer2+" "+delta.x+" "+delta.y);
-        }catch (NullPointerException e){}
         if(!previousInitial1.equals(initialPointer1)&&!previousInitial2.equals(initialPointer2)){
             //Starting a new gesture
             //Just make previous initial to avoid jumpiness from the previous gesture's values carrying over
@@ -72,15 +72,16 @@ public class ActorGestureResizer extends ActorGestureListener {
             previousPointer2 = initialPointer2;
         }
 
-        zoomCam(initialPointer1.cpy().dst(initialPointer2), pointer1.cpy().dst(pointer2));
-        delta = previousPointer1.cpy().add(previousPointer2).scl(.5f).sub(pointer1.cpy().add(pointer2).scl(.5f));
+        zoomCam(initialPointer1.dst(initialPointer2), pointer1.dst(pointer2));
+        tmp1.set(previousPointer1);
+        tmp2.set(pointer1);
+        delta = tmp1.add(previousPointer2).scl(.5f).sub(tmp2.add(pointer2).scl(.5f));
         panCam(delta.x, delta.y);
-        Gdx.app.log("Pinch after", initialPointer1+" "+initialPointer2+" "+ previousPointer1+" "+previousPointer2+" "+pointer1+" "+pointer2+" "+delta.x+" "+delta.y);
 
-        previousInitial1 = initialPointer1.cpy();
-        previousInitial2 = initialPointer2.cpy();
-        previousPointer1 = pointer1.cpy();
-        previousPointer2 = pointer2.cpy();
+        previousInitial1.set(initialPointer1);
+        previousInitial2.set(initialPointer2);
+        previousPointer1=pointer1.cpy();//TODO figure out why it doesn't work when these are .set()
+        previousPointer2=pointer2.cpy();
         return;
     }
 

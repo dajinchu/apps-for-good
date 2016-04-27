@@ -35,8 +35,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import net.objecthunter.exp4j.ExpressionBuilder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,7 +43,7 @@ import java.util.Map;
 public class Main extends ApplicationAdapter {
     private Stage stage;
     private Skin skin;
-    private Block row;
+    private EvaluatorBlock row;
     private Label result;
     private Table rootTable;
     private ImageButton redo;
@@ -68,6 +66,7 @@ public class Main extends ApplicationAdapter {
     TextureRegion poly;
     private Polygon wholebound;
     private Array<Polygon> bounds;
+    private String s;
 
     @Override
 	public void create () {
@@ -139,35 +138,35 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(!drawing || circle.size()<3)return;
-
-                Gdx.app.log("Touch up", "points "+circle.size());
-                Float[] first = circle.get(0);
-                Float[] last = circle.get(circle.size()-1);
-                //Check if they've come close enough to closing the polygon
-                if(Vector2.dst2(first[0],first[1],last[0],last[1])<10000) {
-                    //Convert the arraylist of 2 element float[] into a single float[] to be compatible with Polygon
-                    boundVertices = new float[circle.size() * 2];
-                    for (int i = 0; i < circle.size(); i ++) {
-                        Float[] point = circle.get(i);
-                        boundVertices[2*i] = point[0];
-                        boundVertices[2*i + 1] = point[1];
-                    }
-                    triangleIndices = new DelaunayTriangulator().computeTriangles(boundVertices, false).toArray();
-                    float[] trianglefloats = new float[triangleIndices.length*2];
-                    Gdx.app.log("touchup", "Triangle shorts"+Arrays.toString(triangleIndices));
-                    for(int i = 0; i < triangleIndices.length; i++){
-                        trianglefloats[2*i]=boundVertices[2*triangleIndices[i]];
-                        trianglefloats[2*i+1]=boundVertices[2*triangleIndices[i]+1];
-                    }
-                    wholebound = new Polygon(boundVertices);
-                    Gdx.app.log("touchup", "Triangle float values"+Arrays.toString(trianglefloats));
-                    bounds = new Array<Polygon>();
-                    for(int i = 0; i < trianglefloats.length; i+=6){
-                        bounds.add(new Polygon(Arrays.copyOfRange(trianglefloats, i,i+6)));
-                    }
-                    Polygon blockPoly = new Polygon(), overlap = new Polygon();
-                    HashMap<Block, Float> overlaps = new HashMap<>();
+                if(drawing && circle.size()>9) {
+                    Bench.start("touchup");
+                    Gdx.app.log("Touch up", "points " + circle.size());
+                    Float[] first = circle.get(0);
+                    Float[] last = circle.get(circle.size() - 1);
+                    //Check if they've come close enough to closing the polygon
+                    if (Vector2.dst2(first[0], first[1], last[0], last[1]) < 40000) {
+                        //Convert the arraylist of 2 element float[] into a single float[] to be compatible with Polygon
+                        boundVertices = new float[circle.size() / 3 * 2];
+                        for (int i = 0; i < circle.size() / 3; i++) {
+                            Float[] point = circle.get(i * 3);
+                            boundVertices[2 * i] = point[0];
+                            boundVertices[2 * i + 1] = point[1];
+                        }
+                        triangleIndices = new DelaunayTriangulator().computeTriangles(boundVertices, false).toArray();
+                        float[] trianglefloats = new float[triangleIndices.length * 2];
+                        Gdx.app.log("touchup", "Triangle shorts" + Arrays.toString(triangleIndices));
+                        for (int i = 0; i < triangleIndices.length; i++) {
+                            trianglefloats[2 * i] = boundVertices[2 * triangleIndices[i]];
+                            trianglefloats[2 * i + 1] = boundVertices[2 * triangleIndices[i] + 1];
+                        }
+                        wholebound = new Polygon(boundVertices);
+                        Gdx.app.log("touchup", "Triangle float values" + Arrays.toString(trianglefloats));
+                        bounds = new Array<Polygon>();
+                        for (int i = 0; i < trianglefloats.length; i += 6) {
+                            bounds.add(new Polygon(Arrays.copyOfRange(trianglefloats, i, i + 6)));
+                        }
+                        Polygon blockPoly = new Polygon(), overlap = new Polygon();
+                        HashMap<Block, Float> overlaps = new HashMap<>();
 
                    /* Gdx.app.log("Touch up","Bounds area is "+bounds.area());
 
@@ -176,76 +175,77 @@ public class Main extends ApplicationAdapter {
 
                     Gdx.app.log("test","contains "+test1.contains(2,2)+" overlap? "+ Intersector.intersectPolygons(test1,test2,overlap)+" area "+overlap.area());
 */
-                    Vector2 v1,v2,v3,v4;
-                    float area;
-                    //Put the overlap areas into a hash map, associating area with blocks
-                    for (Actor actor : row.getChildren()) {
-                        if (actor instanceof Block) {//We know they will be blocks, but make sure
-                            v1 = actor.localToStageCoordinates(new Vector2(0,0));
-                            v2 = actor.localToStageCoordinates(new Vector2(actor.getWidth(),0));
-                            v3 = actor.localToStageCoordinates(new Vector2(actor.getWidth(),actor.getHeight()));
-                            v4 = actor.localToStageCoordinates(new Vector2(0,actor.getHeight()));
-                            blockPoly.setVertices(new float[]{v1.x,v1.y, v2.x,v2.y, v3.x,v3.y, v4.x,v4.y});
-                            area = 0;
-                            for(Polygon p : bounds) {
-                                Gdx.app.log("Touch up", ((Block) actor).getChildrenString() + " bound " + p.getBoundingRectangle() + " block " + blockPoly.getBoundingRectangle());
-                                try {
-                                    if (Intersector.intersectPolygons(blockPoly, p, overlap)) {
-                                        Gdx.app.log("Touch up", " overlap area: " + overlap.area());
-                                        area+=overlap.area();
-                                    }
-                                }catch(IllegalArgumentException e){
+                        Vector2 v1, v2, v3, v4, tmpA = new Vector2(0, 0), tmpB = new Vector2(), tmpC = new Vector2(), tmpD = new Vector2();
+                        float area;
+                        //Put the overlap areas into a hash map, associating area with blocks
+                        Bench.start("intersect");
+                        for (Actor actor : row.getChildren()) {
+                            if (actor instanceof Block) {//We know they will be blocks, but make sure
+                                v1 = actor.localToStageCoordinates(tmpA.set(0, 0));
+                                v2 = actor.localToStageCoordinates(tmpB.set(actor.getWidth(), 0));
+                                v3 = actor.localToStageCoordinates(tmpC.set(actor.getWidth(), actor.getHeight()));
+                                v4 = actor.localToStageCoordinates(tmpD.set(0, actor.getHeight()));
+                                blockPoly.setVertices(new float[]{v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, v4.x, v4.y});
+                                area = 0;
+                                for (Polygon p : bounds) {
+                                    try {
+                                        if (Intersector.intersectPolygons(blockPoly, p, overlap)) {
+                                            area += overlap.area();
+                                        }
+                                    } catch (IllegalArgumentException e) {
 
+                                    }
+                                }
+                                if (area > blockPoly.area() * .4f) {
+                                    overlaps.put((Block) actor, area);
                                 }
                             }
-                            if(area>blockPoly.area()*.4f) {
-                                overlaps.put((Block) actor, area);
+                        }
+                        Bench.end("intersect");
+                        if (overlaps.size() > 1) {
+                            HashMap<Block, Float> parentAreas = new HashMap<>();
+                            Block parent;
+                            for (Map.Entry<Block, Float> entry : overlaps.entrySet()) {
+                                if (entry.getKey().getParent() instanceof Block) {
+                                    parent = (Block) entry.getKey().getParent();
+                                    if (!parentAreas.containsKey(parent)) {
+                                        //Add this parent if it isn't already in there, and give it area of the current entry
+                                        parentAreas.put(parent, entry.getValue());
+                                    } else {
+                                        //add area of current entry to parent's area sum
+                                        parentAreas.put(parent, parentAreas.get(parent) + entry.getValue());
+                                    }
+                                }
+                            }
+                            //Get parent with max area
+                            Float max = 0f;
+                            Block parentWithLargestArea = null;
+                            for (Map.Entry<Block, Float> entry : parentAreas.entrySet()) {
+                                if (entry.getValue() > max) {
+                                    max = entry.getValue();
+                                    parentWithLargestArea = entry.getKey();
+                                }
+                            }
+                            if (parentWithLargestArea != null) {
+                                SnapshotArray<Actor> childrenList = parentWithLargestArea.getChildren();
+                                int leftmost = childrenList.size - 1, rightmost = 0, tmp;
+                                Block left = null, right = null;
+                                for (Block b : overlaps.keySet()) {
+                                    tmp = childrenList.indexOf(b, true);
+                                    if (tmp < leftmost) {
+                                        leftmost = tmp;
+                                        left = b;
+                                    }
+                                    if (tmp > rightmost) {
+                                        rightmost = tmp;
+                                        right = b;
+                                    }
+                                }
+                                new ParenthesisCommand(left, right, skin).execute();
                             }
                         }
                     }
-                    if(overlaps.size()>1) {
-                        HashMap<Block, Float> parentAreas = new HashMap<>();
-                        Block parent;
-                        for (Map.Entry<Block, Float> entry : overlaps.entrySet()) {
-                            if (entry.getKey().getParent() instanceof Block) {
-                                parent = (Block) entry.getKey().getParent();
-                                if (!parentAreas.containsKey(parent)) {
-                                    //Add this parent if it isn't already in there, and give it area of the current entry
-                                    parentAreas.put(parent, entry.getValue());
-                                } else {
-                                    //add area of current entry to parent's area sum
-                                    parentAreas.put(parent, parentAreas.get(parent) + entry.getValue());
-                                }
-                            }
-                        }
-                        //Get parent with max area
-                        Float max = 0f;
-                        Block parentWithLargestArea = null;
-                        for (Map.Entry<Block, Float> entry : parentAreas.entrySet()) {
-                            if (entry.getValue() > max) {
-                                max = entry.getValue();
-                                parentWithLargestArea = entry.getKey();
-                            }
-                        }
-                        if (parentWithLargestArea != null) {
-                            Gdx.app.log("Touch up", parentWithLargestArea.getChildrenString());
-                            SnapshotArray<Actor> childrenList = parentWithLargestArea.getChildren();
-                            int leftmost = childrenList.size - 1, rightmost = 0, tmp;
-                            Block left = null, right = null;
-                            for (Block b : overlaps.keySet()) {
-                                tmp = childrenList.indexOf(b, true);
-                                if (tmp < leftmost) {
-                                    leftmost = tmp;
-                                    left = b;
-                                }
-                                if (tmp > rightmost) {
-                                    rightmost = tmp;
-                                    right = b;
-                                }
-                            }
-                            new ParenthesisCommand(left, right, skin).execute();
-                        }
-                    }
+                    Bench.end("touchup");
                 }
                 drawing = false;
                 circle.clear();
@@ -383,22 +383,18 @@ public class Main extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1,1,1,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
-
         result.setColor(Color.DARK_GRAY);
         //Convert the blocks in HorizontalGroup to a string
-        String s = row.getChildrenString();
+        s = row.getChildrenString();
         //Evaluate the expression
         //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
         if(s.isEmpty()){
             result.setText("");
-        }else {
-            try {
-                result.setText("=" + new ExpressionBuilder(s).build().evaluate());
-            } catch (IllegalArgumentException error) {
-                result.setColor(Color.RED);
-                result.setText("false");
-            }
+        }else if (row.getResult() == null) {
+            result.setColor(Color.RED);
+            result.setText("false");
+        } else {
+            result.setText(row.getResult());
         }
 
         debug.setText(s);
@@ -429,8 +425,9 @@ public class Main extends ApplicationAdapter {
             p2 = circle.get(i+1);
             BatchShapeUtils.drawLine(stage.getBatch(), p1[0],p1[1],p2[0],p2[1],2);
         }
+        BatchShapeUtils.drawDashedRectangle(stage.getBatch(), 1260.0f,595.5f,40.0f,88.0f,3);
         stage.getBatch().end();
-        /*BatchShapeUtils.drawDashedRectangle(stage.getBatch(), 1260.0f,595.5f,40.0f,88.0f,3);
+/*
         if(boundVertices!=null) {
             psg.begin();
             psg.setTransformMatrix(stage.getBatch().getTransformMatrix());
