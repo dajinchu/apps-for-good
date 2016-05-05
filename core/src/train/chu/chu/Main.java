@@ -53,6 +53,10 @@ public class Main extends ApplicationAdapter {
     private int tabNum;
     private int prevtabNum;
     private int keyToggle;
+    private boolean landscape;
+    private int size;
+    private TrashCan trashCan = null;
+    private Group toolbar;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
@@ -70,8 +74,6 @@ public class Main extends ApplicationAdapter {
 
     @Override
 	public void create () {
-        psg = new PolygonSpriteBatch();
-        poly = new TextureRegion(new Texture("green.png"));
         //Generate bitmap font from TrueType Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -262,7 +264,7 @@ public class Main extends ApplicationAdapter {
         });
 
         //Creates the trash can
-        final TrashCan trashCan = new TrashCan();
+        trashCan = new TrashCan();
         trashCan.setDrawable(skin,"delete");
         trashCan.addListener(new ClickListener(){
             @Override
@@ -307,14 +309,14 @@ public class Main extends ApplicationAdapter {
                     //Hide KeyPad, set to up arrow
                     keyToggle=1;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),-100, 0.5f, Interpolation.swingIn));
-                    keypad.addAction(Actions.moveTo(keypad.getX(),-500, 0.5f,Interpolation.swingIn));
+                    keypad.addAction(Actions.moveTo(keypad.getX(),-(size*4+100), 0.5f,Interpolation.swingIn));
                     keyPadToggle.setChecked(true);
 
 
                 }else{
                     //Bring up keypad, set to down arrow
                     keyToggle=0;
-                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),400, 0.5f,Interpolation.swingOut));
+                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),size*4, 0.5f,Interpolation.swingOut));
                     keypad.addAction(Actions.moveTo(keypad.getX(),0, 0.5f,Interpolation.swingOut));
                     keyPadToggle.setChecked(false);
                 }
@@ -322,12 +324,54 @@ public class Main extends ApplicationAdapter {
         });
 
         //Create the toolbar, keypad toggle, undo/redo buttons
-        Group toolbar=new HorizontalGroup();
+        toolbar=new HorizontalGroup();
         toolbar.addActor(keyPadToggle);
         toolbar.addActor(undo);
         toolbar.addActor(redo);
 
 
+
+
+        //Debugger
+        debug = new Label("",skin);
+        debug.setPosition(20,40);
+        debug.setFontScale(.6f);
+        debug.setColor(Color.GRAY);
+
+        stage.addActor(debug);
+
+
+
+        stage.setViewport(new ScreenViewport());
+	}
+
+    @Override
+    public void resize(int width, int height) {
+        //Handle resize. This is still important on static windows (eg. Android) because it is
+        // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
+        // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
+        //set stage viewport
+        stage.getViewport().update(width,height,true);
+        //calcZone.setPosition((width-calcZone.getWidth())/2,(height-calcZone.getHeight())/2);
+        if(rootTable.getChildren().contains(keyPadTabs,true)){
+            rootTable.clearChildren();
+        }
+
+        if(Gdx.graphics.getWidth()>Gdx.graphics.getHeight()){
+            landscape=true;
+            size=120;
+            System.out.println("landscape:"+size);
+            calcZone.setPosition((float)((Gdx.graphics.getWidth()-((size*5)))/2),(height-calcZone.getHeight())/2+50);
+
+        }else{
+            landscape=false;
+            size=Gdx.graphics.getWidth()/5;
+            System.out.println("portrait:"+size);
+            calcZone.setPosition((width-calcZone.getWidth())/2,(float)(Gdx.graphics.getHeight()-((size*4.5)/4)));
+
+
+        }
+        System.out.println("Run");
         //KeyPad
         tabNum=1;
 
@@ -337,7 +381,7 @@ public class Main extends ApplicationAdapter {
 
             TextButton inputButton=new TextButton(""+i, skin);
             inputButton.getLabel().setFontScale(0.5f);
-            keyPadTabs.add(inputButton).width(50).height(50).colspan(i);
+            keyPadTabs.add(inputButton).width(size/2).height(size/2).colspan(i);
             final int valueof=i;
             inputButton.addListener(new ClickListener(){
                 @Override
@@ -352,14 +396,8 @@ public class Main extends ApplicationAdapter {
         keypad=new Table();
         tabChooser();
 
-        //Debugger
-        debug = new Label("",skin);
-        debug.setPosition(20,40);
-        debug.setFontScale(.6f);
-        debug.setColor(Color.GRAY);
-
-        stage.addActor(debug);
-
+        rootTable.setZIndex(998);
+        row.setZIndex(1);
         //Populate rootTable
         rootTable.add(trashCan).expandX().left().top().expandY().top();
         rootTable.add(toolbar).expandX().right().top().expandY().top();
@@ -367,17 +405,6 @@ public class Main extends ApplicationAdapter {
         rootTable.add(keyPadTabs).expandX().right().colspan(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
-        stage.setViewport(new ScreenViewport());
-	}
-
-    @Override
-    public void resize(int width, int height) {
-        //Handle resize. This is still important on static windows (eg. Android) because it is
-        // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
-        // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
-        //set stage viewport
-        stage.getViewport().update(width,height,true);
-        calcZone.setPosition((width-calcZone.getWidth())/2,(height-calcZone.getHeight())/2);
     }
 
     @Override
@@ -385,6 +412,8 @@ public class Main extends ApplicationAdapter {
         //Wipe the screen clean with a white clear color
 		Gdx.gl.glClearColor(1,1,1,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+
 
         result.setColor(Color.DARK_GRAY);
         //Convert the blocks in HorizontalGroup to a string
@@ -557,6 +586,8 @@ public class Main extends ApplicationAdapter {
         //Clear the existing keypad
         keypad.clear();
 
+
+
         //Keypad generator
         for(int x=0; x<keys.length; x++){
             for(int y=0; y<keys[0].length; y++){
@@ -575,7 +606,7 @@ public class Main extends ApplicationAdapter {
 
                 //Make Button, create block at end of row if clicked.
                 Actor inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
-                keypad.add(inputButton).width(i*100).height(100).colspan(i);
+                keypad.add(inputButton).width(i*size).height(size).colspan(i);
                 inputButton.addListener(new ClickListener(){
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
