@@ -21,7 +21,7 @@ public class TrashCan extends Image {
 
             @Override
             public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                if(source.getActor().getClass()==Block.class){
+                if(source.getActor() instanceof Block){
                     //Make SURE the source is a block before deleting it, don't want to be deleting keypad buttons
                     //source.getActor().remove();
                     Command cmd=new RemoveCommand(source.getActor());

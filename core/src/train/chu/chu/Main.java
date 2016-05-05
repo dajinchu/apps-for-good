@@ -122,7 +122,10 @@ public class Main extends ApplicationAdapter {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //Set selected on the Up event, but NOT if the click location has moved too much
                 if(Math.abs(this.x-x)<10 && Math.abs(this.y-y)<10) {
-                    row.setSelected();
+                    Actor block = stage.hit(x, y, true);
+                    if (block instanceof ParenthesisBlock) {
+                        ((ParenthesisBlock) block).toggleMoving();
+                    }
                 }
             }
         });
@@ -425,7 +428,6 @@ public class Main extends ApplicationAdapter {
             p2 = circle.get(i+1);
             BatchShapeUtils.drawLine(stage.getBatch(), p1[0],p1[1],p2[0],p2[1],2);
         }
-        BatchShapeUtils.drawDashedRectangle(stage.getBatch(), 1260.0f,595.5f,40.0f,88.0f,3);
         stage.getBatch().end();
 /*
         if(boundVertices!=null) {
