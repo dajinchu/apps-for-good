@@ -49,10 +49,10 @@ public class ParenthesisContainer extends Block {
     }
 
     @Override
-    protected void updateChildrenString() {
-        super.updateChildrenString();
-        Gdx.app.log("Paren","Container update string");
+    public String getChildrenString() {
+        return parenthesis.getChildrenString();
     }
+
 
     protected PayloadBlock getDragActor() {
         Group parent = getParent();
