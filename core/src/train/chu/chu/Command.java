@@ -1,5 +1,7 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.Gdx;
+
 import java.util.Stack;
 
 /**
@@ -31,6 +33,7 @@ public abstract class Command {
      * Unexecute a given command (Undo)
      */
     public void unexecute(){
+        Gdx.app.log("undo",this.toString());
         //Undoes command and pushes it to the redo stack
         negativeAction();
         redoCommands.push(this);

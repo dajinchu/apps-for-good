@@ -26,13 +26,14 @@ public class AddCommand extends Command {
 
     @Override
     /**
-     * Removes actor at specifed index
+     * Removes actor
      */
     protected void negativeAction() {
-        int index=name.getChildren().indexOf(newActor, true);
+        newActor.remove();
+    }
 
-        if(index>=0){
-            name.removeActor(name.getChildren().get(index));
-        }
+    @Override
+    public String toString() {
+        return "add "+newActor.toString();
     }
 }

@@ -22,7 +22,16 @@ public class BlockCreator {
 
         //Creates Block
         Block block;
-        block = new Block();
+        switch(name){
+            case "(":
+                block = new ParenthesisBlock(ParenthesisBlock.Side.OPENING);
+                break;
+            case ")":
+                block = new ParenthesisBlock(ParenthesisBlock.Side.CLOSING);
+                break;
+            default:
+                block = new Block();
+        }
         block.setTouchable(Touchable.enabled);
         //Creates Label
         Label second = new Label(name,skin);

@@ -60,4 +60,9 @@ public class MoveCommand extends Command {
         }
 
     }
+
+    @Override
+    public String toString() {
+        return "move "+sourceActor+" to "+targetActor;
+    }
 }

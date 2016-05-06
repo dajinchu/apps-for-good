@@ -44,4 +44,9 @@ public class ParenthesisCommand extends Command {
         a1.getParent().addActorBefore(a1,p1);
         a2.getParent().addActorAfter(a2,p2);
     }
+
+    @Override
+    public String toString() {
+        return "Parenthesis";
+    }
 }

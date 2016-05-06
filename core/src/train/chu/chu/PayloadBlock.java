@@ -11,12 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
  */
 public class PayloadBlock extends HorizontalGroup {
 
+
+
     public PayloadBlock(Block b){
         float firstParentScale = ScaleUtils.getTrueScale(b);
         this.setScale(firstParentScale);
         //Iterate through children and add them to the clone group
         for (Actor a : b.getChildren()) {
-            if (a.getClass() == Block.class) {
+            if (a instanceof Block) {
                 //If the child is a block class, ask that nested block to duplicate too
                 PayloadBlock childDupe = new PayloadBlock((Block) a);
                 childDupe.setScale(1f);

@@ -14,6 +14,9 @@ public class BatchShapeUtils {
 
     private static TextureRegion dot = new TextureRegion(new Texture("dot.png"));
 
+    private static float len, dx, dy, dist, rad;
+    private static Vector2 vector2 = new Vector2();
+
     public static void drawOutline(Batch batch, Actor actor, int thickness){
         drawDashedRectangle(batch, actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight(), thickness);
     }
@@ -26,8 +29,8 @@ public class BatchShapeUtils {
     }
 
     public static void drawDashedLine(Batch batch, float x1, float y1, float x2, float y2, int thickness){
-        Vector2 vector2 = new Vector2(x2,y2).sub(new Vector2(x1,y1));
-        float len = vector2.len();
+        vector2.set(x2-x1,y2-y1);
+        len = vector2.len();
         for(float i = 0; i < len; i+=20){
             vector2.clamp(len - i - 10, len - i - 10);
             batch.draw(dot, x1+vector2.x, y1+vector2.y, 0, 0, 10, thickness, 1, 1, vector2.angle());
@@ -35,10 +38,10 @@ public class BatchShapeUtils {
     }
 
     public static void drawLine(Batch batch, float x1, float y1, float x2, float y2, int thickness){
-        float dx = x2-x1;
-        float dy = y2-y1;
-        float dist = (float)Math.sqrt(dx*dx + dy*dy);
-        float rad = (float)Math.atan2(dy, dx);
+        dx = x2-x1;
+        dy = y2-y1;
+        dist = (float)Math.sqrt(dx*dx + dy*dy);
+        rad = (float)Math.atan2(dy, dx);
         batch.draw(dot, x1, y1, 0,0, dist, thickness, 1, 1, (float) Math.toDegrees(rad));
     }
 
