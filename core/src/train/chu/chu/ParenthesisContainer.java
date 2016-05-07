@@ -124,9 +124,12 @@ public class ParenthesisContainer extends Block {
 
         //Blocks need to be dragged individually to make sure undo/redo works, as the container probably
         // won't exist during undo operations
-        new MoveCommand(at,contents.get(0),side).execute();
+        BatchedCommand batch = new BatchedCommand();
+        batch.add(new MoveCommand(at,contents.get(0),side));
         for(int i = 1; i < contents.size; i ++){
-            new MoveCommand(contents.get(i-1),contents.get(i), MoveCommand.Side.RIGHT).execute();
+            batch.add(new MoveCommand(contents.get(i-1),contents.get(i), MoveCommand.Side.RIGHT));
         }
+        Gdx.app.log("Parenthesis",batch.toString());
+        batch.execute();
     }
 }
