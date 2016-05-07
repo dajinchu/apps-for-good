@@ -23,6 +23,8 @@ public class ParenthesisCommand extends Command {
         this.a1 = left;
         this.a2 = right;
         this.skin = skin;
+        p1 = BlockCreator.BlockCreator("(",skin);
+        p2 = BlockCreator.BlockCreator(")",skin);
     }
 
     @Override
@@ -39,8 +41,6 @@ public class ParenthesisCommand extends Command {
     Creates Actor
      */
     protected void positiveAction() {
-        p1 = BlockCreator.BlockCreator("(",skin);
-        p2 = BlockCreator.BlockCreator(")",skin);
         a1.getParent().addActorBefore(a1,p1);
         a2.getParent().addActorAfter(a2,p2);
     }
