@@ -144,6 +144,18 @@ public class Block extends HorizontalGroup {
     }
 
     public void moveRelative(Block at, MoveCommand.Side side){
+        int offset;
+        if(side==MoveCommand.Side.LEFT){
+            offset=-1;
+        }else{
+            offset= 1;
+        }
+        try {
+            int atIndex = at.getParent().getChildren().indexOf(at, true);
+            if (at.getParent().getChildren().get(atIndex + offset) == this) return;
+        } catch (IndexOutOfBoundsException e){
+
+        }
         new MoveCommand(at, this, side).execute();
     }
 

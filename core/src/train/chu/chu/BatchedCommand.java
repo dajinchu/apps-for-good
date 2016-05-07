@@ -8,9 +8,11 @@ import com.badlogic.gdx.utils.StringBuilder;
  */
 public class BatchedCommand extends Command {
     private Array<Command> cmds = new Array<>();
+    private boolean firstTime = true;
 
     public void add(Command c){
         cmds.add(c);
+        c.positiveAction();
     }
     @Override
     protected void negativeAction() {
@@ -23,6 +25,10 @@ public class BatchedCommand extends Command {
 
     @Override
     protected void positiveAction() {
+        if(firstTime){
+            firstTime = false;
+            return;
+        }
         for(Command c:cmds){
             c.positiveAction();
         }
