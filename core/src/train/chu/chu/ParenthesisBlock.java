@@ -10,6 +10,12 @@ public class ParenthesisBlock extends Block {
     public enum Side {OPENING, CLOSING}
     Side side;
 
+    public static void clearSelection(){
+        if(moveBlock!=null){
+            moveBlock.setMoving(false);
+        }
+    }
+
     public ParenthesisBlock(final Side side){
         this.side = side;
     }

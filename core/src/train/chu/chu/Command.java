@@ -48,17 +48,17 @@ public abstract class Command {
      */
     public static void undo(){
         if(!undoCommands.empty()){
+            ParenthesisBlock.clearSelection();
             undoCommands.pop().unexecute();
         }
-
     }
 
     /**
      * Redoes last undo, removes from redo stack.
      */
     public static void redo(){
-
         if(!redoCommands.empty()){
+            ParenthesisBlock.clearSelection();
             Command command = redoCommands.pop();
             command.redoing = true;
             command.execute();

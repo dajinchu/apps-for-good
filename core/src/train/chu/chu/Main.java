@@ -127,6 +127,8 @@ public class Main extends ApplicationAdapter {
                     Actor block = stage.hit(x, y, true);
                     if (block instanceof ParenthesisBlock) {
                         ((ParenthesisBlock) block).toggleMoving();
+                    } else {
+                        ParenthesisBlock.clearSelection();
                     }
                 }
             }
