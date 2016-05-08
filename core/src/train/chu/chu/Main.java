@@ -42,7 +42,7 @@ import java.util.Map;
 
 public class Main extends ApplicationAdapter {
     private Stage stage;
-    private Skin skin;
+    public static Skin skin;
     private EvaluatorBlock row;
     private Label result;
     private Table rootTable;
@@ -248,7 +248,7 @@ public class Main extends ApplicationAdapter {
                                         right = b;
                                     }
                                 }
-                                new ParenthesisCommand(left, right, skin).execute();
+                                new ParenthesisCommand(left, right).execute();
                             }
                         }
                     }
@@ -607,7 +607,7 @@ public class Main extends ApplicationAdapter {
                 y+=i-1;
 
                 //Make Button, create block at end of row if clicked.
-                Actor inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
+                Actor inputButton=ButtonCreator.ButtonCreator(buttonTxt);
                 keypad.add(inputButton).width(i*size).height(size).colspan(i);
                 inputButton.addListener(new ClickListener(){
                     @Override

@@ -1,7 +1,6 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 /**
  * Created by Da-Jin on 4/19/2016.
@@ -10,21 +9,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 public class ParenthesisCommand extends Command {
 
     private final Actor a1, a2;
-    private final Skin skin;
     private Block p1, p2;
 
     /**
      * Creates parantheses
      * @param left the left actor
      * @param right the right actor
-     * @param skin the skin
      */
-    public ParenthesisCommand(Actor left, Actor right, Skin skin){
+    public ParenthesisCommand(Actor left, Actor right){
         this.a1 = left;
         this.a2 = right;
-        this.skin = skin;
-        p1 = BlockCreator.BlockCreator("(",skin);
-        p2 = BlockCreator.BlockCreator(")",skin);
+        p1 = BlockCreator.BlockCreator("(",Main.skin);
+        p2 = BlockCreator.BlockCreator(")",Main.skin);
     }
 
     @Override

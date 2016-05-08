@@ -1,12 +1,9 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
@@ -23,10 +20,9 @@ public class ButtonCreator {
     /**
      * Creates a Button
      * @param str takes the string for the button
-     * @param skin the skin for the Skin
      * @return an ImageButton or TextButton
      */
-    public static Button ButtonCreator(String str, Skin skin){
+    public static Button ButtonCreator(String str){
 
         String orig=str;
         String name= generateString(str);
@@ -35,7 +31,7 @@ public class ButtonCreator {
             return inputButton;
 
         }else{
-            inputButton = new TextButton(name, skin);
+            inputButton = new TextButton(name, Main.skin);
             return inputButton;
         }
 
