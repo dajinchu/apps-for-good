@@ -53,6 +53,9 @@ public class Block extends HorizontalGroup {
             // block itself, not a look-alike. This block should disappear, and leave only the payload visible
             Block.this.setVisible(false);
 
+            //get the scale before anything gets messed up in getDragActor(), eg. in ParenthesisContainer
+            float scale = ScaleUtils.getTrueScale(Block.this);
+
             //Duplicate this block, and set that Actor as the Payload dragActor.
             // Duplication does NOT create a Block, merely a WidgetGroup lookalike. Making it a block
             // might be problematic, as then the payload Block would have all the functions of a placed Block.
@@ -62,7 +65,6 @@ public class Block extends HorizontalGroup {
             //setDragActorPosition is to offset the dragActor from the pointer location
             // without this part, the pointer is always dragging the actor by its left edge
             // instead, this offsets to be held by where it was picked up
-            float scale = ScaleUtils.getTrueScale(Block.this);
             dad.setDragActorPosition(-dragActor.getWidth()*scale/2,
                     -dragActor.getHeight()*scale/2+dragActor.getHeight());//Add getHeight to y to offset some stupid stuff done internally in DragAndDrop source code
 
