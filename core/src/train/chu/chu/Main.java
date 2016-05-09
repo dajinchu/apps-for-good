@@ -2,6 +2,7 @@ package train.chu.chu;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -150,39 +151,17 @@ public class Main extends ApplicationAdapter {
             stage.addListener(new ActorGestureResizer(stage.getCamera(),calcZone,new Vector2(1000,1000)));
             stage.addActor(calcZone);
 
-            stage.addListener(new ClickListener(){
-                public float x, y;
+        stage.addListener(new ClickListener(){
+            public float x, y;
 
-                @Override
-                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    //track touch down location.. TODO maybe change this to also track time?
-                    this.x = x;
-                    this.y = y;
-                    return true;
-                }
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                //track touch down location.. TODO maybe change this to also track time?
+                this.x = x;
+                this.y = y;
+                return true;
+            }
 
-                @Override
-                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                    //Set selected on the Up event, but NOT if the click location has moved too much
-                    if(Math.abs(this.x-x)<10 && Math.abs(this.y-y)<10) {
-                        row.setSelected();
-                    }
-                }
-            });
-            stage.addListener(new ActorGestureListener(){
-                float minx, maxx, miny, maxy;
-                boolean drawing = false;
-                @Override
-                public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if(stage.hit(x,y,true)!=null){
-                        return;
-                    }
-                    drawing = true;
-                    minx = x;
-                    maxx = x;
-                    miny = y;
-                    maxy = y;
-                }
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //Set selected on the Up event, but NOT if the click location has moved too much
@@ -190,6 +169,8 @@ public class Main extends ApplicationAdapter {
                     Actor block = stage.hit(x, y, true);
                     if (block instanceof ParenthesisBlock) {
                         ((ParenthesisBlock) block).toggleMoving();
+                    } else {
+                        ParenthesisBlock.clearSelection();
                     }
                 }
             }
@@ -204,18 +185,6 @@ public class Main extends ApplicationAdapter {
                 drawing = true;
             }
 
-                @Override
-                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                    if(!drawing)return;
-                    float avgy = (miny+maxy)/2;
-                    Actor left = stage.hit(minx,avgy,true);
-                    Actor right = stage.hit(maxx,avgy,true);
-                    if(left!=null && right!= null) {
-                        new ParenthesisCommand(left, right, skin).execute();
-                    }
-                    drawing = false;
-                    circle.clear();
-                }
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if(drawing && circle.size()>9) {
@@ -249,10 +218,8 @@ public class Main extends ApplicationAdapter {
                         HashMap<Block, Float> overlaps = new HashMap<>();
 
                    /* Gdx.app.log("Touch up","Bounds area is "+bounds.area());
-
                     Polygon test1 = new Polygon(new float[]{1,0,4,0,4,3,1,3});
                     Polygon test2 = new Polygon(new float[]{0,1,0,2,5,2,5,1});
-
                     Gdx.app.log("test","contains "+test1.contains(2,2)+" overlap? "+ Intersector.intersectPolygons(test1,test2,overlap)+" area "+overlap.area());
 */
                         Vector2 v1, v2, v3, v4, tmpA = new Vector2(0, 0), tmpB = new Vector2(), tmpC = new Vector2(), tmpD = new Vector2();
@@ -331,24 +298,6 @@ public class Main extends ApplicationAdapter {
                 circle.clear();
             }
 
-                @Override
-                public void pan(InputEvent event, float x, float y, float deltaX, float deltaY) {
-                    if(!drawing)return;
-                    if(x<minx){
-                        minx = x;
-                    }
-                    if(x>maxx){
-                        maxx = x;
-                    }
-                    if(y<miny){
-                        miny = y;
-                    }
-                    if(y>maxy){
-                        maxy = y;
-                    }
-                    circle.add(new Float[]{x,y});
-                }
-            });
             @Override
             public void pan(InputEvent event, float x, float y, float deltaX, float deltaY) {
                 if(!drawing)return;
@@ -356,7 +305,8 @@ public class Main extends ApplicationAdapter {
             }
         });
 
-            //Creates the trash can
+
+        //Creates the trash can
             trashCan = new TrashCan();
             trashCan.setDrawable(skin, "delete");
 
