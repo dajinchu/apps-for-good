@@ -23,6 +23,7 @@ public class ParenthesisContainer extends Block {
     private Array<Actor> contents = new Array<>();
 
     Side side;
+    private ParenthesisBlock open, close;
 
     protected class ParenthesisContainerSource extends BlockSource {
 
@@ -66,8 +67,6 @@ public class ParenthesisContainer extends Block {
         }else{
             parent.addActorBefore(this,parenthesis);
         }
-
-        ParenthesisBlock open = null, close = null;
 
         //Find the open and close parenthesis.
         if (this.side == Side.OPENING) {
@@ -122,11 +121,24 @@ public class ParenthesisContainer extends Block {
         //Make sure we aren't dragging on ourself
         if(contents.contains(at,true))return;
 
+        SnapshotArray<Actor> atSiblings = at.getParent().getChildren();
+        try {
+            if ((side == MoveCommand.Side.RIGHT && atSiblings.get(atSiblings.indexOf(at, true) + 1) == open) ||
+                    (side == MoveCommand.Side.LEFT && atSiblings.get(atSiblings.indexOf(at, true) - 1) == close)) {
+                return;
+            }
+        }catch(IndexOutOfBoundsException e){
+
+        }
+
         //Blocks need to be dragged individually to make sure undo/redo works, as the container probably
         // won't exist during undo operations
-        new MoveCommand(at,contents.get(0),side).execute();
+        BatchedCommand batch = new BatchedCommand();
+        batch.add(new MoveCommand(at,contents.get(0),side));
         for(int i = 1; i < contents.size; i ++){
-            new MoveCommand(contents.get(i-1),contents.get(i), MoveCommand.Side.RIGHT).execute();
+            batch.add(new MoveCommand(contents.get(i-1),contents.get(i), MoveCommand.Side.RIGHT));
         }
+        Gdx.app.log("Parenthesis",batch.toString());
+        batch.execute();
     }
 }

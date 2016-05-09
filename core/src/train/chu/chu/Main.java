@@ -440,7 +440,7 @@ public class Main extends ApplicationAdapter {
         tabChooser();
 
         rootTable.setZIndex(998);
-        row.setZIndex(1);
+        calcZone.setZIndex(1);
         //Populate rootTable
         rootTable.add(trashCan).expandX().left().top().expandY().top();
         rootTable.add(toolbar).expandX().right().top().expandY().top();
