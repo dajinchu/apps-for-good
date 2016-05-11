@@ -1,9 +1,9 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.StringBuilder;
  */
 public class Block extends HorizontalGroup {
 
-    protected DragAndDrop dad;
+    protected DragAndDrop dad = Main.dragAndDrop;
     //Center rect is the detection area for getting out of the way, or merging blocks
     private static final double HOVER_TIME =.11;
 
@@ -90,6 +90,7 @@ public class Block extends HorizontalGroup {
             //Something is being dragged over this target
             if (source.getActor() == Block.this || !(source.getActor() instanceof Block)) {
                 //This probably won't happen. But to be sure, this prevents dragging over itself
+                //It also checks to make sure its a Block that's getting dragged over
                 return false;
             }
 
@@ -126,7 +127,9 @@ public class Block extends HorizontalGroup {
 
 
     public Block() {
-        this.dad = Main.dragAndDrop;
+        Gdx.app.log(getChildrenString(),"constructor");
+        setTargetable(true);
+        setDraggable(true);
     }
 
     @Override
@@ -175,7 +178,6 @@ public class Block extends HorizontalGroup {
     protected void childrenChanged() {
         super.childrenChanged();
         updateChildrenString();
-        setAllChildrenSelect(isSelected());
     }
 
     protected void updateChildrenString() {
@@ -232,55 +234,6 @@ public class Block extends HorizontalGroup {
         selectedBlock = this;
         if(oldSelected != null) {
             oldSelected.setColor(Color.BLACK);
-            oldSelected.setAllChildrenSelect(false);
-        }
-        setAllChildrenSelect(true);
-
-    }
-
-    private void setAllChildrenSelect(boolean select){
-        //setTargetable(!select);
-        for(Actor child: getChildren()){
-            if(child instanceof Block) {
-                ((Block) child).setAsChildOfSelected(select);
-            }
-        }
-        if(select){
-            Group parent = getParent();
-            Block childContainingSelected = this;
-            while(parent instanceof Block){
-                for(Actor child : parent.getChildren()){
-                    if(child instanceof Block && child!=childContainingSelected){
-                        ((Block) child).setTargetable(true);
-                    }//TODO Else set untargetable?
-                }
-                if(parent.hasParent()){
-                    childContainingSelected = (Block) parent;
-                    parent = parent.getParent();
-                } else {
-                    break;
-                }
-            }
-        }
-    }
-
-    private void setAsChildOfSelected(boolean childOf){
-        //Private convenience method to switch a block on/off as the child of the selected block
-        // Needed because this needs to happen in setSelected, but also in addActor to apply the
-        // childOfSelected behavior to newly added blocks too
-        setDraggable(childOf);
-        setTargetable(childOf);
-
-        Color set = Color.BLACK;
-        if(childOf) {
-            set = Color.valueOf("3F51B5");
-        }
-        if((getChildren().size==1 && getChildren().get(0) instanceof Label)){
-            //This is a block with just a label inside, it has no outline, so color the label
-            getChildren().get(0).setColor(set);
-        }else{
-            //This is a group-block, color the outline, NOT the label children
-            this.setColor(set);
         }
     }
 

@@ -19,8 +19,8 @@ public class ParenthesisCommand extends Command {
     public ParenthesisCommand(Actor left, Actor right){
         this.a1 = left;
         this.a2 = right;
-        p1 = BlockCreator.BlockCreator("(",Main.skin);
-        p2 = BlockCreator.BlockCreator(")",Main.skin);
+        p1 = BlockCreator.BlockCreator("(");
+        p2 = BlockCreator.BlockCreator(")");
     }
 
     @Override

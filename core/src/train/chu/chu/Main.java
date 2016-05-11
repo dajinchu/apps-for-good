@@ -26,7 +26,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -43,7 +42,7 @@ import java.util.Map;
 public class Main extends ApplicationAdapter {
     private Stage stage;
     public static Skin skin;
-    private EvaluatorBlock row;
+    private Expression row;
     private Label result;
     private Table rootTable;
     private ImageButton redo;
@@ -60,7 +59,7 @@ public class Main extends ApplicationAdapter {
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
-    private VerticalGroup calcZone;
+    private Group calcZone;
 
     private ArrayList<Float[]> circle = new ArrayList<>();
     private Float[] p1, p2;
@@ -98,14 +97,16 @@ public class Main extends ApplicationAdapter {
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
 
-        //row is the outermost ui element for the sandbox, it holds all the blocks
-        row = new EvaluatorBlock();
+        //calcZone is the outermost ui element for the sandbox, it holds all the blocks
+        calcZone = new Group();
 
-        result = new Label("",skin);
-
-        calcZone = new VerticalGroup();
+        row = new Expression();
+        row.setPosition(100,100);
         calcZone.addActor(row);
-        calcZone.addActor(result);
+
+        row = new Expression();
+        calcZone.addActor(row);
+
         stage.addListener(new ActorGestureResizer(stage.getCamera(),calcZone,new Vector2(1000,1000)));
         stage.addActor(calcZone);
 
@@ -175,38 +176,36 @@ public class Main extends ApplicationAdapter {
                         Polygon blockPoly = new Polygon(), overlap = new Polygon();
                         HashMap<Block, Float> overlaps = new HashMap<>();
 
-                   /* Gdx.app.log("Touch up","Bounds area is "+bounds.area());
-
-                    Polygon test1 = new Polygon(new float[]{1,0,4,0,4,3,1,3});
-                    Polygon test2 = new Polygon(new float[]{0,1,0,2,5,2,5,1});
-
-                    Gdx.app.log("test","contains "+test1.contains(2,2)+" overlap? "+ Intersector.intersectPolygons(test1,test2,overlap)+" area "+overlap.area());
-*/
                         Vector2 v1, v2, v3, v4, tmpA = new Vector2(0, 0), tmpB = new Vector2(), tmpC = new Vector2(), tmpD = new Vector2();
                         float area;
                         //Put the overlap areas into a hash map, associating area with blocks
                         Bench.start("intersect");
-                        for (Actor actor : row.getChildren()) {
-                            if (actor instanceof Block) {//We know they will be blocks, but make sure
-                                v1 = actor.localToStageCoordinates(tmpA.set(0, 0));
-                                v2 = actor.localToStageCoordinates(tmpB.set(actor.getWidth(), 0));
-                                v3 = actor.localToStageCoordinates(tmpC.set(actor.getWidth(), actor.getHeight()));
-                                v4 = actor.localToStageCoordinates(tmpD.set(0, actor.getHeight()));
-                                blockPoly.setVertices(new float[]{v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, v4.x, v4.y});
-                                area = 0;
-                                for (Polygon p : bounds) {
-                                    try {
-                                        if (Intersector.intersectPolygons(blockPoly, p, overlap)) {
-                                            area += overlap.area();
-                                        }
-                                    } catch (IllegalArgumentException e) {
-
+                        Array<Actor> allBlocks = new Array<>();
+                        for(Actor exp:calcZone.getChildren()){
+                            if(exp instanceof Expression){
+                                allBlocks.addAll(((Expression) exp).getBlocks());
+                            }
+                        }
+                        for (Actor actor : allBlocks) {
+                            v1 = actor.localToStageCoordinates(tmpA.set(0, 0));
+                            v2 = actor.localToStageCoordinates(tmpB.set(actor.getWidth(), 0));
+                            v3 = actor.localToStageCoordinates(tmpC.set(actor.getWidth(), actor.getHeight()));
+                            v4 = actor.localToStageCoordinates(tmpD.set(0, actor.getHeight()));
+                            blockPoly.setVertices(new float[]{v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, v4.x, v4.y});
+                            area = 0;
+                            for (Polygon p : bounds) {
+                                try {
+                                    if (Intersector.intersectPolygons(blockPoly, p, overlap)) {
+                                        area += overlap.area();
                                     }
-                                }
-                                if (area > blockPoly.area() * .4f) {
-                                    overlaps.put((Block) actor, area);
+                                } catch (IllegalArgumentException e) {
+
                                 }
                             }
+                            if (area > blockPoly.area() * .4f) {
+                                overlaps.put((Block) actor, area);
+                            }
+
                         }
                         Bench.end("intersect");
                         if (overlaps.size() > 1) {
@@ -234,11 +233,13 @@ public class Main extends ApplicationAdapter {
                                 }
                             }
                             if (parentWithLargestArea != null) {
+                                Gdx.app.log("intersectorparent",parentWithLargestArea.getChildrenString());
                                 SnapshotArray<Actor> childrenList = parentWithLargestArea.getChildren();
                                 int leftmost = childrenList.size - 1, rightmost = 0, tmp;
                                 Block left = null, right = null;
                                 for (Block b : overlaps.keySet()) {
                                     tmp = childrenList.indexOf(b, true);
+                                    if(tmp==-1)continue;
                                     if (tmp < leftmost) {
                                         leftmost = tmp;
                                         left = b;
@@ -414,22 +415,6 @@ public class Main extends ApplicationAdapter {
         //Wipe the screen clean with a white clear color
 		Gdx.gl.glClearColor(1,1,1,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-
-
-        result.setColor(Color.DARK_GRAY);
-        //Convert the blocks in HorizontalGroup to a string
-        s = row.getChildrenString();
-        //Evaluate the expression
-        //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
-        if(s.isEmpty()){
-            result.setText("");
-        }else if (row.getResult() == null) {
-            result.setColor(Color.RED);
-            result.setText("false");
-        } else {
-            result.setText(row.getResult());
-        }
 
         debug.setText(s);
 
@@ -612,9 +597,7 @@ public class Main extends ApplicationAdapter {
                 inputButton.addListener(new ClickListener(){
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
-                        Command cmd=new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
-                        //row.addActor(block);
-                        cmd.execute();
+                        row.addBlock(BlockCreator.BlockCreator(buttonTxt));
                     }
                 });
 
