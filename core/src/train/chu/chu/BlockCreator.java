@@ -33,6 +33,7 @@ public class BlockCreator {
         block.setTouchable(Touchable.enabled);
         //Creates Label
         Label second = new Label(name,Main.skin);
+        second.setFontScale(0.25f);
         second.setTouchable(Touchable.disabled);
         second.setColor(Color.BLACK);
         block.addActor(second);

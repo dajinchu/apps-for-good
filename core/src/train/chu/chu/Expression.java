@@ -31,6 +31,7 @@ public class Expression extends VerticalGroup{
         };
         result = new Label("",Main.skin);
         result.setColor(Color.BLACK);
+        result.setFontScale(0.25f);
         row.addActor(BlockCreator.BlockCreator("5"));
         this.addActor(row);
         this.addActor(result);
