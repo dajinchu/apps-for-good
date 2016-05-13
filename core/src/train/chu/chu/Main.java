@@ -461,16 +461,16 @@ public class Main extends ApplicationAdapter {
 
 
         //Change the color of the redo/undo button to gray if stack is empty.
-        if(Command.redoCommands.isEmpty()){
-            redo.getImage().setColor(Color.GRAY);
-        }else{
+        if(Command.canRedo()){
             redo.getImage().setColor(Color.BLACK);
+        }else{
+            redo.getImage().setColor(Color.GRAY);
         }
 
-        if(Command.undoCommands.isEmpty()){
-            undo.getImage().setColor(Color.GRAY);
-        }else{
+        if(Command.canUndo()){
             undo.getImage().setColor(Color.BLACK);
+        }else{
+            undo.getImage().setColor(Color.GRAY);
         }
 
         //Scene2d. Step forward the world and draw the scene

@@ -66,6 +66,14 @@ public abstract class Command {
 
     }
 
+    public static boolean canRedo(){
+        return !redoCommands.isEmpty();
+    }
+
+    public static boolean canUndo(){
+        return !undoCommands.isEmpty();
+    }
+
     protected static Stack<Command> undoCommands =new Stack<Command>();
     protected static Stack<Command> redoCommands =new Stack<Command>();
 
