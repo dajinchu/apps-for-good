@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -26,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -59,7 +61,7 @@ public class Main extends ApplicationAdapter {
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
-    private Group calcZone;
+    private WidgetGroup calcZone;
 
     private ArrayList<Float[]> circle = new ArrayList<>();
     private Float[] p1, p2;
@@ -135,13 +137,16 @@ public class Main extends ApplicationAdapter {
         stage.addActor(rootTable);
 
         //calcZone is the outermost ui element for the sandbox, it holds all the blocks
-        calcZone = new Group();
+        calcZone = new WidgetGroup();
+        calcZone.setFillParent(true);
+        calcZone.setTouchable(Touchable.childrenOnly);
 
         row = new Expression();
         row.setPosition(100,100);
         calcZone.addActor(row);
 
         row = new Expression();
+        row.setPosition(300,300);
         calcZone.addActor(row);
 
         stage.addListener(new ActorGestureResizer(stage.getCamera(),calcZone,new Vector2(1000,1000)));
@@ -398,19 +403,15 @@ public class Main extends ApplicationAdapter {
             rootTable.clearChildren();
         }
 
+        float calcZoneY = 0;
         if(Gdx.graphics.getWidth()>Gdx.graphics.getHeight()){
             landscape=true;
             size=Gdx.graphics.getWidth()/10;
-            System.out.println("landscape:"+size);
-            calcZone.setPosition((float)((Gdx.graphics.getWidth()-((size*5)))/2),(height-calcZone.getHeight())/2+50);
 
         }else{
             landscape=false;
             size=Gdx.graphics.getWidth()/5;
-            System.out.println("portrait:"+size);
-            calcZone.setPosition((width-calcZone.getWidth())/2,(float)(Gdx.graphics.getHeight()-((size*4.5)/4)));
-
-
+            calcZoneY = keypad.getTop();
         }
         System.out.println("Run");
         //KeyPad
@@ -437,6 +438,7 @@ public class Main extends ApplicationAdapter {
         keypad=new Table();
         tabChooser();
 
+        calcZone.setPosition(0,calcZoneY);
         rootTable.setZIndex(998);
         calcZone.setZIndex(1);
         //Populate rootTable

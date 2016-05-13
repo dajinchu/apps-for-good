@@ -1,6 +1,5 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -127,7 +126,6 @@ public class Block extends HorizontalGroup {
 
 
     public Block() {
-        Gdx.app.log(getChildrenString(),"constructor");
         setTargetable(true);
         setDraggable(true);
     }

@@ -44,7 +44,9 @@ public class ParenthesisContainer extends Block {
     public ParenthesisContainer(ParenthesisBlock block) {
         this.side = block.side;
         this.parenthesis = block;
+        dad.removeSource(source);
         this.source = new ParenthesisContainerSource(this);
+        setDraggable(true);
         block.getParent().addActorAfter(block,this);
         addActor(block);
     }
