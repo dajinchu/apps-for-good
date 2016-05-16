@@ -32,12 +32,16 @@ public class ParenthesisContainer extends Block {
         }
         @Override
         public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
-            for(Actor a:contents){
+            super.dragStop(event,x,y,pointer,payload,target);
+            for (Actor a : contents) {
                 a.setVisible(true);
             }
-            ParenthesisContainer.this.setVisible(true);
-            parenthesis.getParent().addActorAfter(parenthesis, ParenthesisContainer.this);
-            addActor(parenthesis);
+
+            if(target!=null) {
+                ParenthesisContainer.this.setVisible(true);
+                parenthesis.getParent().addActorAfter(parenthesis, ParenthesisContainer.this);
+                addActor(parenthesis);
+            }
         }
     }
 

@@ -25,6 +25,9 @@ public class Expression extends VerticalGroup {
             @Override
             protected void childrenChanged() {
                 super.childrenChanged();
+                if(!hasChildren()){
+                    Expression.this.remove();
+                }
                 try {
                     result.setText("" + new ExpressionBuilder(row.getChildrenString()).build().evaluate());
                 } catch (Exception e) {
@@ -35,7 +38,6 @@ public class Expression extends VerticalGroup {
         result = new Label("", Main.skin);
         result.setColor(Color.BLACK);
         result.setFontScale(0.25f);
-        row.addActor(BlockCreator.BlockCreator("5"));
         this.addActor(row);
         this.addActor(result);
         row.setTargetable(false);

@@ -75,6 +75,12 @@ public class Block extends HorizontalGroup {
             //Drag stopped. Wherever block ended up, make it visible again. Payload is automatically
             // destroyed by DragAndDrop
             Block.this.setVisible(true);
+            if(! (getStage().hit(event.getStageX(),event.getStageY(),true) instanceof Block)){
+                Expression exp = new Expression();
+                exp.setPosition(event.getStageX(),event.getStageY());
+                exp.addBlock(Block.this);
+                Main.calcZone.addActor(exp);
+            }
         }
     }
     protected Source source = new BlockSource(this);
@@ -148,7 +154,7 @@ public class Block extends HorizontalGroup {
 
     public void moveRelative(Block at, MoveCommand.Side side){
         int offset;
-        if(side==MoveCommand.Side.LEFT){
+        if(side== MoveCommand.Side.LEFT){
             offset=-1;
         }else{
             offset= 1;

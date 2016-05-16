@@ -61,7 +61,7 @@ public class Main extends ApplicationAdapter {
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
-    private WidgetGroup calcZone;
+    public static WidgetGroup calcZone;
 
     private ArrayList<Float[]> circle = new ArrayList<>();
     private Float[] p1, p2;
