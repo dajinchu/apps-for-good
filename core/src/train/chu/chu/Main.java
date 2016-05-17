@@ -411,7 +411,7 @@ public class Main extends ApplicationAdapter {
         }else{
             landscape=false;
             size=Gdx.graphics.getWidth()/5;
-            calcZoneY = keypad.getTop();
+            calcZoneY = size*5;
         }
         System.out.println("Run");
         //KeyPad

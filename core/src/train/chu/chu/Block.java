@@ -77,7 +77,7 @@ public class Block extends HorizontalGroup {
             Block.this.setVisible(true);
             if(! (getStage().hit(event.getStageX(),event.getStageY(),true) instanceof Block)){
                 Expression exp = new Expression();
-                exp.setPosition(event.getStageX(),event.getStageY());
+                exp.setPosition(event.getStageX()-getParent().getX(),event.getStageY()-getParent().getY());
                 exp.addBlock(Block.this);
                 Main.calcZone.addActor(exp);
             }

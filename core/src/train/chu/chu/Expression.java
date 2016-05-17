@@ -65,7 +65,7 @@ public class Expression extends VerticalGroup {
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
                 Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
-                Expression.this.setPosition(event.getStageX(),event.getStageY() );
+                Expression.this.setPosition(event.getStageX()-getParent().getX(),event.getStageY()-getParent().getY());
             }
         };
         Main.dragAndDrop.addSource(source);
