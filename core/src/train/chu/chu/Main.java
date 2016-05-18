@@ -70,22 +70,22 @@ public class Main extends ApplicationAdapter {
     private Float[] p1, p2;
     private short[] triangleIndices;
     private float[] boundVertices;
-    private PolygonSpriteBatch psg ;
+    private PolygonSpriteBatch psg;
     TextureRegion poly;
     private Polygon wholebound;
     private Array<Polygon> bounds;
     private String s;
 
     @Override
-	public void create () {
+    public void create() {
 
-            //Generate bitmap font from TrueType Font
-            SmartFontGenerator fontGen = new SmartFontGenerator();
-            FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
-            BitmapFont robotoKeypadTabs = fontGen.createFont(exoFile, "exo-small", (int)Math.min(480,Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.1));
-            BitmapFont robotoKeypad = fontGen.createFont(exoFile, "exo-medium", (int)Math.min(480,Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.09));
-            BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int)Math.min(480,(Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.25)));
-            //BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", 480);
+        //Generate bitmap font from TrueType Font
+        SmartFontGenerator fontGen = new SmartFontGenerator();
+        FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
+        BitmapFont robotoKeypadTabs = fontGen.createFont(exoFile, "exo-small", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .1));
+        BitmapFont robotoKeypad = fontGen.createFont(exoFile, "exo-medium", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .09));
+        BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int) Math.min(480, (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .25)));
+        //BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", 480);
 
 
 
@@ -96,62 +96,59 @@ public class Main extends ApplicationAdapter {
             BitmapFont roboto = generator.generateFont(parameter);
             generator.dispose();
             */
-            //Load skin with images and styles for use in scene2d ui elements
-            Drawable green=new Image(new Texture("green.png")).getDrawable();
-                skin = new Skin();
-                Drawable undoImg;
-                Drawable redoImg;
-                final Drawable keytogsUp;
-                final Drawable keytogsDown;
-            if(Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())<1000){
-                undoImg=new Image(new Texture("undo.png")).getDrawable();
-                redoImg=new Image(new Texture("redo.png")).getDrawable();
-                keytogsDown=new Image(new Texture("upArrow.png")).getDrawable();
-                keytogsUp=new Image(new Texture("downArrow.png")).getDrawable();
-                skin.add("delete", new Texture("delete.png"));
-            }else{
-                undoImg=new Image(new Texture("undoLarge.png")).getDrawable();
-                redoImg=new Image(new Texture("redoLarge.png")).getDrawable();
-                keytogsDown=new Image(new Texture("upArrowLarge.png")).getDrawable();
-                keytogsUp=new Image(new Texture("downArrowLarge.png")).getDrawable();
-                skin.add("delete", new Texture("deleteLarge.png"));
-            }
+        //Load skin with images and styles for use in scene2d ui elements
+        Drawable green = new Image(new Texture("green.png")).getDrawable();
+        skin = new Skin();
+        Drawable undoImg;
+        Drawable redoImg;
+        final Drawable keytogsUp;
+        final Drawable keytogsDown;
+        if (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) < 1000) {
+            undoImg = new Image(new Texture("undo.png")).getDrawable();
+            redoImg = new Image(new Texture("redo.png")).getDrawable();
+            keytogsDown = new Image(new Texture("upArrow.png")).getDrawable();
+            keytogsUp = new Image(new Texture("downArrow.png")).getDrawable();
+            skin.add("delete", new Texture("delete.png"));
+        } else {
+            undoImg = new Image(new Texture("undoLarge.png")).getDrawable();
+            redoImg = new Image(new Texture("redoLarge.png")).getDrawable();
+            keytogsDown = new Image(new Texture("upArrowLarge.png")).getDrawable();
+            keytogsUp = new Image(new Texture("downArrowLarge.png")).getDrawable();
+            skin.add("delete", new Texture("deleteLarge.png"));
+        }
 
 
+        skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
+
+        skin.add("default", new TextButton.TextButtonStyle(green, green, green, robotoKeypad));
+
+        //Instantiate Stage for scene2d management
+        stage = new Stage();
+        Gdx.input.setInputProcessor(stage);
 
 
-            skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
-
-            skin.add("default", new TextButton.TextButtonStyle(green, green, green, robotoKeypad));
-
-            //Instantiate Stage for scene2d management
-            stage = new Stage();
-            Gdx.input.setInputProcessor(stage);
-
-
-
-            //Add a root table.
-            rootTable = new Table();
-            rootTable.setFillParent(true);
-            stage.addActor(rootTable);
+        //Add a root table.
+        rootTable = new Table();
+        rootTable.setFillParent(true);
+        stage.addActor(rootTable);
         //Add a root table.
         rootTable = new Table();
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
 
-            //row is the outermost ui element for the sandbox, it holds all the blocks
-            row = new EvaluatorBlock();
+        //row is the outermost ui element for the sandbox, it holds all the blocks
+        row = new EvaluatorBlock();
 
-            result = new Label("",skin);
-            result.setFontScale(0.25f);
+        result = new Label("", skin);
+        result.setFontScale(0.25f);
 
-            calcZone = new VerticalGroup();
-            calcZone.addActor(result);
-            calcZone.addActor(row);
-            stage.addListener(new ActorGestureResizer(stage.getCamera(),calcZone,new Vector2(1000,1000)));
-            stage.addActor(calcZone);
+        calcZone = new VerticalGroup();
+        calcZone.addActor(row);
+        calcZone.addActor(result);
+        stage.addListener(new ActorGestureResizer(stage.getCamera(), calcZone, new Vector2(1000, 1000)));
+        stage.addActor(calcZone);
 
-        stage.addListener(new ClickListener(){
+        stage.addListener(new ClickListener() {
             public float x, y;
 
             @Override
@@ -165,7 +162,7 @@ public class Main extends ApplicationAdapter {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //Set selected on the Up event, but NOT if the click location has moved too much
-                if(Math.abs(this.x-x)<10 && Math.abs(this.y-y)<10) {
+                if (Math.abs(this.x - x) < 10 && Math.abs(this.y - y) < 10) {
                     Actor block = stage.hit(x, y, true);
                     if (block instanceof ParenthesisBlock) {
                         ((ParenthesisBlock) block).toggleMoving();
@@ -175,11 +172,12 @@ public class Main extends ApplicationAdapter {
                 }
             }
         });
-        stage.addListener(new ActorGestureListener(){
+        stage.addListener(new ActorGestureListener() {
             boolean drawing = false;
+
             @Override
             public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if(stage.hit(x,y,true) instanceof Block){
+                if (stage.hit(x, y, true) instanceof Block) {
                     return;
                 }
                 drawing = true;
@@ -187,7 +185,7 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(drawing && circle.size()>9) {
+                if (drawing && circle.size() > 9) {
                     Bench.start("touchup");
                     Gdx.app.log("Touch up", "points " + circle.size());
                     Float[] first = circle.get(0);
@@ -300,93 +298,90 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public void pan(InputEvent event, float x, float y, float deltaX, float deltaY) {
-                if(!drawing)return;
-                circle.add(new Float[]{x,y});
+                if (!drawing) return;
+                circle.add(new Float[]{x, y});
             }
         });
 
 
         //Creates the trash can
-            trashCan = new TrashCan();
-            trashCan.setDrawable(skin, "delete");
+        trashCan = new TrashCan();
+        trashCan.setDrawable(skin, "delete");
 
-            trashCan.addListener(new ClickListener(){
-                @Override
-                public void clicked(InputEvent event, float z, float y) {
+        trashCan.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
 
-                    Command cmd=new ClearChildren(row);
-                    cmd.execute();
+                Command cmd = new ClearChildren(row);
+                cmd.execute();
+            }
+        });
+
+
+        //Creates the redo button
+        redo = new ImageButton(redoImg);
+
+        redo.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Command.redo();
+            }
+        });
+
+        //creates the undo button
+        undo = new ImageButton(undoImg);
+        undo.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                Command.undo();
+            }
+        });
+
+        //Key Pad toggle button
+
+        final ImageButton keyPadToggle = new ImageButton(keytogsUp, keytogsDown, keytogsDown);
+
+        //Toggle the keypad on and off
+        keyPadToggle.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+
+                if (keyToggle == 0) {
+                    //Hide KeyPad, set to up arrow
+                    keyToggle = 1;
+                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), -100, 0.5f, Interpolation.swingIn));
+                    keypad.addAction(Actions.moveTo(keypad.getX(), -(size * 4 + 100), 0.5f, Interpolation.swingIn));
+                    keyPadToggle.setChecked(true);
+
+
+                } else {
+                    //Bring up keypad, set to down arrow
+                    keyToggle = 0;
+                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), size * 4, 0.5f, Interpolation.swingOut));
+                    keypad.addAction(Actions.moveTo(keypad.getX(), 0, 0.5f, Interpolation.swingOut));
+                    keyPadToggle.setChecked(false);
                 }
-            });
+            }
+        });
+
+        //Create the toolbar, keypad toggle, undo/redo buttons
+        toolbar = new HorizontalGroup();
+        toolbar.addActor(keyPadToggle);
+        toolbar.addActor(undo);
+        toolbar.addActor(redo);
 
 
-            //Creates the redo button
-            redo = new ImageButton(redoImg);
+        //Debugger
+        debug = new Label("", skin);
+        debug.setPosition(20, 40);
+        debug.setFontScale(.15f);
+        debug.setColor(Color.GRAY);
 
-            redo.addListener(new ClickListener(){
-                @Override
-                public void clicked(InputEvent event, float z, float y) {
-                    Command.redo();
-                }
-            });
-
-            //creates the undo button
-            undo = new ImageButton(undoImg);
-            undo.addListener(new ClickListener(){
-                @Override
-                public void clicked(InputEvent event, float z, float y) {
-                    Command.undo();
-                }
-            });
-
-            //Key Pad toggle button
-
-            final ImageButton keyPadToggle=new ImageButton(keytogsUp,keytogsDown,keytogsDown);
-
-            //Toggle the keypad on and off
-           keyPadToggle.addListener(new ClickListener(){
-                @Override
-                public void clicked(InputEvent event, float z, float y) {
-
-                    if(keyToggle==0){
-                        //Hide KeyPad, set to up arrow
-                        keyToggle=1;
-                        keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),-100, 0.5f, Interpolation.swingIn));
-                        keypad.addAction(Actions.moveTo(keypad.getX(),-(size*4+100), 0.5f,Interpolation.swingIn));
-                        keyPadToggle.setChecked(true);
+        stage.addActor(debug);
 
 
-                    }else{
-                        //Bring up keypad, set to down arrow
-                        keyToggle=0;
-                        keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(),size*4, 0.5f,Interpolation.swingOut));
-                        keypad.addAction(Actions.moveTo(keypad.getX(),0, 0.5f,Interpolation.swingOut));
-                        keyPadToggle.setChecked(false);
-                    }
-                }
-            });
-
-            //Create the toolbar, keypad toggle, undo/redo buttons
-            toolbar=new HorizontalGroup();
-            toolbar.addActor(keyPadToggle);
-            toolbar.addActor(undo);
-            toolbar.addActor(redo);
-
-
-
-
-            //Debugger
-            debug = new Label("",skin);
-            debug.setPosition(20,40);
-            debug.setFontScale(.15f);
-            debug.setColor(Color.GRAY);
-
-            stage.addActor(debug);
-
-
-
-            stage.setViewport(new ScreenViewport());
-	}
+        stage.setViewport(new ScreenViewport());
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -394,49 +389,49 @@ public class Main extends ApplicationAdapter {
         // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
         //set stage viewport
-        stage.getViewport().update(width,height,true);
+        stage.getViewport().update(width, height, true);
         //calcZone.setPosition((width-calcZone.getWidth())/2,(height-calcZone.getHeight())/2);
-        if(rootTable.getChildren().contains(keyPadTabs,true)){
+        if (rootTable.getChildren().contains(keyPadTabs, true)) {
             rootTable.clearChildren();
         }
 
-        if(Gdx.graphics.getWidth()>Gdx.graphics.getHeight()){
-            landscape=true;
-            size=Gdx.graphics.getWidth()/10;
-            System.out.println("landscape:"+size);
-            calcZone.setPosition((float)((Gdx.graphics.getWidth()-((size*5)))/2),(height-calcZone.getHeight())/2+50);
+        if (Gdx.graphics.getWidth() > Gdx.graphics.getHeight()) {
+            landscape = true;
+            size = Gdx.graphics.getWidth() / 10;
+            System.out.println("landscape:" + size);
+            calcZone.setPosition((float) ((Gdx.graphics.getWidth() - ((size * 5))) / 2), (height - calcZone.getHeight()) / 2 + 50);
 
-        }else{
-            landscape=false;
-            size=Gdx.graphics.getWidth()/5;
-            System.out.println("portrait:"+size);
-            calcZone.setPosition((width-calcZone.getWidth())/2,(float)(Gdx.graphics.getHeight()-((size*4.5)/4)));
+        } else {
+            landscape = false;
+            size = Gdx.graphics.getWidth() / 5;
+            System.out.println("portrait:" + size);
+            calcZone.setPosition((width - calcZone.getWidth()) / 2, (float) (Gdx.graphics.getHeight() - ((size * 4.5) / 4)));
 
 
         }
         System.out.println("Run");
         //KeyPad
-        tabNum=1;
+        tabNum = 1;
 
         //KeyPad tab generator, generates 10 different tabs
-        keyPadTabs=new Table();
-        for(int i=1; i<=10; i++){
+        keyPadTabs = new Table();
+        for (int i = 1; i <= 10; i++) {
 
-            TextButton inputButton=new TextButton(""+i, skin);
+            TextButton inputButton = new TextButton("" + i, skin);
             inputButton.getLabel().setFontScale(0.5f);
-            keyPadTabs.add(inputButton).width(size/2).height(size/2).colspan(i);
-            final int valueof=i;
-            inputButton.addListener(new ClickListener(){
+            keyPadTabs.add(inputButton).width(size / 2).height(size / 2).colspan(i);
+            final int valueof = i;
+            inputButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float z, float y) {
-                    tabNum=valueof;
+                    tabNum = valueof;
                     tabChooser();
                 }
             });
         }
         keyPadTabs.row();
-        prevtabNum=tabNum;
-        keypad=new Table();
+        prevtabNum = tabNum;
+        keypad = new Table();
         tabChooser();
 
         rootTable.setZIndex(998);
@@ -452,11 +447,10 @@ public class Main extends ApplicationAdapter {
     }
 
     @Override
-	public void render () {
+    public void render() {
         //Wipe the screen clean with a white clear color
-		Gdx.gl.glClearColor(1,1,1,1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
         result.setColor(Color.DARK_GRAY);
@@ -464,9 +458,9 @@ public class Main extends ApplicationAdapter {
         s = row.getChildrenString();
         //Evaluate the expression
         //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
-        if(s.isEmpty()){
+        if (s.isEmpty()) {
             result.setText("");
-        }else if (row.getResult() == null) {
+        } else if (row.getResult() == null) {
             result.setColor(Color.RED);
             result.setText("false");
         } else {
@@ -477,15 +471,15 @@ public class Main extends ApplicationAdapter {
 
 
         //Change the color of the redo/undo button to gray if stack is empty.
-        if(Command.redoCommands.isEmpty()){
+        if (Command.redoCommands.isEmpty()) {
             redo.getImage().setColor(Color.GRAY);
-        }else{
+        } else {
             redo.getImage().setColor(Color.BLACK);
         }
 
-        if(Command.undoCommands.isEmpty()){
+        if (Command.undoCommands.isEmpty()) {
             undo.getImage().setColor(Color.GRAY);
-        }else{
+        } else {
             undo.getImage().setColor(Color.BLACK);
         }
 
@@ -496,10 +490,10 @@ public class Main extends ApplicationAdapter {
 
         stage.getBatch().begin();
         stage.getBatch().setColor(Color.BLACK);
-        for(int i = 0; i < circle.size()-1; i++){
+        for (int i = 0; i < circle.size() - 1; i++) {
             p1 = circle.get(i);
-            p2 = circle.get(i+1);
-            BatchShapeUtils.drawLine(stage.getBatch(), p1[0],p1[1],p2[0],p2[1],2);
+            p2 = circle.get(i + 1);
+            BatchShapeUtils.drawLine(stage.getBatch(), p1[0], p1[1], p2[0], p2[1], 2);
         }
         stage.getBatch().end();
 /*
@@ -515,46 +509,49 @@ public class Main extends ApplicationAdapter {
             stage.getBatch().draw(poly, wholebound.getBoundingRectangle().getX(),wholebound.getBoundingRectangle().getY(),wholebound.getBoundingRectangle().width,wholebound.getBoundingRectangle().height);
             stage.getBatch().end();
         }*/
-	}
+    }
 
-    public void dispose () {
+    public void dispose() {
         //When the app is destroyed, don't leave any memory leaks behind
         stage.dispose();
         skin.dispose();
     }
 
-    public void tabChooser(){
+    public void tabChooser() {
 
         //Choose between the 10 different tabs
         System.out.println(tabNum);
         String[][] keys;
 
         //The arrays for the 10 different tabs (Only the first tab is real right now, N is a placeholder).
-        switch (tabNum){
-            case 1:keys = new String[][]{
-                    {"7","8","9","+", "^"},
-                    {"4","5","6","-", "^-2"},
-                    {"1","2","3","*", "("},
-                    {"0", "0", ".","/", ")"}
+        switch (tabNum) {
+            case 1:
+                keys = new String[][]{
+                        {"7", "8", "9", "+", "^"},
+                        {"4", "5", "6", "-", "^-2"},
+                        {"1", "2", "3", "*", "("},
+                        {"0", "0", ".", "/", ")"}
 
-            };
+                };
                 break;
-            case 2:keys = new String[][]{
-                    {"2","2","2","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
+            case 2:
+                keys = new String[][]{
+                        {"2", "2", "2", "+", "N"},
+                        {"4", "5", "6", "-", "N"},
+                        {"1", "2", "3", "*", "N"},
+                        {"0", "0", ".", "/", "N"}
 
-            };
+                };
                 break;
 
-            default: keys = new String[][]{
-                    {"7","8","9","+", "N"},
-                    {"4","5","6","-", "N"},
-                    {"1","2","3","*", "N"},
-                    {"0", "0", ".","/", "N"}
+            default:
+                keys = new String[][]{
+                        {"7", "8", "9", "+", "N"},
+                        {"4", "5", "6", "-", "N"},
+                        {"1", "2", "3", "*", "N"},
+                        {"0", "0", ".", "/", "N"}
 
-            };
+                };
         }
 
         //Generate the keypad
@@ -562,36 +559,35 @@ public class Main extends ApplicationAdapter {
     }
 
 
-    public void keyPadGenerator(String[][] keys){
+    public void keyPadGenerator(String[][] keys) {
 
         //Clear the existing keypad
         keypad.clear();
 
 
-
         //Keypad generator
-        for(int x=0; x<keys.length; x++){
-            for(int y=0; y<keys[0].length; y++){
-                final String buttonTxt=keys[x][y];
+        for (int x = 0; x < keys.length; x++) {
+            for (int y = 0; y < keys[0].length; y++) {
+                final String buttonTxt = keys[x][y];
 
                 //Used to keep track of col-span.
-                int i=1;
+                int i = 1;
                 //Look for repeated keys
-                while(y<keys[0].length-1&&buttonTxt.equals(keys[x][y+i])){
+                while (y < keys[0].length - 1 && buttonTxt.equals(keys[x][y + i])) {
                     i++;
 
                 }
 
                 //Skip forward to avoid repetition
-                y+=i-1;
+                y += i - 1;
 
                 //Make Button, create block at end of row if clicked.
-                Actor inputButton=ButtonCreator.ButtonCreator(buttonTxt, skin);
-                keypad.add(inputButton).width(i*size).height(size).colspan(i);
-                inputButton.addListener(new ClickListener(){
+                Actor inputButton = ButtonCreator.ButtonCreator(buttonTxt, skin);
+                keypad.add(inputButton).width(i * size).height(size).colspan(i);
+                inputButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
-                        Command cmd=new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
+                        Command cmd = new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
                         //row.addActor(block);
                         cmd.execute();
                     }
