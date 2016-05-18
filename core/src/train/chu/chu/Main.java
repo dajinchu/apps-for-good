@@ -179,7 +179,7 @@ public class Main extends ApplicationAdapter {
             boolean drawing = false;
             @Override
             public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if(stage.hit(x,y,true)!=null){
+                if(stage.hit(x,y,true) instanceof Block){
                     return;
                 }
                 drawing = true;
