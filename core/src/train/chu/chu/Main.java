@@ -464,7 +464,7 @@ public class Main extends ApplicationAdapter {
             result.setColor(Color.RED);
             result.setText("false");
         } else {
-            result.setText(row.getResult());
+            result.setText("="+row.getResult());
         }
 
         debug.setText(s);
