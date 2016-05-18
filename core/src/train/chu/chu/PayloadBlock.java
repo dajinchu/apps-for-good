@@ -28,6 +28,7 @@ public class PayloadBlock extends HorizontalGroup {
                 Label aLabel = (Label) a;
                 //Create a new Label instance, and give it the same properties as the old one
                 Label dupe = new Label(aLabel.getText(), aLabel.getStyle());
+                dupe.setFontScale(aLabel.getFontScaleX());
                 dupe.setColor(aLabel.getColor());
                 //And add it to the clone group, of course
                 this.addActor(dupe);
