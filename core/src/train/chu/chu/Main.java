@@ -81,7 +81,7 @@ public class Main extends ApplicationAdapter {
             FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
             BitmapFont robotoKeypadTabs = fontGen.createFont(exoFile, "exo-small", (int)Math.min(480,Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.1));
             BitmapFont robotoKeypad = fontGen.createFont(exoFile, "exo-medium", (int)Math.min(480,Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.09));
-            BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int)Math.min(480,(Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.5)));
+            BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int)Math.min(480,(Math.min(Gdx.graphics.getWidth(),Gdx.graphics.getHeight())*.25)));
             //BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", 480);
 
 
