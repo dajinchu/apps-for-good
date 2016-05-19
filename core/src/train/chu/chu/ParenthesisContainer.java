@@ -141,4 +141,10 @@ public class ParenthesisContainer extends Block {
         Gdx.app.log("Parenthesis",batch.toString());
         batch.execute();
     }
+    public void removeContents(){
+        ParenthesisBlock.clearSelection();
+        for(Actor a:contents) {
+            new RemoveCommand(a).execute();
+        }
+    }
 }

@@ -1,11 +1,9 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -35,7 +33,9 @@ public class ButtonCreator {
             return inputButton;
 
         }else{
-            inputButton = new TextButton(name, skin);
+            TextButton tmp = new TextButton(name, skin);
+            tmp.getLabel().setFontScale(.36f);
+            inputButton = tmp;
             return inputButton;
         }
 

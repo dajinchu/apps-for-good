@@ -82,8 +82,6 @@ public class Main extends ApplicationAdapter {
         //Generate bitmap font from TrueType Font
         SmartFontGenerator fontGen = new SmartFontGenerator();
         FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
-        BitmapFont robotoKeypadTabs = fontGen.createFont(exoFile, "exo-small", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .1));
-        BitmapFont robotoKeypad = fontGen.createFont(exoFile, "exo-medium", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .09));
         BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int) Math.min(480, (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .25)));
         //BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", 480);
 
@@ -120,7 +118,7 @@ public class Main extends ApplicationAdapter {
 
         skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
 
-        skin.add("default", new TextButton.TextButtonStyle(green, green, green, robotoKeypad));
+        skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         //Instantiate Stage for scene2d management
         stage = new Stage();
@@ -418,7 +416,7 @@ public class Main extends ApplicationAdapter {
         for (int i = 1; i <= 10; i++) {
 
             TextButton inputButton = new TextButton("" + i, skin);
-            inputButton.getLabel().setFontScale(0.5f);
+            inputButton.getLabel().setFontScale(.5f);
             keyPadTabs.add(inputButton).width(size / 2).height(size / 2).colspan(i);
             final int valueof = i;
             inputButton.addListener(new ClickListener() {
