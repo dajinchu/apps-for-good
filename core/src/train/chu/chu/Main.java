@@ -586,7 +586,6 @@ public class Main extends ApplicationAdapter {
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
                         Command cmd = new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
-                        //row.addActor(block);
                         cmd.execute();
                     }
                 });
