@@ -31,9 +31,10 @@ public class ParenthesisContainer extends Block {
         public ParenthesisContainerSource(Actor actor) {
             super(actor);
         }
+
         @Override
         public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
-            for(Actor a:contents){
+            for (Actor a : contents) {
                 a.setVisible(true);
             }
             ParenthesisContainer.this.setVisible(true);
@@ -48,7 +49,7 @@ public class ParenthesisContainer extends Block {
         this.side = block.side;
         this.parenthesis = block;
         this.source = new ParenthesisContainerSource(this);
-        block.getParent().addActorAfter(block,this);
+        block.getParent().addActorAfter(block, this);
         addActor(block);
     }
 
@@ -65,32 +66,48 @@ public class ParenthesisContainer extends Block {
 
         //Parenthesis might be open or close, so it might need to go at the beginning or end.
         // Make it all much simpler by just removing it and adding everything from open->close
-        if(side == Side.OPENING) {
-            parent.addActorAfter(this,parenthesis);
-        }else{
-            parent.addActorBefore(this,parenthesis);
+        if (side == Side.OPENING) {
+            parent.addActorAfter(this, parenthesis);
+        } else {
+            parent.addActorBefore(this, parenthesis);
         }
 
         //Find the open and close parenthesis.
         if (this.side == Side.OPENING) {
             open = parenthesis;
+            int counter = 0;
             for (int i = siblings.indexOf(open, true) + 1; i < siblings.size; i++) {
-                if (siblings.get(i) instanceof ParenthesisBlock &&
-                        ((ParenthesisBlock) siblings.get(i)).side == Side.CLOSING) {
+                if (siblings.get(i) instanceof ParenthesisBlock) {
+                    if (((ParenthesisBlock) siblings.get(i)).side == Side.CLOSING) {
+                        counter--;
+                    } else if (((ParenthesisBlock) siblings.get(i)).side == Side.OPENING) {
+                        counter++;
+                    }
+                }
+                if (counter == -1) {
                     close = (ParenthesisBlock) siblings.get(i);
                     break;
                 }
             }
         } else {
             close = parenthesis;
+            int counter = 0;
             for (int i = siblings.indexOf(close, true) - 1; i >= 0; i--) {
-                if (siblings.get(i) instanceof ParenthesisBlock &&
-                        ((ParenthesisBlock) siblings.get(i)).side == Side.OPENING) {
+                if (siblings.get(i) instanceof ParenthesisBlock) {
+                    if (((ParenthesisBlock) siblings.get(i)).side == Side.CLOSING) {
+                        counter++;
+                    } else if (((ParenthesisBlock) siblings.get(i)).side == Side.OPENING) {
+                        counter--;
+                    }
+                }
+                if (counter == -1) {
                     open = (ParenthesisBlock) siblings.get(i);
                     break;
                 }
+
             }
         }
+
 
         //Copy all children into contents so we can keep track of them
         // Also make them invisible
