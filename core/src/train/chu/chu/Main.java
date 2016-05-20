@@ -2,12 +2,14 @@ package train.chu.chu;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.DelaunayTriangulator;
@@ -75,16 +77,26 @@ public class Main extends ApplicationAdapter {
     private Polygon wholebound;
     private Array<Polygon> bounds;
     private String s;
+    private SpriteBatch load;
+    private boolean firstTime;
+    private boolean secondTime;
+    private Texture logo;
 
     @Override
-    public void create() {
+    public void create(){
+        load=new SpriteBatch();
+        logo=new Texture("finalLogo.png");
+        firstTime=true;
+    }
+    public void setup() {
 
+        Bench.start("font");
         //Generate bitmap font from TrueType Font
         SmartFontGenerator fontGen = new SmartFontGenerator();
         FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
         BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int) Math.min(480, (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .25)));
         //BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", 480);
-
+        Bench.end("font");
 
 
             /*
@@ -95,6 +107,7 @@ public class Main extends ApplicationAdapter {
             generator.dispose();
             */
         //Load skin with images and styles for use in scene2d ui elements
+        Bench.start("the rest");
         Drawable green = new Image(new Texture("green.png")).getDrawable();
         skin = new Skin();
         Drawable undoImg;
@@ -292,6 +305,7 @@ public class Main extends ApplicationAdapter {
                 }
                 drawing = false;
                 circle.clear();
+
             }
 
             @Override
@@ -379,10 +393,16 @@ public class Main extends ApplicationAdapter {
 
 
         stage.setViewport(new ScreenViewport());
+        Bench.end("the rest");
+
+        resize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
     }
 
     @Override
     public void resize(int width, int height) {
+        if(firstTime){
+            return;
+        }
         //Handle resize. This is still important on static windows (eg. Android) because it is
         // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
@@ -446,54 +466,68 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        //Wipe the screen clean with a white clear color
-        Gdx.gl.glClearColor(1, 1, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        if(firstTime){
+            Gdx.gl.glClearColor(230/255f,74/255f,25/255f,1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            load.begin();
+            load.draw(logo, Gdx.graphics.getWidth()/4, Gdx.graphics.getHeight()/2-Gdx.graphics.getWidth()/4,Gdx.graphics.getWidth()/2,Gdx.graphics.getWidth()/2);
+            load.end();
+            firstTime=false;
+            secondTime=true;
+
+        }else if(secondTime){
+            secondTime=false;
+            setup();
+        }else {
+            //Wipe the screen clean with a white clear color
+            Gdx.gl.glClearColor(1, 1, 1, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-        result.setColor(Color.DARK_GRAY);
-        //Convert the blocks in HorizontalGroup to a string
-        s = row.getChildrenString();
-        //Evaluate the expression
-        //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
-        if (s.isEmpty()) {
-            result.setText("");
-        } else if (row.getResult() == null) {
-            result.setColor(Color.RED);
-            result.setText("false");
-        } else {
-            result.setText("="+row.getResult());
-        }
+            result.setColor(Color.DARK_GRAY);
+            //Convert the blocks in HorizontalGroup to a string
+            s = row.getChildrenString();
+            //Evaluate the expression
+            //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
+            if (s.isEmpty()) {
+                result.setText("");
+            } else if (row.getResult() == null) {
+                result.setColor(Color.RED);
+                result.setText("false");
+            } else {
+                result.setText("=" + row.getResult());
+            }
 
-        debug.setText(s);
+            debug.setText(s);
 
 
-        //Change the color of the redo/undo button to gray if stack is empty.
-        if (Command.redoCommands.isEmpty()) {
-            redo.getImage().setColor(Color.GRAY);
-        } else {
-            redo.getImage().setColor(Color.BLACK);
-        }
+            //Change the color of the redo/undo button to gray if stack is empty.
+            if (Command.redoCommands.isEmpty()) {
+                redo.getImage().setColor(Color.GRAY);
+            } else {
+                redo.getImage().setColor(Color.BLACK);
+            }
 
-        if (Command.undoCommands.isEmpty()) {
-            undo.getImage().setColor(Color.GRAY);
-        } else {
-            undo.getImage().setColor(Color.BLACK);
-        }
+            if (Command.undoCommands.isEmpty()) {
+                undo.getImage().setColor(Color.GRAY);
+            } else {
+                undo.getImage().setColor(Color.BLACK);
+            }
 
-        //Scene2d. Step forward the world and draw the scene
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
-        //stage.setDebugAll(true);
+            //Scene2d. Step forward the world and draw the scene
+            stage.act(Gdx.graphics.getDeltaTime());
+            stage.draw();
+            //stage.setDebugAll(true);
 
-        stage.getBatch().begin();
-        stage.getBatch().setColor(Color.BLACK);
-        for (int i = 0; i < circle.size() - 1; i++) {
-            p1 = circle.get(i);
-            p2 = circle.get(i + 1);
-            BatchShapeUtils.drawLine(stage.getBatch(), p1[0], p1[1], p2[0], p2[1], 2);
-        }
-        stage.getBatch().end();
+            stage.getBatch().begin();
+            stage.getBatch().setColor(Color.BLACK);
+            for (int i = 0; i < circle.size() - 1; i++) {
+                p1 = circle.get(i);
+                p2 = circle.get(i + 1);
+                BatchShapeUtils.drawLine(stage.getBatch(), p1[0], p1[1], p2[0], p2[1], 2);
+            }
+            stage.getBatch().end();
 /*
         if(boundVertices!=null) {
             psg.begin();
@@ -507,6 +541,7 @@ public class Main extends ApplicationAdapter {
             stage.getBatch().draw(poly, wholebound.getBoundingRectangle().getX(),wholebound.getBoundingRectangle().getY(),wholebound.getBoundingRectangle().width,wholebound.getBoundingRectangle().height);
             stage.getBatch().end();
         }*/
+        }
     }
 
     public void dispose() {
