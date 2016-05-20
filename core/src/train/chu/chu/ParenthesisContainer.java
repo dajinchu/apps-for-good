@@ -24,6 +24,7 @@ public class ParenthesisContainer extends Block {
 
     Side side;
     private ParenthesisBlock open, close;
+    private boolean trashing = false;
 
     protected class ParenthesisContainerSource extends BlockSource {
 
@@ -36,6 +37,8 @@ public class ParenthesisContainer extends Block {
                 a.setVisible(true);
             }
             ParenthesisContainer.this.setVisible(true);
+
+            if(trashing)return;
             parenthesis.getParent().addActorAfter(parenthesis, ParenthesisContainer.this);
             addActor(parenthesis);
         }
@@ -142,9 +145,13 @@ public class ParenthesisContainer extends Block {
         batch.execute();
     }
     public void removeContents(){
-        ParenthesisBlock.clearSelection();
+
+        //ParenthesisBlock.clearSelection();
+        trashing = true;
+        BatchedCommand batched = new BatchedCommand();
         for(Actor a:contents) {
-            new RemoveCommand(a).execute();
-        }
+            batched.add(new RemoveCommand(a));
+        }//TODO move the contents out too. Probably shouldn't overid remove atually
+        batched.execute();
     }
 }
