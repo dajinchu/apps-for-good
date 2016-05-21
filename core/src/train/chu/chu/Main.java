@@ -48,7 +48,7 @@ import java.util.Map;
 
 public class Main extends ApplicationAdapter {
     private Stage stage;
-    private Skin skin;
+    public static Skin skin;
     private EvaluatorBlock row;
     private Label result;
     private Table rootTable;
@@ -148,13 +148,20 @@ public class Main extends ApplicationAdapter {
         stage.addActor(rootTable);
 
         //row is the outermost ui element for the sandbox, it holds all the blocks
+        HorizontalGroup rowWithGhost = new HorizontalGroup();
         row = new EvaluatorBlock();
+        Actor leftghost = new GhostBlock(MoveCommand.Side.LEFT,row);
+        Actor rightghost = new GhostBlock(MoveCommand.Side.RIGHT,row);
+
+        rowWithGhost.addActor(leftghost);
+        rowWithGhost.addActor(row);
+        rowWithGhost.addActor(rightghost);
 
         result = new Label("", skin);
         result.setFontScale(0.25f);
 
         calcZone = new VerticalGroup();
-        calcZone.addActor(row);
+        calcZone.addActor(rowWithGhost);
         calcZone.addActor(result);
         stage.addListener(new ActorGestureResizer(stage.getCamera(), calcZone, new Vector2(1000, 1000)));
         stage.addActor(calcZone);
