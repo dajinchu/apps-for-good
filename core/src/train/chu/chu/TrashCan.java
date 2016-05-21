@@ -22,7 +22,7 @@ public class TrashCan extends Image {
             @Override
             public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                 if(source.getActor() instanceof ParenthesisContainer) {
-                    ((ParenthesisContainer) source.getActor()).removeContents();
+                    ((ParenthesisContainer) source.getActor()).trash();
                 }else
                 if(source.getActor() instanceof Block){
                     //Make SURE the source is a block before deleting it, don't want to be deleting keypad buttons

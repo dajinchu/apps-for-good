@@ -28,7 +28,7 @@ public class Block extends HorizontalGroup {
     private TargetState targetState = TargetState.NOT;
     private double targetHoverCount = 0;
 
-    private String childrenString = "";
+    protected String childrenString = "";
     private StringBuilder sb = new StringBuilder();
 
     //DragAndDrop has Source, Payload, and Target
@@ -176,7 +176,6 @@ public class Block extends HorizontalGroup {
         //Recursive function goes through Block children and asks for their strings too
         // getText for Label children
         sb.setLength(0);
-        if (getChildren().size > 1) sb.append("(");
         for (Actor a : getChildren()) {
             if (a instanceof Block) {
                 sb.append(((Block) a).getChildrenString());
@@ -185,7 +184,6 @@ public class Block extends HorizontalGroup {
                 sb.append(((Label) a).getText());
             }
         }
-        if (getChildren().size > 1) sb.append(")");
         childrenString = sb.toString();
     }
 

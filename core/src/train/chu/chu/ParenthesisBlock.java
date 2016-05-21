@@ -41,8 +41,7 @@ public class ParenthesisBlock extends Block {
                 oldMove.setMoving(false);
             }
             if(this.getParent() == container) {
-                container.getParent().addActorBefore(container, this);
-                container.remove();
+                container.unselect();
             }
         }
     }
