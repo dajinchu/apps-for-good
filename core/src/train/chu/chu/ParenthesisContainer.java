@@ -61,7 +61,6 @@ public class ParenthesisContainer extends Block {
 
         Group parent = getParent();
         SnapshotArray<Actor> siblings = parent.getChildren();
-        setTouchable(Touchable.enabled);
 
         //Parenthesis might be open or close, so it might need to go at the beginning or end.
         // Make it all much simpler by just removing it and adding everything from open->close
@@ -137,7 +136,9 @@ public class ParenthesisContainer extends Block {
         // interact with the row and the undo system properly.
         for(Actor a: contents) {
             this.addActor(a);
+            a.setTouchable(Touchable.disabled);
         }
+        this.setTouchable(Touchable.enabled);
     }
     private void takeContentsOut(){
         //Take contents out of this container.
@@ -146,6 +147,10 @@ public class ParenthesisContainer extends Block {
         for(int i = 1; i < contents.size; i ++){
             getParent().addActorAfter(contents.get(i-1), contents.get(i));
         }
+        for(Actor a:contents){
+            a.setTouchable(Touchable.enabled);
+        }
+        this.setTouchable(Touchable.disabled);
     }
 
     protected PayloadBlock getDragActor() {

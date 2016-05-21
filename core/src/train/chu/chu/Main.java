@@ -174,6 +174,13 @@ public class Main extends ApplicationAdapter {
                 //track touch down location.. TODO maybe change this to also track time?
                 this.x = x;
                 this.y = y;
+                //If user tapped outside of a Parenthesis container, clear the selected parenthesis.
+                // This is important for preventing things outside parenthesis getting dragged into
+                // a parenthesis container. 
+                Actor block = stage.hit(x, y, true);
+                if(!(block instanceof ParenthesisContainer)){
+                    ParenthesisBlock.clearSelection();
+                }
                 return true;
             }
 
@@ -184,8 +191,6 @@ public class Main extends ApplicationAdapter {
                     Actor block = stage.hit(x, y, true);
                     if (block instanceof ParenthesisBlock) {
                         ((ParenthesisBlock) block).toggleMoving();
-                    } else {
-                        ParenthesisBlock.clearSelection();
                     }
                 }
             }
