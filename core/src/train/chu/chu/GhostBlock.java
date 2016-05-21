@@ -18,7 +18,9 @@ public class GhostBlock extends Container<Label>{
     public GhostBlock(MoveCommand.Side side, HorizontalGroup expression){
         this.expression = expression;
         this.side = side;
-        setActor(new Label("g",Main.skin));
+        Label label = new Label("g", Main.skin);
+        label.setFontScale(BlockCreator.FONT_SCALE);
+        setActor(label);
         Main.dragAndDrop.addTarget(new DragAndDrop.Target(this) {
             @Override
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {

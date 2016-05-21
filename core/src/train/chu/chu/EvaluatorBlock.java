@@ -11,7 +11,8 @@ public class EvaluatorBlock extends Block{
 
     public EvaluatorBlock() {
         super();
-        setSelected();
+        setDraggable(false);
+        setTargetable(false);
     }
 
     @Override
