@@ -176,7 +176,7 @@ public class Main extends ApplicationAdapter {
                 this.y = y;
                 //If user tapped outside of a Parenthesis container, clear the selected parenthesis.
                 // This is important for preventing things outside parenthesis getting dragged into
-                // a parenthesis container. 
+                // a parenthesis container.
                 Actor block = stage.hit(x, y, true);
                 if(!(block instanceof ParenthesisContainer)){
                     ParenthesisBlock.clearSelection();
@@ -573,7 +573,7 @@ public class Main extends ApplicationAdapter {
             case 1:
                 keys = new String[][]{
                         {"7", "8", "9", "+", "^"},
-                        {"4", "5", "6", "-", "^"},
+                        {"4", "5", "6", "-", "E"},
                         {"1", "2", "3", "*", "("},
                         {"0", "0", ".", "/", ")"}
 
