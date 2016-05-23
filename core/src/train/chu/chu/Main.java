@@ -2,7 +2,6 @@ package train.chu.chu;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
@@ -38,15 +36,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-
-import net.objecthunter.exp4j.ExpressionBuilder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Main extends ApplicationAdapter {
+    public static AnalyticsProvider analytics;
     private Stage stage;
     public static Skin skin;
     private EvaluatorBlock row;
@@ -81,6 +77,10 @@ public class Main extends ApplicationAdapter {
     private boolean firstTime;
     private boolean secondTime;
     private Texture logo;
+
+    public Main(AnalyticsProvider analytics){
+        this.analytics = analytics;
+    }
 
     @Override
     public void create(){

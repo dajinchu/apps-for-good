@@ -7,11 +7,14 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class AndroidLauncher extends AndroidApplication {
-	@Override
+
+    private FirebaseAnalytics firebaseAnalytics;
+
+    @Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		FirebaseAnalytics.getInstance(this);
-		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new Main(), config);
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+		initialize(new Main(new AndroidFirebaseAnalytics(firebaseAnalytics)), config);
 	}
 }
