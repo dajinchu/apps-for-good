@@ -27,6 +27,6 @@ public class AndroidFirebaseAnalytics implements AnalyticsProvider {
 
     @Override
     public void logEvent(String event) {
-        firebaseAnalytics.logEvent(event,Bundle.EMPTY);
+        firebaseAnalytics.logEvent(event, null);
     }
 }
