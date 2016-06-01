@@ -18,7 +18,7 @@ public class Block extends HorizontalGroup {
 
     protected DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
-    public static final double HOVER_TIME =.11;
+    public static final double HOVER_TIME =.08;
 
 
 
@@ -86,7 +86,7 @@ public class Block extends HorizontalGroup {
                 return false;
             }
 
-            if (x < getWidth() * .3f) {
+            if (x < getWidth() * .4f) {
                 //The centerRect has been entered, go swap with payload's source.
                 // To the user this looks this block is getting out of the way of what's being dragged
                 // It's a little different in code because the payload is just sort of 'representing'
@@ -94,7 +94,7 @@ public class Block extends HorizontalGroup {
                 targetState = TargetState.LEFT;
                 //System.out.println(Gdx.graphics.getDeltaTime());
 
-            } else if (x > getWidth() * .7f) {
+            } else if (x > getWidth() * .6f) {
                 targetState = TargetState.RIGHT;
                 //System.out.println(Gdx.graphics.getDeltaTime());
             } else {
