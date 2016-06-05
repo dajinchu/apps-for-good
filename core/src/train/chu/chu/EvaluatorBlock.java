@@ -1,5 +1,7 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.Gdx;
+
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 /**
@@ -11,19 +13,20 @@ public class EvaluatorBlock extends Block{
 
     public EvaluatorBlock() {
         super();
-        setSelected();
+        setDraggable(false);
+        setTargetable(false);
     }
 
     @Override
     protected void childrenChanged() {
         super.childrenChanged();
+        Gdx.app.log("evaluator","building result");
         try {
             result = ""+new ExpressionBuilder(getChildrenString()).build().evaluate();
         }catch(Exception e){
             result = null;
         }
     }
-
 
     public String getResult() {
         return result;

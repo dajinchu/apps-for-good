@@ -27,6 +27,7 @@ public abstract class Command {
         //Execute the postive action and adds command to undo stack
         positiveAction();
         undoCommands.push(this);
+        Main.analytics.logEvent(this.getClass().getSimpleName());
     }
 
     /**

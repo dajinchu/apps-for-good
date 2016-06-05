@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
  * Created by Arun on 4/6/2016.
  */
 public class BlockCreator {
-
+    public static final float FONT_SCALE = 0.5f;
     /**
      * Takes a string and a skin and returns a block with a label attached
      * @param str the str for the block
@@ -35,7 +35,7 @@ public class BlockCreator {
         block.setTouchable(Touchable.enabled);
         //Creates Label
         Label second = new Label(name,skin);
-        second.setFontScale(0.25f);
+        second.setFontScale(FONT_SCALE);
         second.setTouchable(Touchable.disabled);
         second.setColor(Color.BLACK);
         block.addActor(second);

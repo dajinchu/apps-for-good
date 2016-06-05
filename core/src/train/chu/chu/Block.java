@@ -1,9 +1,7 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -20,7 +18,7 @@ public class Block extends HorizontalGroup {
 
     protected DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
-    private static final double HOVER_TIME =.11;
+    public static final double HOVER_TIME =.08;
 
 
 
@@ -30,10 +28,7 @@ public class Block extends HorizontalGroup {
     private TargetState targetState = TargetState.NOT;
     private double targetHoverCount = 0;
 
-    //There can only be one block selected at a time
-    private static Block selectedBlock;
-
-    private String childrenString = "";
+    protected String childrenString = "";
     private StringBuilder sb = new StringBuilder();
 
     //DragAndDrop has Source, Payload, and Target
@@ -91,7 +86,7 @@ public class Block extends HorizontalGroup {
                 return false;
             }
 
-            if (x < getWidth() * .3f) {
+            if (x < getWidth() * .4f) {
                 //The centerRect has been entered, go swap with payload's source.
                 // To the user this looks this block is getting out of the way of what's being dragged
                 // It's a little different in code because the payload is just sort of 'representing'
@@ -99,7 +94,7 @@ public class Block extends HorizontalGroup {
                 targetState = TargetState.LEFT;
                 //System.out.println(Gdx.graphics.getDeltaTime());
 
-            } else if (x > getWidth() * .7f) {
+            } else if (x > getWidth() * .6f) {
                 targetState = TargetState.RIGHT;
                 //System.out.println(Gdx.graphics.getDeltaTime());
             } else {
@@ -125,6 +120,8 @@ public class Block extends HorizontalGroup {
 
     public Block() {
         this.dad = Main.dragAndDrop;
+        setDraggable(true);
+        setTargetable(true);
     }
 
     @Override
@@ -173,14 +170,12 @@ public class Block extends HorizontalGroup {
     protected void childrenChanged() {
         super.childrenChanged();
         updateChildrenString();
-        setAllChildrenSelect(isSelected());
     }
 
     protected void updateChildrenString() {
         //Recursive function goes through Block children and asks for their strings too
         // getText for Label children
         sb.setLength(0);
-        if (getChildren().size > 1) sb.append("(");
         for (Actor a : getChildren()) {
             if (a instanceof Block) {
                 sb.append(((Block) a).getChildrenString());
@@ -189,7 +184,6 @@ public class Block extends HorizontalGroup {
                 sb.append(((Label) a).getText());
             }
         }
-        if (getChildren().size > 1) sb.append(")");
         childrenString = sb.toString();
     }
 
@@ -210,93 +204,5 @@ public class Block extends HorizontalGroup {
             dad.addTarget(target);
         }
         //Gdx.app.log(getChildrenString(),"targetable to " + targetable);
-    }
-
-    public void setNestedColors(Color color){
-        //Recursive function that works the same way as getChildrenString, but with color setting
-        for(Actor a : getChildren()) {
-            if (a instanceof Block) {
-                ((Block) a).setNestedColors(color);
-            } else {
-                a.setColor(color);
-            }
-        }
-    }
-
-    public void setSelected(){
-        //Set this block as the selected one
-        //Gdx.app.log(getChildrenString(),"setselected");
-        Block oldSelected = selectedBlock;
-        selectedBlock = this;
-        if(oldSelected != null) {
-            oldSelected.setColor(Color.BLACK);
-            oldSelected.setAllChildrenSelect(false);
-        }
-        setAllChildrenSelect(true);
-
-    }
-
-    private void setAllChildrenSelect(boolean select){
-        //setTargetable(!select);
-        for(Actor child: getChildren()){
-            if(child instanceof Block) {
-                ((Block) child).setAsChildOfSelected(select);
-            }
-        }
-        if(select){
-            Group parent = getParent();
-            Block childContainingSelected = this;
-            while(parent instanceof Block){
-                for(Actor child : parent.getChildren()){
-                    if(child instanceof Block && child!=childContainingSelected){
-                        ((Block) child).setTargetable(true);
-                    }//TODO Else set untargetable?
-                }
-                if(parent.hasParent()){
-                    childContainingSelected = (Block) parent;
-                    parent = parent.getParent();
-                } else {
-                    break;
-                }
-            }
-        }
-    }
-
-    private void setAsChildOfSelected(boolean childOf){
-        //Private convenience method to switch a block on/off as the child of the selected block
-        // Needed because this needs to happen in setSelected, but also in addActor to apply the
-        // childOfSelected behavior to newly added blocks too
-        setDraggable(childOf);
-        setTargetable(childOf);
-
-        Color set = Color.BLACK;
-        if(childOf) {
-            set = Color.valueOf("3F51B5");
-        }
-        if((getChildren().size==1 && getChildren().get(0) instanceof Label)){
-            //This is a block with just a label inside, it has no outline, so color the label
-            getChildren().get(0).setColor(set);
-        }else{
-            //This is a group-block, color the outline, NOT the label children
-            this.setColor(set);
-        }
-    }
-
-    public boolean isSelected(){
-        //It is possible to instead use a selected flag in each Block, but it would be prone to failure
-        return this == Block.selectedBlock;
-    }
-
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-
-        //Dashed-line border
-        if(getChildren().size==0 || (getChildren().size==1 && getChildren().get(0) instanceof Label)) return;//TODO This set of ifs is repeatedly needed
-        if (isTransform()) applyTransform(batch, computeTransform());
-        batch.setColor(getColor());
-        BatchShapeUtils.drawDashedRectangle(batch, 0, 0, getWidth(), getHeight(), 2);
-        if (isTransform()) resetTransform(batch);
-
     }
 }

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "252078753048",
+    "firebase_url": "https://sandbox-e9d6a.firebaseio.com",
+    "project_id": "sandbox-e9d6a",
+    "storage_bucket": "sandbox-e9d6a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252078753048:android:d3725eb6e89a2996",
+        "android_client_info": {
+          "package_name": "train.chu.chu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252078753048-1lbt3slc8c5m2prmd75775iq2bbcun6i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzyDtVKex-fXoO8l2aMdySgeqXU8JzEGU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

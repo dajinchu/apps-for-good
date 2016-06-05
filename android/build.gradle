@@ -16,7 +16,7 @@ android {
     }
     defaultConfig {
         applicationId "train.chu.chu"
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 23
     }
 }
