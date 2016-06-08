@@ -61,7 +61,7 @@ public class GhostBlock extends Container<Label>{
                 case RIGHT : relative = (Block) expression.getChildren().get(expression.getChildren().size-1);break;
             }
             if(relative != hoverActor){
-                hoverActor.moveRelative(relative, side);
+                hoverActor.getNode().move(relative.getNode(), side);
             }
             dragging = false;
             dragTime = 0;

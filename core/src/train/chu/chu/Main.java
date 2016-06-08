@@ -40,9 +40,10 @@ import java.util.HashMap;
 
 import train.chu.chu.model.ExpressionNode;
 import train.chu.chu.model.Model;
+import train.chu.chu.model.ModelListener;
 import train.chu.chu.model.Node;
 
-public class Main extends ApplicationAdapter {
+public class Main extends ApplicationAdapter implements ModelListener{
     public static AnalyticsProvider analytics;
     private Stage stage;
     public static Skin skin;
@@ -69,7 +70,6 @@ public class Main extends ApplicationAdapter {
     private float[] boundVertices;
     private Polygon wholebound;
     private Array<Polygon> bounds;
-    private String s;
     private SpriteBatch load;
     private boolean firstTime;
     private boolean secondTime;
@@ -94,8 +94,6 @@ public class Main extends ApplicationAdapter {
         //Generate bitmap font from TrueType Font
         SmartFontGenerator fontGen = new SmartFontGenerator();
         FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
-        BitmapFont robotoKeypadTabs = fontGen.createFont(exoFile, "exo-small", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .1));
-        BitmapFont robotoKeypad = fontGen.createFont(exoFile, "exo-medium", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .09));
         BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int) Math.min(480, (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .25)));
 
         //Load skin with images and styles for use in scene2d ui elements
@@ -124,7 +122,7 @@ public class Main extends ApplicationAdapter {
 
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
-        this.model = new Model();
+        this.model = new Model(this);
 
         //Instantiate Stage for scene2d management
         stage = new Stage();
@@ -379,16 +377,6 @@ public class Main extends ApplicationAdapter {
         syncWithModel();
     }
 
-    public void syncWithModel(){
-        for(ExpressionNode exp : model.getExpressions()){
-            Expression expression = new Expression(exp);
-            calcZone.addActor(expression);
-            for(Node node : exp.getChildren()){
-                expression.row.addActor(BlockCreator.BlockCreator(node,skin));
-            }
-        }
-    }
-
     @Override
     public void resize(int width, int height) {
         if (firstTime) {
@@ -475,9 +463,6 @@ public class Main extends ApplicationAdapter {
             Gdx.gl.glClearColor(1, 1, 1, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-            debug.setText(s);
-
-
             //Change the color of the redo/undo button to gray if stack is empty.
             if (model.canRedo()) {//TODO Model should notify whether undo-ability has changed
                 redo.getImage().setColor(Color.GRAY);
@@ -494,7 +479,7 @@ public class Main extends ApplicationAdapter {
             //Scene2d. Step forward the world and draw the scene
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
-            //stage.setDebugAll(true);
+            stage.setDebugAll(true);
 
             stage.getBatch().begin();
             stage.getBatch().setColor(Color.BLACK);
@@ -599,11 +584,29 @@ public class Main extends ApplicationAdapter {
                         model.addBlock(buttonTxt,model.getExpressions().first());//TODO cursor
                     }
                 });
-
-
             }
             keypad.row();
         }
 
+    }
+
+
+    private void syncWithModel(){
+        Bench.start("sync model");
+        calcZone.clear();
+        for(ExpressionNode exp : model.getExpressions()){
+            Expression expression = new Expression(exp);
+            calcZone.addActor(expression);
+            for(Node node : exp.getChildren()){
+                expression.row.addActor(BlockCreator.BlockCreator(node,skin));
+            }
+            expression.setResult(exp.getResult());
+        }
+        Bench.end("sync model");
+    }
+
+    @Override
+    public void update() {
+        syncWithModel();
     }
 }

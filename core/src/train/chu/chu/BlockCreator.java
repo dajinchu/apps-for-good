@@ -35,7 +35,7 @@ public class BlockCreator {
         second.setTouchable(Touchable.disabled);
         second.setColor(Color.BLACK);
         block.addActor(second);
-
+        if(node.isSelected())second.setColor(Color.BLUE);
         //Returns Block
         return block;
     }

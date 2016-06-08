@@ -1,6 +1,10 @@
 package train.chu.chu.model;
 
-        import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.StringBuilder;
+
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 /**
  * Created by Da-Jin on 6/5/2016.
@@ -8,35 +12,60 @@ package train.chu.chu.model;
  * Calculates final result
  * Stores its position in sandbox world
  */
-        public class ExpressionNode implements Positioned{
+public class ExpressionNode implements Positioned {
 
-            private int x,y;
-            private Array<Node> children;
+    private final ModelListener listener;
+    private float x;
+    private float y;
+    private Array<Node> children;
 
-            protected ExpressionNode(int x, int y) {
-                this.x = x;
-                this.y = y;
-                this.children = new Array<>();;
-            }
-
-            @Override
-            public int getX() {
-                return x;
-            }
-            @Override
-            public void setX(int x) {
-                this.x = x;
-            }
-            @Override
-            public int getY() {
-                return y;
+    protected ExpressionNode(float x, float y, ModelListener listener) {
+        this.x = x;
+        this.y = y;
+        this.listener = listener;
+        this.children = new Array<>();
     }
+
+    public void move(float x, float y){
+        this.x=x;
+        this.y=y;
+        listener.update();
+    }
+
     @Override
-    public void setY(int y) {
+    public float getX() {
+        return x;
+    }
+
+    @Override
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    @Override
+    public float getY() {
+        return y;
+    }
+
+    @Override
+    public void setY(float y) {
         this.y = y;
     }
 
     public Array<Node> getChildren() {
         return children;
+    }
+
+    public String getResult(){
+        StringBuilder sb = new StringBuilder();
+        for(Node child : getChildren()){
+            sb.append(child.getData());
+        }
+        Expression expression = new ExpressionBuilder(sb.toString()).build();
+        if(expression.validate().isValid()) {
+            return String.valueOf(expression.evaluate());
+        } else {
+            return "false";
+        }
     }
 }

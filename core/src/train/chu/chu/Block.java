@@ -4,12 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
-import com.badlogic.gdx.utils.StringBuilder;
 
 import train.chu.chu.model.Node;
 import train.chu.chu.model.Side;
@@ -24,16 +22,11 @@ public class Block extends HorizontalGroup {//TODO clean this class the fuck up 
     //Center rect is the detection area for getting out of the way, or merging blocks
     public static final double HOVER_TIME =.08;
 
-
-
     private Block hoverActor;
 
     private enum TargetState{LEFT,RIGHT,NOT};
     private TargetState targetState = TargetState.NOT;
     private double targetHoverCount = 0;
-
-    protected String childrenString = "";
-    private StringBuilder sb = new StringBuilder();
 
     //DragAndDrop has Source, Payload, and Target
     //Source is what we drag from.
@@ -137,63 +130,12 @@ public class Block extends HorizontalGroup {//TODO clean this class the fuck up 
         }
         if(targetHoverCount> HOVER_TIME){
             switch (targetState){
-                case LEFT:hoverActor.moveRelative(this, Side.LEFT);break;
-                case RIGHT:hoverActor.moveRelative(this, Side.RIGHT);break;
+                case LEFT: hoverActor.getNode().move(this.getNode(), Side.LEFT); break;
+                case RIGHT:hoverActor.getNode().move(this.getNode(), Side.RIGHT);break;
             }
             targetState = TargetState.NOT;
             targetHoverCount = 0;
         }
-    }
-
-    public void moveRelative(Block at, Side side){
-        int offset;
-        if(side==Side.LEFT){
-            offset=-1;
-        }else{
-            offset= 1;
-        }
-        try {
-            int atIndex = at.getParent().getChildren().indexOf(at, true);
-            if (at.getParent().getChildren().get(atIndex + offset) == this) return;
-        } catch (IndexOutOfBoundsException e){
-
-        }
-        node.move(at.getNode(), side);
-    }
-
-    @Override
-    public void layout() {
-        super.layout();
-        //When this block's layout has to be recalculated (see super.layout()), we can also recalculate the centerRect.
-        //This can't be done just once on creation, because the children might not have been added,
-        // and the block's children could change. This is the best place to calculate centerRect.
-       // Gdx.app.log(getChildrenString(),"Layout");
-        pack();
-    }
-
-    @Override
-    protected void childrenChanged() {
-        super.childrenChanged();
-        updateChildrenString();
-    }
-
-    protected void updateChildrenString() {
-        //Recursive function goes through Block children and asks for their strings too
-        // getText for Label children
-        sb.setLength(0);
-        for (Actor a : getChildren()) {
-            if (a instanceof Block) {
-                sb.append(((Block) a).getChildrenString());
-            }
-            if (a instanceof Label) {
-                sb.append(((Label) a).getText());
-            }
-        }
-        childrenString = sb.toString();
-    }
-
-    public String getChildrenString() {
-        return childrenString;
     }
 
     public void setDraggable(boolean draggable) {

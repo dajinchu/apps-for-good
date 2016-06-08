@@ -22,7 +22,7 @@ public class Expression extends VerticalGroup {
     HorizontalGroup row;
     private Label result;
 
-    public Expression(ExpressionNode exp) {
+    public Expression(final ExpressionNode exp) {
         this.setPosition(exp.getX(),exp.getY());
 
         HorizontalGroup rowWithGhost = new HorizontalGroup();
@@ -47,28 +47,36 @@ public class Expression extends VerticalGroup {
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 VerticalGroup dragActor = new VerticalGroup();
-                dragActor.addActor(new PayloadBlock(row));
+                PayloadBlock actor = new PayloadBlock(row);
+                actor.setScale(1);
+                dragActor.addActor(actor);
                 Label l = new Label(result.getText().toString(), Main.skin);
                 l.setColor(Color.BLACK);
+                l.setFontScale(.5f);
                 dragActor.addActor(l);
-                dragActor.setScale(.25f);
                 payload.setDragActor(dragActor);
 
                 float scale = ScaleUtils.getTrueScale(Expression.this);
-                Main.dragAndDrop.setDragActorPosition(-Expression.this.getWidth()*scale/2,
-                        -Expression.this.getPrefHeight()*scale/2+Expression.this.getPrefHeight());
+                Main.dragAndDrop.setDragActorPosition(-dragActor.getWidth()*scale/2,
+                        -dragActor.getHeight()*scale/2+dragActor.getHeight()+result.getHeight()*scale);
+
+                dragActor.setScale(scale);
                 return payload;
             }
 
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
                 Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
-                Expression.this.setPosition(event.getStageX()-getParent().getX(),event.getStageY()-getParent().getY());
+                exp.move((event.getStageX()-getParent().getX())/getParent().getScaleX(),
+                        (event.getStageY()-getParent().getY())/getParent().getScaleX()+result.getHeight());
             }
         };
         Main.dragAndDrop.addSource(source);
     }
 
+    public void setResult(String result) {
+        this.result.setText(result);
+    }
 
     public Array<Block> getBlocks() {
         SnapshotArray<Actor> children = row.getChildren();
