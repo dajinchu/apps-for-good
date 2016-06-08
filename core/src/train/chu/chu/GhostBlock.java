@@ -5,17 +5,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
+import train.chu.chu.model.Side;
+
 /**
  * Created by Da-Jin on 5/20/2016.
  */
 public class GhostBlock extends Container<Label>{
     private final HorizontalGroup expression;
-    private final MoveCommand.Side side;
+    private final Side side;
     private boolean dragging = false;
     private double dragTime;
     private Block hoverActor;
 
-    public GhostBlock(MoveCommand.Side side, HorizontalGroup expression){
+    public GhostBlock(Side side, HorizontalGroup expression){
         this.expression = expression;
         this.side = side;
         Label label = new Label("g", Main.skin);

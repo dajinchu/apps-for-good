@@ -11,11 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
 import com.badlogic.gdx.utils.StringBuilder;
 
+import train.chu.chu.model.Node;
+import train.chu.chu.model.Side;
+
 /**
  * Created by Da-Jin on 3/9/2016.
  */
-public class Block extends HorizontalGroup {
+public class Block extends HorizontalGroup {//TODO clean this class the fuck up (restart?)
 
+    private final Node node;
     protected DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
     public static final double HOVER_TIME =.08;
@@ -118,8 +122,9 @@ public class Block extends HorizontalGroup {
     };
 
 
-    public Block() {
+    public Block(Node node) {
         this.dad = Main.dragAndDrop;
+        this.node = node;
         setDraggable(true);
         setTargetable(true);
     }
@@ -132,17 +137,17 @@ public class Block extends HorizontalGroup {
         }
         if(targetHoverCount> HOVER_TIME){
             switch (targetState){
-                case LEFT:hoverActor.moveRelative(this, MoveCommand.Side.LEFT);break;
-                case RIGHT:hoverActor.moveRelative(this, MoveCommand.Side.RIGHT);break;
+                case LEFT:hoverActor.moveRelative(this, Side.LEFT);break;
+                case RIGHT:hoverActor.moveRelative(this, Side.RIGHT);break;
             }
             targetState = TargetState.NOT;
             targetHoverCount = 0;
         }
     }
 
-    public void moveRelative(Block at, MoveCommand.Side side){
+    public void moveRelative(Block at, Side side){
         int offset;
-        if(side==MoveCommand.Side.LEFT){
+        if(side==Side.LEFT){
             offset=-1;
         }else{
             offset= 1;
@@ -153,7 +158,7 @@ public class Block extends HorizontalGroup {
         } catch (IndexOutOfBoundsException e){
 
         }
-        new MoveCommand(at, this, side).execute();
+        node.move(at.getNode(), side);
     }
 
     @Override
@@ -204,5 +209,9 @@ public class Block extends HorizontalGroup {
             dad.addTarget(target);
         }
         //Gdx.app.log(getChildrenString(),"targetable to " + targetable);
+    }
+
+    public Node getNode(){
+        return node;
     }
 }

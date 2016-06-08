@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
  */
 public class PayloadBlock extends HorizontalGroup {
 
-    public PayloadBlock(Block b){
+    public PayloadBlock(HorizontalGroup b){
         float firstParentScale = ScaleUtils.getTrueScale(b);
         this.setScale(firstParentScale);
         //Iterate through children and add them to the clone group

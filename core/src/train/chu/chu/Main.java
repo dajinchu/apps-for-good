@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
@@ -19,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -27,25 +26,27 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.SnapshotArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+
+import train.chu.chu.model.ExpressionNode;
+import train.chu.chu.model.Model;
+import train.chu.chu.model.Node;
 
 public class Main extends ApplicationAdapter {
     public static AnalyticsProvider analytics;
     private Stage stage;
     public static Skin skin;
-    private EvaluatorBlock row;
+    private Expression row;
     private Label result;
     private Table rootTable;
     private ImageButton redo;
@@ -53,23 +54,19 @@ public class Main extends ApplicationAdapter {
     private Table keypad;
     private Table keyPadTabs;
     private int tabNum;
-    private int prevtabNum;
     private int keyToggle;
-    private boolean landscape;
     private int size;
     private TrashCan trashCan = null;
     private Group toolbar;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
-    private VerticalGroup calcZone;
+    private WidgetGroup calcZone;
 
     private ArrayList<Float[]> circle = new ArrayList<>();
     private Float[] p1, p2;
     private short[] triangleIndices;
     private float[] boundVertices;
-    private PolygonSpriteBatch psg;
-    TextureRegion poly;
     private Polygon wholebound;
     private Array<Polygon> bounds;
     private String s;
@@ -77,37 +74,31 @@ public class Main extends ApplicationAdapter {
     private boolean firstTime;
     private boolean secondTime;
     private Texture logo;
+    private int prevtabNum;
+    private Model model;
+    private boolean landscape;
 
-    public Main(AnalyticsProvider analytics){
+    public Main(AnalyticsProvider analytics) {
         this.analytics = analytics;
     }
 
     @Override
-    public void create(){
-        load=new SpriteBatch();
-        logo=new Texture("finalLogo.png");
-        firstTime=true;
+    public void create() {
+        load = new SpriteBatch();
+        logo = new Texture("finalLogo.png");
+        firstTime = true;
     }
+
     public void setup() {
 
-        Bench.start("font");
         //Generate bitmap font from TrueType Font
         SmartFontGenerator fontGen = new SmartFontGenerator();
         FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
+        BitmapFont robotoKeypadTabs = fontGen.createFont(exoFile, "exo-small", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .1));
+        BitmapFont robotoKeypad = fontGen.createFont(exoFile, "exo-medium", (int) Math.min(480, Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .09));
         BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int) Math.min(480, (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .25)));
-        //BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", 480);
-        Bench.end("font");
 
-
-            /*
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Light.ttf"));
-            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 72
-            BitmapFont roboto = generator.generateFont(parameter);
-            generator.dispose();
-            */
         //Load skin with images and styles for use in scene2d ui elements
-        Bench.start("the rest");
         Drawable green = new Image(new Texture("green.png")).getDrawable();
         skin = new Skin();
         Drawable undoImg;
@@ -133,6 +124,8 @@ public class Main extends ApplicationAdapter {
 
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
+        this.model = new Model();
+
         //Instantiate Stage for scene2d management
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
@@ -147,22 +140,10 @@ public class Main extends ApplicationAdapter {
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
 
-        //row is the outermost ui element for the sandbox, it holds all the blocks
-        HorizontalGroup rowWithGhost = new HorizontalGroup();
-        row = new EvaluatorBlock();
-        Actor leftghost = new GhostBlock(MoveCommand.Side.LEFT,row);
-        Actor rightghost = new GhostBlock(MoveCommand.Side.RIGHT,row);
+        calcZone = new WidgetGroup();
+        calcZone.setFillParent(true);
+        calcZone.setTouchable(Touchable.childrenOnly);
 
-        rowWithGhost.addActor(leftghost);
-        rowWithGhost.addActor(row);
-        rowWithGhost.addActor(rightghost);
-
-        result = new Label("", skin);
-        result.setFontScale(0.25f);
-
-        calcZone = new VerticalGroup();
-        calcZone.addActor(rowWithGhost);
-        calcZone.addActor(result);
         stage.addListener(new ActorGestureResizer(stage.getCamera(), calcZone, new Vector2(1000, 1000)));
         stage.addActor(calcZone);
 
@@ -174,13 +155,6 @@ public class Main extends ApplicationAdapter {
                 //track touch down location.. TODO maybe change this to also track time?
                 this.x = x;
                 this.y = y;
-                //If user tapped outside of a Parenthesis container, clear the selected parenthesis.
-                // This is important for preventing things outside parenthesis getting dragged into
-                // a parenthesis container.
-                Actor block = stage.hit(x, y, true);
-                if(!(block instanceof ParenthesisContainer)){
-                    ParenthesisBlock.clearSelection();
-                }
                 return true;
             }
 
@@ -189,9 +163,6 @@ public class Main extends ApplicationAdapter {
                 //Set selected on the Up event, but NOT if the click location has moved too much
                 if (Math.abs(this.x - x) < 10 && Math.abs(this.y - y) < 10) {
                     Actor block = stage.hit(x, y, true);
-                    if (block instanceof ParenthesisBlock) {
-                        ((ParenthesisBlock) block).toggleMoving();
-                    }
                 }
             }
         });
@@ -207,10 +178,9 @@ public class Main extends ApplicationAdapter {
             }
 
             @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {//TODO
                 if (drawing && circle.size() > 9) {
                     Bench.start("touchup");
-                    Gdx.app.log("Touch up", "points " + circle.size());
                     Float[] first = circle.get(0);
                     Float[] last = circle.get(circle.size() - 1);
                     //Check if they've come close enough to closing the polygon
@@ -224,13 +194,11 @@ public class Main extends ApplicationAdapter {
                         }
                         triangleIndices = new DelaunayTriangulator().computeTriangles(boundVertices, false).toArray();
                         float[] trianglefloats = new float[triangleIndices.length * 2];
-                        Gdx.app.log("touchup", "Triangle shorts" + Arrays.toString(triangleIndices));
                         for (int i = 0; i < triangleIndices.length; i++) {
                             trianglefloats[2 * i] = boundVertices[2 * triangleIndices[i]];
                             trianglefloats[2 * i + 1] = boundVertices[2 * triangleIndices[i] + 1];
                         }
                         wholebound = new Polygon(boundVertices);
-                        Gdx.app.log("touchup", "Triangle float values" + Arrays.toString(trianglefloats));
                         bounds = new Array<Polygon>();
                         for (int i = 0; i < trianglefloats.length; i += 6) {
                             bounds.add(new Polygon(Arrays.copyOfRange(trianglefloats, i, i + 6)));
@@ -238,16 +206,17 @@ public class Main extends ApplicationAdapter {
                         Polygon blockPoly = new Polygon(), overlap = new Polygon();
                         HashMap<Block, Float> overlaps = new HashMap<>();
 
-                   /* Gdx.app.log("Touch up","Bounds area is "+bounds.area());
-                    Polygon test1 = new Polygon(new float[]{1,0,4,0,4,3,1,3});
-                    Polygon test2 = new Polygon(new float[]{0,1,0,2,5,2,5,1});
-                    Gdx.app.log("test","contains "+test1.contains(2,2)+" overlap? "+ Intersector.intersectPolygons(test1,test2,overlap)+" area "+overlap.area());
-*/
                         Vector2 v1, v2, v3, v4, tmpA = new Vector2(0, 0), tmpB = new Vector2(), tmpC = new Vector2(), tmpD = new Vector2();
                         float area;
                         //Put the overlap areas into a hash map, associating area with blocks
                         Bench.start("intersect");
-                        for (Actor actor : row.getChildren()) {
+                        Array<Actor> allBlocks = new Array<>();
+                        for(Actor exp:calcZone.getChildren()){
+                            if(exp instanceof Expression){
+                                allBlocks.addAll(((Expression) exp).getBlocks());
+                            }
+                        }
+                        for (Actor actor : allBlocks) {
                             if (actor instanceof Block) {//We know they will be blocks, but make sure
                                 v1 = actor.localToStageCoordinates(tmpA.set(0, 0));
                                 v2 = actor.localToStageCoordinates(tmpB.set(actor.getWidth(), 0));
@@ -260,9 +229,7 @@ public class Main extends ApplicationAdapter {
                                         if (Intersector.intersectPolygons(blockPoly, p, overlap)) {
                                             area += overlap.area();
                                         }
-                                    } catch (IllegalArgumentException e) {
-
-                                    }
+                                    } catch (IllegalArgumentException e) {}
                                 }
                                 if (area > blockPoly.area() * .4f) {
                                     overlaps.put((Block) actor, area);
@@ -270,7 +237,12 @@ public class Main extends ApplicationAdapter {
                             }
                         }
                         Bench.end("intersect");
-                        if (overlaps.size() > 1) {
+                        Array<Node> selection = new Array<Node>();
+                        for(Block block : overlaps.keySet()){
+                            selection.add(block.getNode());
+                        }
+                        model.selectBlocks(selection);
+                        /*if (overlaps.size() > 1) {
                             HashMap<Block, Float> parentAreas = new HashMap<>();
                             Block parent;
                             for (Map.Entry<Block, Float> entry : overlaps.entrySet()) {
@@ -309,9 +281,8 @@ public class Main extends ApplicationAdapter {
                                         right = b;
                                     }
                                 }
-                                new ParenthesisCommand(left, right, skin).execute();
                             }
-                        }
+                        }*/
                     }
                     Bench.end("touchup");
                 }
@@ -335,9 +306,7 @@ public class Main extends ApplicationAdapter {
         trashCan.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-
-                Command cmd = new ClearChildren(row);
-                cmd.execute();
+                //TODO
             }
         });
 
@@ -348,7 +317,7 @@ public class Main extends ApplicationAdapter {
         redo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                Command.redo();
+                model.redo();
             }
         });
 
@@ -357,7 +326,7 @@ public class Main extends ApplicationAdapter {
         undo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                Command.undo();
+                model.undo();
             }
         });
 
@@ -405,14 +374,24 @@ public class Main extends ApplicationAdapter {
 
 
         stage.setViewport(new ScreenViewport());
-        Bench.end("the rest");
 
-        resize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        syncWithModel();
+    }
+
+    public void syncWithModel(){
+        for(ExpressionNode exp : model.getExpressions()){
+            Expression expression = new Expression(exp);
+            calcZone.addActor(expression);
+            for(Node node : exp.getChildren()){
+                expression.row.addActor(BlockCreator.BlockCreator(node,skin));
+            }
+        }
     }
 
     @Override
     public void resize(int width, int height) {
-        if(firstTime){
+        if (firstTime) {
             return;
         }
         //Handle resize. This is still important on static windows (eg. Android) because it is
@@ -479,49 +458,34 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
 
-        if(firstTime){
-            Gdx.gl.glClearColor(230/255f,74/255f,25/255f,1);
+        if (firstTime) {
+            Gdx.gl.glClearColor(230 / 255f, 74 / 255f, 25 / 255f, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             load.begin();
-            load.draw(logo, Gdx.graphics.getWidth()/4, Gdx.graphics.getHeight()/2-Gdx.graphics.getWidth()/4,Gdx.graphics.getWidth()/2,Gdx.graphics.getWidth()/2);
+            load.draw(logo, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 2 - Gdx.graphics.getWidth() / 4, Gdx.graphics.getWidth() / 2, Gdx.graphics.getWidth() / 2);
             load.end();
-            firstTime=false;
-            secondTime=true;
+            firstTime = false;
+            secondTime = true;
 
-        }else if(secondTime){
-            secondTime=false;
+        } else if (secondTime) {
+            secondTime = false;
             setup();
-        }else {
+        } else {
             //Wipe the screen clean with a white clear color
             Gdx.gl.glClearColor(1, 1, 1, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-
-            result.setColor(Color.DARK_GRAY);
-            //Convert the blocks in HorizontalGroup to a string
-            s = row.getChildrenString();
-            //Evaluate the expression
-            //Use ExpressionBuilder from exp4j to perform the calculations and set the result text
-            if (s.isEmpty()) {
-                result.setText("");
-            } else if (row.getResult() == null) {
-                result.setColor(Color.RED);
-                result.setText("false");
-            } else {
-                result.setText("=" + row.getResult());
-            }
 
             debug.setText(s);
 
 
             //Change the color of the redo/undo button to gray if stack is empty.
-            if (Command.redoCommands.isEmpty()) {
+            if (model.canRedo()) {//TODO Model should notify whether undo-ability has changed
                 redo.getImage().setColor(Color.GRAY);
             } else {
                 redo.getImage().setColor(Color.BLACK);
             }
 
-            if (Command.undoCommands.isEmpty()) {
+            if (model.canUndo()) {
                 undo.getImage().setColor(Color.GRAY);
             } else {
                 undo.getImage().setColor(Color.BLACK);
@@ -632,8 +596,7 @@ public class Main extends ApplicationAdapter {
                 inputButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float z, float y) {
-                        Command cmd = new AddCommand(BlockCreator.BlockCreator(buttonTxt, skin), row);
-                        cmd.execute();
+                        model.addBlock(buttonTxt,model.getExpressions().first());//TODO cursor
                     }
                 });
 
