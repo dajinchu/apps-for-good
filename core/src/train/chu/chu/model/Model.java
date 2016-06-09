@@ -1,6 +1,5 @@
 package train.chu.chu.model;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -13,74 +12,36 @@ public class Model {
     private final ModelListener listener;
     private Array<ExpressionNode> expressions;
 
-    private Array<Node> selected = new Array<>();
-    private ExpressionNode selectedExpression;
-    private int leftest, rightest;
+    private SelectionContainerNode selection;
 
     public Model(ModelListener listener){
         expressions = new Array<>();
+        selection = new SelectionContainerNode(listener);
         this.listener = listener;
         ExpressionNode expressionNode = new ExpressionNode(0, 0, listener);
-        new Node("142",expressionNode,listener);
-        new Node("*",expressionNode,listener);
-        new Node("5",expressionNode,listener);
+        new BaseNode("142",expressionNode,listener);
+        new BaseNode("*",expressionNode,listener);
+        new BaseNode("5",expressionNode,listener);
         expressions.add(expressionNode);
     }
 
     public Array<ExpressionNode> getExpressions(){
         return expressions;
     }
+    public SelectionContainerNode getSelection(){
+        return selection;
+    }
 
     public void addBlock(String data, ExpressionNode target){
-        new Node(data,target,listener);
+        new BaseNode(data,target,listener);
         listener.update();
     }
 
-    public void selectBlocks(Array<Node> selections){
-        //Reset selection first
-        for(Node node : selected){
-            node.setSelected(false);
-        }
-        selected.clear();
-        if (selections.size > 0) {
-            //Make sure they are from the same expression
-            //Also get the left and right most nodes
-            selectedExpression = selections.first().getExpression();
-            leftest = selectedExpression.getChildren().size - 1;
-            rightest = 0;
-            for (Node node : selections) {
-                if (node.getExpression() != selectedExpression) {
-                    //Node has different parent! Abort!
-                    return;
-                }
-                //Check node expands the selection range by being more right or left
-                int index = selectedExpression.getChildren().indexOf(node, true);
-                if (index < leftest) {
-                    leftest = index;
-                }
-                if (index > rightest) {
-                    rightest = index;
-                }
-            }
-            //Add everything in selection range to the selected array
-            for (int i = leftest; i <= rightest; i++) {
-                Node node = selectedExpression.getChildren().get(i);
-                node.setSelected(true);
-                selected.add(node);
-            }
-        }
-        listener.update();
-        Gdx.app.log("Model","selectBlocks");
+    public void selectBlocks(Array<BaseNode> selections){
+        selection.setSelection(selections);
     }
     public void deselect(){
-        selectBlocks(new Array<Node>());
-    }
-    public void removeSelected(){
-
-    }
-
-    public void moveSelected(Node to, Side side) {
-
+        selectBlocks(new Array<BaseNode>());
     }
     public void parenthesizeSelected(){
 

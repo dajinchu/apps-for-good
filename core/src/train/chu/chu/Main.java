@@ -38,10 +38,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import train.chu.chu.model.BaseNode;
 import train.chu.chu.model.ExpressionNode;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.ModelListener;
-import train.chu.chu.model.Node;
 
 public class Main extends ApplicationAdapter implements ModelListener{
     public static AnalyticsProvider analytics;
@@ -77,6 +77,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private int prevtabNum;
     private Model model;
     private boolean landscape;
+    private Array<LabelBlock> allBlocks = new Array<>();
 
     public Main(AnalyticsProvider analytics) {
         this.analytics = analytics;
@@ -160,7 +161,10 @@ public class Main extends ApplicationAdapter implements ModelListener{
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 //Set selected on the Up event, but NOT if the click location has moved too much
                 if (Math.abs(this.x - x) < 10 && Math.abs(this.y - y) < 10) {
-                    Actor block = stage.hit(x, y, true);
+                    Actor hit = stage.hit(x, y, true);
+                    if(hit == null){
+                        model.deselect();
+                    }
                 }
             }
         });
@@ -169,7 +173,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
             @Override
             public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (stage.hit(x, y, true) instanceof Block) {
+                if (stage.hit(x, y, true) instanceof LabelBlock) {
                     return;
                 }
                 drawing = true;
@@ -202,20 +206,14 @@ public class Main extends ApplicationAdapter implements ModelListener{
                             bounds.add(new Polygon(Arrays.copyOfRange(trianglefloats, i, i + 6)));
                         }
                         Polygon blockPoly = new Polygon(), overlap = new Polygon();
-                        HashMap<Block, Float> overlaps = new HashMap<>();
+                        HashMap<LabelBlock, Float> overlaps = new HashMap<>();
 
                         Vector2 v1, v2, v3, v4, tmpA = new Vector2(0, 0), tmpB = new Vector2(), tmpC = new Vector2(), tmpD = new Vector2();
                         float area;
                         //Put the overlap areas into a hash map, associating area with blocks
                         Bench.start("intersect");
-                        Array<Actor> allBlocks = new Array<>();
-                        for(Actor exp:calcZone.getChildren()){
-                            if(exp instanceof Expression){
-                                allBlocks.addAll(((Expression) exp).getBlocks());
-                            }
-                        }
                         for (Actor actor : allBlocks) {
-                            if (actor instanceof Block) {//We know they will be blocks, but make sure
+                            if (actor instanceof LabelBlock) {//We know they will be blocks, but make sure
                                 v1 = actor.localToStageCoordinates(tmpA.set(0, 0));
                                 v2 = actor.localToStageCoordinates(tmpB.set(actor.getWidth(), 0));
                                 v3 = actor.localToStageCoordinates(tmpC.set(actor.getWidth(), actor.getHeight()));
@@ -230,13 +228,13 @@ public class Main extends ApplicationAdapter implements ModelListener{
                                     } catch (IllegalArgumentException e) {}
                                 }
                                 if (area > blockPoly.area() * .4f) {
-                                    overlaps.put((Block) actor, area);
+                                    overlaps.put((LabelBlock) actor, area);
                                 }
                             }
                         }
                         Bench.end("intersect");
-                        Array<Node> selection = new Array<Node>();
-                        for(Block block : overlaps.keySet()){
+                        Array<BaseNode> selection = new Array<>();
+                        for(LabelBlock block : overlaps.keySet()){
                             selection.add(block.getNode());
                         }
                         model.selectBlocks(selection);
@@ -594,11 +592,22 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private void syncWithModel(){
         Bench.start("sync model");
         calcZone.clear();
+        allBlocks.clear();
+        SelectedBlock selectedBlock = new SelectedBlock(model.getSelection());
         for(ExpressionNode exp : model.getExpressions()){
             Expression expression = new Expression(exp);
             calcZone.addActor(expression);
-            for(Node node : exp.getChildren()){
-                expression.row.addActor(BlockCreator.BlockCreator(node,skin));
+            for(BaseNode node : exp.getChildren()){
+                LabelBlock block = BlockCreator.BlockCreator(node, skin);
+                allBlocks.add(block);
+                if(node == selectedBlock.getNode().getFirstNode()){
+                    expression.row.addActor(selectedBlock);
+                }
+                if(node.isSelected()){
+                    selectedBlock.addActor(block);
+                } else {
+                    expression.row.addActor(block);
+                }
             }
             expression.setResult(exp.getResult());
         }

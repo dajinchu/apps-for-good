@@ -8,8 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.SnapshotArray;
 
 import train.chu.chu.model.ExpressionNode;
 import train.chu.chu.model.Side;
@@ -76,16 +74,5 @@ public class Expression extends VerticalGroup {
 
     public void setResult(String result) {
         this.result.setText(result);
-    }
-
-    public Array<Block> getBlocks() {
-        SnapshotArray<Actor> children = row.getChildren();
-        Array<Block> ret = new Array<>();
-        for (Actor a : children) {
-            if (a instanceof Block) {
-                ret.add((Block) a);
-            }
-        }
-        return ret;
     }
 }

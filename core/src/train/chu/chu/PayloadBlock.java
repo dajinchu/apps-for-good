@@ -14,9 +14,9 @@ public class PayloadBlock extends HorizontalGroup {
         this.setScale(firstParentScale);
         //Iterate through children and add them to the clone group
         for (Actor a : b.getChildren()) {
-            if (a instanceof Block) {
+            if (a instanceof HorizontalGroup) {
                 //If the child is a block class, ask that nested block to duplicate too
-                PayloadBlock childDupe = new PayloadBlock((Block) a);
+                PayloadBlock childDupe = new PayloadBlock((HorizontalGroup) a);
                 childDupe.setScale(1f);
                 this.addActor(childDupe);
             } else {

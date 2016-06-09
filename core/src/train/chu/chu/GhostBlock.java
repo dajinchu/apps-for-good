@@ -15,7 +15,7 @@ public class GhostBlock extends Container<Label>{
     private final Side side;
     private boolean dragging = false;
     private double dragTime;
-    private Block hoverActor;
+    private LabelBlock hoverActor;
 
     public GhostBlock(Side side, HorizontalGroup expression){
         this.expression = expression;
@@ -26,11 +26,11 @@ public class GhostBlock extends Container<Label>{
         Main.dragAndDrop.addTarget(new DragAndDrop.Target(this) {
             @Override
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                if(!(source.getActor() instanceof Block)){
+                if(!(source.getActor() instanceof LabelBlock)){
                     return false;
                 }
                 dragging = true;
-                hoverActor = (Block)source.getActor();
+                hoverActor = (LabelBlock)source.getActor();
                 return true;
             }
 
@@ -54,11 +54,11 @@ public class GhostBlock extends Container<Label>{
         if(dragging){
             dragTime+=delta;
         }
-        if(dragTime>=Block.HOVER_TIME){
-            Block relative = null;
+        if(dragTime>= LabelBlock.HOVER_TIME){
+            LabelBlock relative = null;
             switch (side){
-                case LEFT : relative = (Block) expression.getChildren().get(0);break;
-                case RIGHT : relative = (Block) expression.getChildren().get(expression.getChildren().size-1);break;
+                case LEFT : relative = (LabelBlock) expression.getChildren().get(0);break;
+                case RIGHT : relative = (LabelBlock) expression.getChildren().get(expression.getChildren().size-1);break;
             }
             if(relative != hoverActor){
                 hoverActor.getNode().move(relative.getNode(), side);

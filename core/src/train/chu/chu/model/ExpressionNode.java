@@ -17,7 +17,7 @@ public class ExpressionNode implements Positioned {
     private final ModelListener listener;
     private float x;
     private float y;
-    private Array<Node> children;
+    private Array<BaseNode> children;
 
     protected ExpressionNode(float x, float y, ModelListener listener) {
         this.x = x;
@@ -52,13 +52,13 @@ public class ExpressionNode implements Positioned {
         this.y = y;
     }
 
-    public Array<Node> getChildren() {
+    public Array<BaseNode> getChildren() {
         return children;
     }
 
     public String getResult(){
         StringBuilder sb = new StringBuilder();
-        for(Node child : getChildren()){
+        for(BaseNode child : getChildren()){
             sb.append(child.getData());
         }
         Expression expression = new ExpressionBuilder(sb.toString()).build();

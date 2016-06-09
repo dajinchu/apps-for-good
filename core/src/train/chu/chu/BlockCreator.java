@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
-import train.chu.chu.model.Node;
+import train.chu.chu.model.BaseNode;
 
 /**
  * Created by Arun on 4/6/2016.
@@ -18,15 +18,15 @@ public class BlockCreator {
      * @param skin the skin
      * @return Block, the block
      */
-    public static Block BlockCreator(Node node, Skin skin){
+    public static LabelBlock BlockCreator(BaseNode node, Skin skin){
 
         String name=node.getData();
 
         //Creates Block
-        Block block;
+        LabelBlock block;
         switch(name){
             default:
-                block = new Block(node);
+                block = new LabelBlock(node);
         }
         block.setTouchable(Touchable.enabled);
         //Creates Label
