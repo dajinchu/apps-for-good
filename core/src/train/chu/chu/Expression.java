@@ -23,11 +23,11 @@ public class Expression extends VerticalGroup {
     public Expression(final ExpressionNode exp) {
         this.setPosition(exp.getX(),exp.getY());
 
-        HorizontalGroup rowWithGhost = new HorizontalGroup();
+        final HorizontalGroup rowWithGhost = new HorizontalGroup();
 
         row = new HorizontalGroup();
-        Actor leftghost = new GhostBlock(Side.LEFT, row);
-        Actor rightghost = new GhostBlock(Side.RIGHT, row);
+        Actor leftghost = new GhostBlock(Side.LEFT, exp);
+        Actor rightghost = new GhostBlock(Side.RIGHT, exp);
 
         rowWithGhost.addActor(leftghost);
         rowWithGhost.addActor(row);
@@ -36,7 +36,7 @@ public class Expression extends VerticalGroup {
         result = new Label("", Main.skin);
         result.setColor(Color.BLACK);
         result.setFontScale(0.5f);
-        this.addActor(row);
+        this.addActor(rowWithGhost);
         this.addActor(result);
 
         DragAndDrop.Source source = new DragAndDrop.Source(result) {
@@ -47,10 +47,14 @@ public class Expression extends VerticalGroup {
                 VerticalGroup dragActor = new VerticalGroup();
                 PayloadBlock actor = new PayloadBlock(row);
                 actor.setScale(1);
-                dragActor.addActor(actor);
+                HorizontalGroup g = new HorizontalGroup();
+                g.addActor(new GhostBlock(Side.LEFT,exp));
+                g.addActor(actor);
+                g.addActor(new GhostBlock(Side.LEFT,exp));
                 Label l = new Label(result.getText().toString(), Main.skin);
                 l.setColor(Color.BLACK);
                 l.setFontScale(.5f);
+                dragActor.addActor(g);
                 dragActor.addActor(l);
                 payload.setDragActor(dragActor);
 

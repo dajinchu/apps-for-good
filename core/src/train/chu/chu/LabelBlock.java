@@ -24,6 +24,16 @@ public class LabelBlock extends HorizontalGroup implements Block {//TODO clean t
 
     private Block hoverActor;
 
+    @Override
+    public void move(BaseNode to, Side side) {
+        node.move(to,side);
+    }
+
+    @Override
+    public void trash() {
+        node.remove();
+    }
+
     private enum TargetState{LEFT,RIGHT,NOT};
     private TargetState targetState = TargetState.NOT;
     private double targetHoverCount = 0;
@@ -130,8 +140,8 @@ public class LabelBlock extends HorizontalGroup implements Block {//TODO clean t
         }
         if(targetHoverCount> HOVER_TIME){
             switch (targetState){
-                case LEFT: hoverActor.getNode().move(this.getNode(), Side.LEFT); break;
-                case RIGHT:hoverActor.getNode().move(this.getNode(), Side.RIGHT);break;
+                case LEFT: hoverActor.move(this.getNode(), Side.LEFT); break;
+                case RIGHT:hoverActor.move(this.getNode(), Side.RIGHT);break;
             }
             targetState = TargetState.NOT;
             targetHoverCount = 0;
@@ -153,7 +163,6 @@ public class LabelBlock extends HorizontalGroup implements Block {//TODO clean t
         //Gdx.app.log(getChildrenString(),"targetable to " + targetable);
     }
 
-    @Override
     public BaseNode getNode(){
         return node;
     }

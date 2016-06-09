@@ -1,22 +1,23 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.*;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 
-import train.chu.chu.model.SelectionContainerNode;
+import train.chu.chu.model.BaseNode;
+import train.chu.chu.model.Model;
+import train.chu.chu.model.Side;
 
 /**
  * Created by Da-Jin on 6/8/2016.
  */
 public class SelectedBlock extends HorizontalGroup implements Block{
 
-    private final SelectionContainerNode node;
+    Model model;
 
-    public SelectedBlock(SelectionContainerNode node){
-        this.node = node;
+    public SelectedBlock(Model model){
+        this.model = model;
         Main.dragAndDrop.addSource(new DragAndDrop.Source(this) {
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
@@ -33,7 +34,12 @@ public class SelectedBlock extends HorizontalGroup implements Block{
     }
 
     @Override
-    public SelectionContainerNode getNode() {
-        return node;
+    public void move(BaseNode to, Side side) {
+        model.moveSelected(to,side);
+    }
+
+    @Override
+    public void trash() {
+        model.removeSelected();
     }
 }

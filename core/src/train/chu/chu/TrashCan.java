@@ -23,7 +23,7 @@ public class TrashCan extends Image {
             public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
                 if(source.getActor() instanceof Block){
                     //Make SURE the source is a block before deleting it, don't want to be deleting keypad buttons
-                    ((Block) source.getActor()).getNode().remove();
+                    ((Block) source.getActor()).trash();
                 }
 
             }

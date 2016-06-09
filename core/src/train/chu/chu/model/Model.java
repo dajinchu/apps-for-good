@@ -12,11 +12,11 @@ public class Model {
     private final ModelListener listener;
     private Array<ExpressionNode> expressions;
 
-    private SelectionContainerNode selection;
+    private Array<BaseNode> selected = new Array<>();
+    private ExpressionNode selectedExpression;
 
     public Model(ModelListener listener){
         expressions = new Array<>();
-        selection = new SelectionContainerNode(listener);
         this.listener = listener;
         ExpressionNode expressionNode = new ExpressionNode(0, 0, listener);
         new BaseNode("142",expressionNode,listener);
@@ -28,8 +28,8 @@ public class Model {
     public Array<ExpressionNode> getExpressions(){
         return expressions;
     }
-    public SelectionContainerNode getSelection(){
-        return selection;
+    public Array<BaseNode> getSelection(){
+        return selected;
     }
 
     public void addBlock(String data, ExpressionNode target){
@@ -43,18 +43,65 @@ public class Model {
     }
 
     public void selectBlocks(Array<BaseNode> selections){
-        selection.setSelection(selections);
+        //Reset selection first
+        for(BaseNode node : selected){
+            node.setSelected(false);
+        }
+        selected.clear();
+        if (selections.size > 0) {
+            //Make sure they are from the same expression
+            //Also get the left and right most nodes
+            selectedExpression = selections.first().getExpression();
+            int leftest = selectedExpression.getChildren().size - 1;
+            int rightest = 0;
+            for (BaseNode node : selections) {
+                if (node.getExpression() != selectedExpression) {
+                    //Node has different parent! Abort!
+                    return;
+                }
+                //Check node expands the selection range by being more right or left
+                int index = selectedExpression.getChildren().indexOf(node, true);
+                if (index < leftest) {
+                    leftest = index;
+                }
+                if (index > rightest) {
+                    rightest = index;
+                }
+            }
+            //Add everything in selection range to the selected array
+            for (int i = leftest; i <= rightest; i++) {
+                BaseNode node = selectedExpression.getChildren().get(i);
+                node.setSelected(true);
+                selected.add(node);
+            }
+        }
+        listener.update();
+    }
+    public void moveSelected(BaseNode to, Side side){
+        if(selected.contains(to, true))return;
+        for(Node node : selected)node.remove();
+        int toIndex = to.getExpression().getChildren().indexOf(to, true)+side.getOffset();
+        for(int i = selected.size-1; i >= 0; i--) {
+            to.getExpression().getChildren().insert(toIndex, selected.get(i));
+            selected.get(i).expression = to.getExpression();
+        }
+        listener.update();
+    }
+    public void removeSelected(){
+        for(BaseNode node : selected){
+            node.remove();
+        }
     }
     public void deselect(){
         selectBlocks(new Array<BaseNode>());
     }
     public void parenthesizeSelected(){
-        if(selection.getSelected().size==0)return;
-        int firstNodeIndex = selection.getExpression().getChildren().indexOf(selection.getFirstNode(), true);
-        Array<BaseNode> selected = new Array<>(selection.getSelected());
-        selected.add(new BaseNode("(",selection.getExpression(),firstNodeIndex, listener));
-        selected.add(new BaseNode(")",selection.getExpression(),firstNodeIndex+selected.size, listener));
-        selectBlocks(selected);
+        if(selected.size==0)return;
+        int firstNodeIndex = selectedExpression.getChildren().indexOf(selected.first(), true);
+        Array<BaseNode> nselected = new Array<>(selected);
+        nselected.add(new BaseNode("(",selectedExpression,firstNodeIndex, listener));
+        nselected.add(new BaseNode(")",selectedExpression, firstNodeIndex+nselected.size, listener));
+        selectBlocks(nselected);
         listener.update();
     }
     public void addExpression(int x, int y) {

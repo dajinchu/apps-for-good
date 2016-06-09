@@ -593,14 +593,14 @@ public class Main extends ApplicationAdapter implements ModelListener{
         Bench.start("sync model");
         calcZone.clear();
         allBlocks.clear();
-        SelectedBlock selectedBlock = new SelectedBlock(model.getSelection());
+        SelectedBlock selectedBlock = new SelectedBlock(model);
         for(ExpressionNode exp : model.getExpressions()){
             Expression expression = new Expression(exp);
             calcZone.addActor(expression);
             for(BaseNode node : exp.getChildren()){
                 LabelBlock block = BlockCreator.BlockCreator(node, skin);
                 allBlocks.add(block);
-                if(node == selectedBlock.getNode().getFirstNode()){
+                if(model.getSelection().size>0 && node == model.getSelection().first()){
                     expression.row.addActor(selectedBlock);
                 }
                 if(node.isSelected()){
@@ -622,7 +622,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         } else {
             undo.getImage().setColor(Color.BLACK);
         }
-        parenthesize.setVisible(model.getSelection().getSelected().size>0);
+        parenthesize.setVisible(model.getSelection().size>0);
         Bench.end("sync model");
     }
 
