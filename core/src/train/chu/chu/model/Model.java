@@ -37,6 +37,11 @@ public class Model {
         listener.update();
     }
 
+    public void insertBlock(String data, ExpressionNode target, int index){
+        new BaseNode(data,target,index,listener);
+        listener.update();
+    }
+
     public void selectBlocks(Array<BaseNode> selections){
         selection.setSelection(selections);
     }
@@ -44,7 +49,13 @@ public class Model {
         selectBlocks(new Array<BaseNode>());
     }
     public void parenthesizeSelected(){
-
+        if(selection.getSelected().size==0)return;
+        int firstNodeIndex = selection.getExpression().getChildren().indexOf(selection.getFirstNode(), true);
+        Array<BaseNode> selected = new Array<>(selection.getSelected());
+        selected.add(new BaseNode("(",selection.getExpression(),firstNodeIndex, listener));
+        selected.add(new BaseNode(")",selection.getExpression(),firstNodeIndex+selected.size, listener));
+        selectBlocks(selected);
+        listener.update();
     }
     public void addExpression(int x, int y) {
 

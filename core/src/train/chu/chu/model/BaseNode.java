@@ -13,10 +13,13 @@ public class BaseNode implements Node {
     boolean selected = false;
 
     protected BaseNode(String data, ExpressionNode expression, ModelListener listener) {
+        this(data, expression, expression.getChildren().size, listener);
+    }
+    protected BaseNode(String data, ExpressionNode expression, int index, ModelListener listener) {
         this.data = data;
         this.expression = expression;
         this.listener = listener;
-        expression.getChildren().add(this);
+        expression.getChildren().insert(index, this);
     }
     protected void setSelected(boolean selected){
         this.selected = selected;

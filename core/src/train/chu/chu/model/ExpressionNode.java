@@ -61,11 +61,12 @@ public class ExpressionNode implements Positioned {
         for(BaseNode child : getChildren()){
             sb.append(child.getData());
         }
-        Expression expression = new ExpressionBuilder(sb.toString()).build();
-        if(expression.validate().isValid()) {
-            return String.valueOf(expression.evaluate());
-        } else {
-            return "false";
-        }
+        try {
+            Expression expression = new ExpressionBuilder(sb.toString()).build();
+            if (expression.validate().isValid()) {
+                return String.valueOf(expression.evaluate());
+            }
+        }catch(Exception e){}
+        return "false";
     }
 }

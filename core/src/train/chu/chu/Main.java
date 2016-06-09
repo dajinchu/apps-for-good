@@ -78,6 +78,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private Model model;
     private boolean landscape;
     private Array<LabelBlock> allBlocks = new Array<>();
+    private Label parenthesize;
 
     public Main(AnalyticsProvider analytics) {
         this.analytics = analytics;
@@ -120,7 +121,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
 
         skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
-
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         this.model = new Model(this);
@@ -162,7 +162,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 //Set selected on the Up event, but NOT if the click location has moved too much
                 if (Math.abs(this.x - x) < 10 && Math.abs(this.y - y) < 10) {
                     Actor hit = stage.hit(x, y, true);
-                    if(hit == null){
+                    boolean hitNothing = hit == null;
+                    boolean hitUnselectedBlock = hit instanceof LabelBlock && !((LabelBlock)hit).getNode().isSelected();
+                    if(hitNothing || hitUnselectedBlock){
                         model.deselect();
                     }
                 }
@@ -353,8 +355,19 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
         });
 
+        parenthesize = new Label("()",skin);
+        parenthesize.setColor(Color.BLACK);
+        parenthesize.setFontScale(.5f);
+        parenthesize.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                model.parenthesizeSelected();
+            }
+        });
+
         //Create the toolbar, keypad toggle, undo/redo buttons
         toolbar = new HorizontalGroup();
+        toolbar.addActor((parenthesize));
         toolbar.addActor(keyPadToggle);
         toolbar.addActor(undo);
         toolbar.addActor(redo);
@@ -461,23 +474,10 @@ public class Main extends ApplicationAdapter implements ModelListener{
             Gdx.gl.glClearColor(1, 1, 1, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-            //Change the color of the redo/undo button to gray if stack is empty.
-            if (model.canRedo()) {//TODO Model should notify whether undo-ability has changed
-                redo.getImage().setColor(Color.GRAY);
-            } else {
-                redo.getImage().setColor(Color.BLACK);
-            }
-
-            if (model.canUndo()) {
-                undo.getImage().setColor(Color.GRAY);
-            } else {
-                undo.getImage().setColor(Color.BLACK);
-            }
-
             //Scene2d. Step forward the world and draw the scene
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
-            stage.setDebugAll(true);
+            //stage.setDebugAll(true);
 
             stage.getBatch().begin();
             stage.getBatch().setColor(Color.BLACK);
@@ -611,6 +611,18 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
             expression.setResult(exp.getResult());
         }
+        //Change the color of the redo/undo button to gray if stack is empty.
+        if (model.canRedo()) {
+            redo.getImage().setColor(Color.GRAY);
+        } else {
+            redo.getImage().setColor(Color.BLACK);
+        }
+        if (model.canUndo()) {
+            undo.getImage().setColor(Color.GRAY);
+        } else {
+            undo.getImage().setColor(Color.BLACK);
+        }
+        parenthesize.setVisible(model.getSelection().getSelected().size>0);
         Bench.end("sync model");
     }
 
