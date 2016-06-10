@@ -38,7 +38,8 @@ public class BaseNode implements Node {
     @Override
     public void moveInto(BlankNode into) {
         this.remove();
-        into.getExpression().getChildren().add(this);
+        int toIndex = into.getExpression().getChildren().indexOf(into, true);
+        into.getExpression().getChildren().insert(toIndex,this);
         this.expression = into.getExpression();
         into.remove();
         model.update();
