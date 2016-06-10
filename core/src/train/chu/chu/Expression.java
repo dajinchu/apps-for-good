@@ -46,7 +46,6 @@ public class Expression extends VerticalGroup {
 
         this.addActor(rowWithGhost);
         this.addActor(resultGroup);
-        this.right();
 
         DragAndDrop.Source source = new DragAndDrop.Source(result) {
 
@@ -55,7 +54,6 @@ public class Expression extends VerticalGroup {
                 setVisible(false);
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 VerticalGroup dragActor = new VerticalGroup();
-                dragActor.right();
                 PayloadBlock actor = new PayloadBlock(row);
                 actor.setScale(1);
                 HorizontalGroup g = new HorizontalGroup();
@@ -63,12 +61,13 @@ public class Expression extends VerticalGroup {
                 g.addActor(actor);
                 g.addActor(new ExternalZone(Side.LEFT,exp));
                 PayloadBlock resultClone = new PayloadBlock(resultGroup);
+                resultClone.setScale(1);
                 dragActor.addActor(g);
                 dragActor.addActor(resultClone);
                 payload.setDragActor(dragActor);
 
                 float scale = ScaleUtils.getTrueScale(Expression.this);
-                Main.dragAndDrop.setDragActorPosition(rowWithGhost.getWidth()*scale/2,
+                Main.dragAndDrop.setDragActorPosition(-dragActor.getWidth()*scale/2,
                         -dragActor.getHeight()*scale/2+dragActor.getHeight()+row.getHeight()*scale);
 
                 dragActor.setScale(scale);
@@ -80,7 +79,7 @@ public class Expression extends VerticalGroup {
                 setVisible(true);
                 Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
                 Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
-                exp.move(pos.x+rowWithGhost.getWidth()/2,pos.y+row.getHeight());
+                exp.move(pos.x,pos.y+row.getHeight());
             }
         };
         Main.dragAndDrop.addSource(source);
