@@ -2,6 +2,8 @@ package train.chu.chu.model;
 
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Iterator;
+
 /**
  * Created by Da-Jin on 6/5/2016.
  * The model operates on the data and exposes it to the view
@@ -18,10 +20,10 @@ public class Model {
     public Model(ModelListener listener){
         expressions = new Array<>();
         this.listener = listener;
-        ExpressionNode expressionNode = new ExpressionNode(0, 0, listener);
-        new BaseNode("6",expressionNode,listener);
-        new BaseNode("*",expressionNode,listener);
-        new BaseNode("7",expressionNode,listener);
+        ExpressionNode expressionNode = new ExpressionNode(0, 0, this);
+        new BaseNode("6",expressionNode,this);
+        new BaseNode("*",expressionNode,this);
+        new BaseNode("7",expressionNode,this);
         expressions.add(expressionNode);
     }
 
@@ -33,15 +35,15 @@ public class Model {
     }
 
     public BaseNode addBlock(String data, ExpressionNode target){
-        BaseNode baseNode = new BaseNode(data, target, listener);
-        listener.update();
+        BaseNode baseNode = new BaseNode(data, target, this);
+        update();
         return baseNode;
     }
 
     public BaseNode insertBlock(String data, ExpressionNode target, BaseNode to, Side side){
-        BaseNode baseNode = new BaseNode(data, target, listener);
+        BaseNode baseNode = new BaseNode(data, target, this);
         baseNode.move(to,side);
-        listener.update();
+        update();
         return baseNode;
     }
 
@@ -78,7 +80,7 @@ public class Model {
                 selected.add(node);
             }
         }
-        listener.update();
+        update();
     }
     public void moveSelected(BaseNode to, Side side){
         if(selected.contains(to, true))return;
@@ -88,7 +90,11 @@ public class Model {
             to.getExpression().getChildren().insert(toIndex, selected.get(i));
             selected.get(i).expression = to.getExpression();
         }
-        listener.update();
+        update();
+    }
+    public void moveSelectedInto(BlankNode into){
+        moveSelected(into,Side.RIGHT);
+        selected.first().moveInto(into);
     }
     public void removeSelected(){
         for(BaseNode node : selected){
@@ -102,13 +108,17 @@ public class Model {
         if(selected.size==0)return;
         int firstNodeIndex = selectedExpression.getChildren().indexOf(selected.first(), true);
         Array<BaseNode> nselected = new Array<>(selected);
-        nselected.add(new BaseNode("(",selectedExpression,firstNodeIndex, listener));
-        nselected.add(new BaseNode(")",selectedExpression, firstNodeIndex+nselected.size, listener));
+        nselected.add(new BaseNode("(",selectedExpression,firstNodeIndex, this));
+        nselected.add(new BaseNode(")",selectedExpression, firstNodeIndex+nselected.size, this));
         selectBlocks(nselected);
-        listener.update();
+        update();
     }
-    public void addExpression(int x, int y) {
-
+    public BlankNode addExpression(float x, float y) {
+        ExpressionNode expressionNode = new ExpressionNode(x, y, this);
+        BlankNode blankNode = new BlankNode(expressionNode, this);
+        expressions.add(expressionNode);
+        update();
+        return blankNode;
     }
     public void removeExpression(ExpressionNode remove){
 
@@ -124,5 +134,18 @@ public class Model {
     }
     public boolean canRedo(){
         return false;
+    }
+
+    protected void update(){
+        validate();
+        listener.update();
+    }
+    private void validate(){
+        Iterator<ExpressionNode> iterator = expressions.iterator();
+        while(iterator.hasNext()){
+            if(iterator.next().getChildren().size==0){
+                iterator.remove();
+            }
+        }
     }
 }

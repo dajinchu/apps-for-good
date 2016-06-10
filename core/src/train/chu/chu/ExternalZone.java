@@ -11,14 +11,14 @@ import train.chu.chu.model.Side;
 /**
  * Created by Da-Jin on 5/20/2016.
  */
-public class GhostBlock extends Container<Label>{
+public class ExternalZone extends Container<Label>{
     private final ExpressionNode expression;
     private final Side side;
     private boolean dragging = false;
     private double dragTime;
     private Block hoverActor;
 
-    public GhostBlock(Side side, ExpressionNode expression){
+    public ExternalZone(Side side, ExpressionNode expression){
         this.expression = expression;
         this.side = side;
         Label label = new Label(" ", Main.skin);

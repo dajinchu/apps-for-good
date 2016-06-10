@@ -63,7 +63,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
-    private WidgetGroup calcZone;
+    public static WidgetGroup calcZone;
 
     private ArrayList<Float[]> circle = new ArrayList<>();
     private Float[] p1, p2;
@@ -585,6 +585,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     }
 
 
+
     private void syncWithModel(){
         Bench.start("sync model");
         calcZone.clear();
@@ -595,7 +596,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             for(BaseNode node : exp.getChildren()){
                 LabelBlock block = blockMap.get(node);
                 if(block==null){
-                    block = BlockCreator.BlockCreator(node, skin);
+                    block = BlockCreator.BlockCreator(node, model);
                     blockMap.put(node, block);
                 }
                 if(model.getSelection().size>0 && node == model.getSelection().first()){

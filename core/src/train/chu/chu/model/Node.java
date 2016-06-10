@@ -6,6 +6,8 @@ package train.chu.chu.model;
 public interface Node {
     void move(BaseNode to, Side side);
 
+    void moveInto(BlankNode into);
+
     void remove();
 
     ExpressionNode getExpression();

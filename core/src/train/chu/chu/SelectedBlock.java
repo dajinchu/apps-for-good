@@ -1,12 +1,13 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 
 import train.chu.chu.model.BaseNode;
+import train.chu.chu.model.BlankNode;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.Side;
 
@@ -22,9 +23,7 @@ public class SelectedBlock extends HorizontalGroup implements Block{
         Main.dragAndDrop.addSource(new DragAndDrop.Source(this) {
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
-                for(Actor block : getChildren()){
-                    block.setVisible(false);
-                }
+                setVisible(false);
 
                 Payload payload = new Payload();
 
@@ -38,8 +37,11 @@ public class SelectedBlock extends HorizontalGroup implements Block{
 
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, Payload payload, DragAndDrop.Target target) {
-                for(Actor block : getChildren()){
-                    block.setVisible(true);
+                setVisible(true);
+                if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
+                    Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
+                    BlankNode blank = model.addExpression(pos.x, pos.y+getHeight()/2);
+                    model.moveSelectedInto(blank);
                 }
             }
         });

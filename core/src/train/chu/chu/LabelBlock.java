@@ -1,6 +1,7 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
 
 import train.chu.chu.model.BaseNode;
+import train.chu.chu.model.BlankNode;
+import train.chu.chu.model.Model;
 import train.chu.chu.model.Side;
 
 /**
@@ -19,6 +22,7 @@ import train.chu.chu.model.Side;
 public class LabelBlock extends Container<Label> implements Block {//TODO clean this class the fuck up (restart?)
 
     private final BaseNode node;
+    private final Model model;
     protected DragAndDrop dad;
     //Center rect is the detection area for getting out of the way, or merging blocks
     public static final double HOVER_TIME =.08;
@@ -77,6 +81,11 @@ public class LabelBlock extends Container<Label> implements Block {//TODO clean 
             //Drag stopped. Wherever block ended up, make it visible again. Payload is automatically
             // destroyed by DragAndDrop
             LabelBlock.this.setVisible(true);
+            if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
+                Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
+                BlankNode blank = model.addExpression(pos.x, pos.y+getHeight()/2);
+                node.moveInto(blank);
+            }
         }
     }
     protected Source source = new BlockSource(this);
@@ -126,8 +135,9 @@ public class LabelBlock extends Container<Label> implements Block {//TODO clean 
     };
 
 
-    public LabelBlock(BaseNode node) {
+    public LabelBlock(BaseNode node, Model model) {
         this.dad = Main.dragAndDrop;
+        this.model = model;
         this.node = node;
     }
 

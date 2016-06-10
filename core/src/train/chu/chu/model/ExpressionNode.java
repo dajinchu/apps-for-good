@@ -14,22 +14,22 @@ import net.objecthunter.exp4j.ExpressionBuilder;
  */
 public class ExpressionNode implements Positioned {
 
-    private final ModelListener listener;
+    private final Model model;
     private float x;
     private float y;
     private Array<BaseNode> children;
 
-    protected ExpressionNode(float x, float y, ModelListener listener) {
+    protected ExpressionNode(float x, float y, Model model) {
         this.x = x;
         this.y = y;
-        this.listener = listener;
+        this.model = model;
         this.children = new Array<>();
     }
 
     public void move(float x, float y){
         this.x=x;
         this.y=y;
-        listener.update();
+        model.update();
     }
 
     @Override

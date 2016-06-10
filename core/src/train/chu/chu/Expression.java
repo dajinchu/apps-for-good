@@ -2,6 +2,7 @@ package train.chu.chu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
@@ -26,8 +27,8 @@ public class Expression extends VerticalGroup {
         final HorizontalGroup rowWithGhost = new HorizontalGroup();
 
         row = new HorizontalGroup();
-        Actor leftghost = new GhostBlock(Side.LEFT, exp);
-        Actor rightghost = new GhostBlock(Side.RIGHT, exp);
+        Actor leftghost = new ExternalZone(Side.LEFT, exp);
+        Actor rightghost = new ExternalZone(Side.RIGHT, exp);
 
         rowWithGhost.addActor(leftghost);
         rowWithGhost.addActor(row);
@@ -48,9 +49,9 @@ public class Expression extends VerticalGroup {
                 PayloadBlock actor = new PayloadBlock(row);
                 actor.setScale(1);
                 HorizontalGroup g = new HorizontalGroup();
-                g.addActor(new GhostBlock(Side.LEFT,exp));
+                g.addActor(new ExternalZone(Side.LEFT,exp));
                 g.addActor(actor);
-                g.addActor(new GhostBlock(Side.LEFT,exp));
+                g.addActor(new ExternalZone(Side.LEFT,exp));
                 Label l = new Label(result.getText().toString(), Main.skin);
                 l.setColor(Color.BLACK);
                 l.setFontScale(.5f);
@@ -69,8 +70,8 @@ public class Expression extends VerticalGroup {
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
                 Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
-                exp.move((event.getStageX()-getParent().getX())/getParent().getScaleX(),
-                        (event.getStageY()-getParent().getY())/getParent().getScaleX()+result.getHeight());
+                Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
+                exp.move(pos.x,pos.y+result.getHeight());
             }
         };
         Main.dragAndDrop.addSource(source);
