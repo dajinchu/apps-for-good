@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -77,8 +78,10 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private int prevtabNum;
     private Model model;
     private boolean landscape;
-    private Array<LabelBlock> allBlocks = new Array<>();
     private Label parenthesize;
+
+    private HashMap<BaseNode, LabelBlock> blockMap = new HashMap<>();
+    private SelectedBlock selectedBlock;
 
     public Main(AnalyticsProvider analytics) {
         this.analytics = analytics;
@@ -124,6 +127,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
         this.model = new Model(this);
+        selectedBlock = new SelectedBlock(model);
 
         //Instantiate Stage for scene2d management
         stage = new Stage();
@@ -214,7 +218,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
                         float area;
                         //Put the overlap areas into a hash map, associating area with blocks
                         Bench.start("intersect");
-                        for (Actor actor : allBlocks) {
+                        for (Actor actor : blockMap.values()) {
                             if (actor instanceof LabelBlock) {//We know they will be blocks, but make sure
                                 v1 = actor.localToStageCoordinates(tmpA.set(0, 0));
                                 v2 = actor.localToStageCoordinates(tmpB.set(actor.getWidth(), 0));
@@ -574,14 +578,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 y += i - 1;
 
                 //Make Button, create block at end of row if clicked.
-                Actor inputButton = ButtonCreator.ButtonCreator(buttonTxt, skin);
-                keypad.add(inputButton).width(i * size).height(size).colspan(i);
-                inputButton.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float z, float y) {
-                        model.addBlock(buttonTxt,model.getExpressions().first());//TODO cursor
-                    }
-                });
+                Container inputButton = new KeypadButton(buttonTxt, model);
+                inputButton.width(i * size).height(size);
+                keypad.add(inputButton).colspan(i);
             }
             keypad.row();
         }
@@ -592,20 +591,26 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private void syncWithModel(){
         Bench.start("sync model");
         calcZone.clear();
-        allBlocks.clear();
-        SelectedBlock selectedBlock = new SelectedBlock(model);
+        selectedBlock.clearChildren();
         for(ExpressionNode exp : model.getExpressions()){
             Expression expression = new Expression(exp);
             calcZone.addActor(expression);
             for(BaseNode node : exp.getChildren()){
-                LabelBlock block = BlockCreator.BlockCreator(node, skin);
-                allBlocks.add(block);
+                LabelBlock block = blockMap.get(node);
+                if(block==null){
+                    block = BlockCreator.BlockCreator(node, skin);
+                    blockMap.put(node, block);
+                }
                 if(model.getSelection().size>0 && node == model.getSelection().first()){
                     expression.row.addActor(selectedBlock);
                 }
+                block.setDraggable(!node.isSelected());
+                block.setTargetable(!node.isSelected());
                 if(node.isSelected()){
                     selectedBlock.addActor(block);
+                    block.getActor().setColor(Color.BLUE);
                 } else {
+                    block.getActor().setColor(Color.BLACK);
                     expression.row.addActor(block);
                 }
             }

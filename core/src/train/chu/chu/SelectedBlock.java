@@ -1,5 +1,6 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -16,11 +17,15 @@ public class SelectedBlock extends HorizontalGroup implements Block{
 
     Model model;
 
-    public SelectedBlock(Model model){
+    public SelectedBlock(final Model model){
         this.model = model;
         Main.dragAndDrop.addSource(new DragAndDrop.Source(this) {
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
+                for(Actor block : getChildren()){
+                    block.setVisible(false);
+                }
+
                 Payload payload = new Payload();
 
                 PayloadBlock dragActor = new PayloadBlock(SelectedBlock.this);
@@ -29,6 +34,13 @@ public class SelectedBlock extends HorizontalGroup implements Block{
                 Main.dragAndDrop.setDragActorPosition(-dragActor.getWidth()*scale/2,
                         -dragActor.getHeight()*scale/2+dragActor.getHeight());
                 return payload;
+            }
+
+            @Override
+            public void dragStop(InputEvent event, float x, float y, int pointer, Payload payload, DragAndDrop.Target target) {
+                for(Actor block : getChildren()){
+                    block.setVisible(true);
+                }
             }
         });
     }

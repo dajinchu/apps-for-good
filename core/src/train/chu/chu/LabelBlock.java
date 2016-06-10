@@ -3,7 +3,8 @@ package train.chu.chu;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
@@ -15,7 +16,7 @@ import train.chu.chu.model.Side;
 /**
  * Created by Da-Jin on 3/9/2016.
  */
-public class LabelBlock extends HorizontalGroup implements Block {//TODO clean this class the fuck up (restart?)
+public class LabelBlock extends Container<Label> implements Block {//TODO clean this class the fuck up (restart?)
 
     private final BaseNode node;
     protected DragAndDrop dad;
@@ -128,8 +129,6 @@ public class LabelBlock extends HorizontalGroup implements Block {//TODO clean t
     public LabelBlock(BaseNode node) {
         this.dad = Main.dragAndDrop;
         this.node = node;
-        setDraggable(!node.isSelected());
-        setTargetable(!node.isSelected());
     }
 
     @Override

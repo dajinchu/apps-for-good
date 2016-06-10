@@ -19,9 +19,9 @@ public class Model {
         expressions = new Array<>();
         this.listener = listener;
         ExpressionNode expressionNode = new ExpressionNode(0, 0, listener);
-        new BaseNode("142",expressionNode,listener);
+        new BaseNode("6",expressionNode,listener);
         new BaseNode("*",expressionNode,listener);
-        new BaseNode("5",expressionNode,listener);
+        new BaseNode("7",expressionNode,listener);
         expressions.add(expressionNode);
     }
 
@@ -32,14 +32,17 @@ public class Model {
         return selected;
     }
 
-    public void addBlock(String data, ExpressionNode target){
-        new BaseNode(data,target,listener);
+    public BaseNode addBlock(String data, ExpressionNode target){
+        BaseNode baseNode = new BaseNode(data, target, listener);
         listener.update();
+        return baseNode;
     }
 
-    public void insertBlock(String data, ExpressionNode target, int index){
-        new BaseNode(data,target,index,listener);
+    public BaseNode insertBlock(String data, ExpressionNode target, BaseNode to, Side side){
+        BaseNode baseNode = new BaseNode(data, target, listener);
+        baseNode.move(to,side);
         listener.update();
+        return baseNode;
     }
 
     public void selectBlocks(Array<BaseNode> selections){

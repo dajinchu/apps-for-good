@@ -34,8 +34,7 @@ public class BlockCreator {
         second.setFontScale(FONT_SCALE);
         second.setTouchable(Touchable.disabled);
         second.setColor(Color.BLACK);
-        block.addActor(second);
-        if(node.isSelected())second.setColor(Color.BLUE);
+        block.setActor(second);
         //Returns Block
         return block;
     }
