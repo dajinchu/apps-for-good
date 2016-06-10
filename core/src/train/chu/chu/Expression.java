@@ -33,11 +33,20 @@ public class Expression extends VerticalGroup {
         rowWithGhost.addActor(row);
         rowWithGhost.addActor(rightghost);
 
+        final HorizontalGroup resultGroup = new HorizontalGroup();
         result = new Label("", Main.skin);
-        result.setColor(Color.BLACK);
-        result.setFontScale(0.5f);
+        result.setColor(Color.GRAY);
+        result.setFontScale(0.25f);
+        Label equalSign = new Label("=", Main.skin);
+        equalSign.setColor(Color.GRAY);
+        equalSign.setFontScale(0.25f);
+
+        resultGroup.addActor(equalSign);
+        resultGroup.addActor(result);
+
         this.addActor(rowWithGhost);
-        this.addActor(result);
+        this.addActor(resultGroup);
+        this.right();
 
         DragAndDrop.Source source = new DragAndDrop.Source(result) {
 
@@ -46,22 +55,21 @@ public class Expression extends VerticalGroup {
                 setVisible(false);
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 VerticalGroup dragActor = new VerticalGroup();
+                dragActor.right();
                 PayloadBlock actor = new PayloadBlock(row);
                 actor.setScale(1);
                 HorizontalGroup g = new HorizontalGroup();
                 g.addActor(new ExternalZone(Side.LEFT,exp));
                 g.addActor(actor);
                 g.addActor(new ExternalZone(Side.LEFT,exp));
-                Label l = new Label(result.getText().toString(), Main.skin);
-                l.setColor(Color.BLACK);
-                l.setFontScale(.5f);
+                PayloadBlock resultClone = new PayloadBlock(resultGroup);
                 dragActor.addActor(g);
-                dragActor.addActor(l);
+                dragActor.addActor(resultClone);
                 payload.setDragActor(dragActor);
 
                 float scale = ScaleUtils.getTrueScale(Expression.this);
-                Main.dragAndDrop.setDragActorPosition(-dragActor.getWidth()*scale/2,
-                        -dragActor.getHeight()*scale/2+dragActor.getHeight()+result.getHeight()*scale);
+                Main.dragAndDrop.setDragActorPosition(rowWithGhost.getWidth()*scale/2,
+                        -dragActor.getHeight()*scale/2+dragActor.getHeight()+row.getHeight()*scale);
 
                 dragActor.setScale(scale);
                 return payload;
@@ -72,7 +80,7 @@ public class Expression extends VerticalGroup {
                 setVisible(true);
                 Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
                 Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
-                exp.move(pos.x,pos.y+result.getHeight());
+                exp.move(pos.x+rowWithGhost.getWidth()/2,pos.y+row.getHeight());
             }
         };
         Main.dragAndDrop.addSource(source);
