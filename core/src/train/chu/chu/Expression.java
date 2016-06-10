@@ -22,7 +22,6 @@ public class Expression extends VerticalGroup {
     private Label result;
 
     public Expression(final ExpressionNode exp) {
-        this.setPosition(exp.getX(),exp.getY());
 
         final HorizontalGroup rowWithGhost = new HorizontalGroup();
 
@@ -44,6 +43,7 @@ public class Expression extends VerticalGroup {
 
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
+                setVisible(false);
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 VerticalGroup dragActor = new VerticalGroup();
                 PayloadBlock actor = new PayloadBlock(row);
@@ -69,6 +69,7 @@ public class Expression extends VerticalGroup {
 
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
+                setVisible(true);
                 Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
                 Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
                 exp.move(pos.x,pos.y+result.getHeight());

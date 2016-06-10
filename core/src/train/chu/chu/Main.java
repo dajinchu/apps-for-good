@@ -81,6 +81,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private Label parenthesize;
 
     private HashMap<BaseNode, LabelBlock> blockMap = new HashMap<>();
+    private HashMap<ExpressionNode, Expression> expressionMap = new HashMap<>();
     private SelectedBlock selectedBlock;
 
     public Main(AnalyticsProvider analytics) {
@@ -591,8 +592,14 @@ public class Main extends ApplicationAdapter implements ModelListener{
         calcZone.clear();
         selectedBlock.clearChildren();
         for(ExpressionNode exp : model.getExpressions()){
-            Expression expression = new Expression(exp);
+            Expression expression = expressionMap.get(exp);
+            if(expression==null) {
+                expression=new Expression(exp);
+                expressionMap.put(exp,expression);
+            }
             calcZone.addActor(expression);
+            expression.row.clearChildren();
+            expression.setPosition(exp.getX(),exp.getY());
             for(BaseNode node : exp.getChildren()){
                 LabelBlock block = blockMap.get(node);
                 if(block==null){
