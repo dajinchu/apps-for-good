@@ -80,6 +80,7 @@ public class LabelBlock extends Container<Label> implements Block {//TODO clean 
         public void dragStop(InputEvent event, float x, float y, int pointer, Payload payload, Target target) {
             //Drag stopped. Wherever block ended up, make it visible again. Payload is automatically
             // destroyed by DragAndDrop
+            if(getStage()==null)return;
             LabelBlock.this.setVisible(true);
             if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
                 Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());

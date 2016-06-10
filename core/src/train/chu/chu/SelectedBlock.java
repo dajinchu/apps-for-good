@@ -37,6 +37,7 @@ public class SelectedBlock extends HorizontalGroup implements Block{
 
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, Payload payload, DragAndDrop.Target target) {
+                if(getStage()==null)return;
                 setVisible(true);
                 if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
                     Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
