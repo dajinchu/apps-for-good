@@ -2,6 +2,7 @@ package train.chu.chu;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -26,6 +27,8 @@ public class KeypadButton extends Container<TextButton> implements Block{
         this.text = text;
         TextButton tmp = new TextButton(text, Main.skin);
         tmp.getLabel().setFontScale(.36f);
+        setTouchable(Touchable.enabled);
+        tmp.setTouchable(Touchable.disabled);
         setActor(tmp);
         addListener(new ClickListener() {
             @Override

@@ -151,27 +151,24 @@ public class Main extends ApplicationAdapter implements ModelListener{
         stage.addActor(calcZone);
 
         stage.addListener(new ClickListener() {
-            public float x, y;
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 //track touch down location.. TODO maybe change this to also track time?
-                this.x = x;
-                this.y = y;
+
+                Actor hit = stage.hit(x, y, true);
+                boolean hitNothing = hit == null;
+                boolean hitUnselectedBlock = hit instanceof LabelBlock && !((LabelBlock)hit).getNode().isSelected();
+                boolean hitKeypad = hit instanceof KeypadButton;
+                if(hit !=null)Gdx.app.log("Main", hit.toString());
+                if(hitNothing || hitUnselectedBlock || hitKeypad){
+                    model.deselect();
+                }
                 return true;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                //Set selected on the Up event, but NOT if the click location has moved too much
-                if (Math.abs(this.x - x) < 10 && Math.abs(this.y - y) < 10) {
-                    Actor hit = stage.hit(x, y, true);
-                    boolean hitNothing = hit == null;
-                    boolean hitUnselectedBlock = hit instanceof LabelBlock && !((LabelBlock)hit).getNode().isSelected();
-                    if(hitNothing || hitUnselectedBlock){
-                        model.deselect();
-                    }
-                }
             }
         });
         stage.addListener(new ActorGestureListener() {
