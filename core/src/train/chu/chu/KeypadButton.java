@@ -1,6 +1,7 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
 import train.chu.chu.model.BaseNode;
+import train.chu.chu.model.BlankNode;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.Node;
 import train.chu.chu.model.Side;
@@ -53,7 +55,15 @@ public class KeypadButton extends Container<TextButton> implements Block{
 
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
-                insert = null;
+                if(getStage()==null){
+                    insert = null;
+                    return;
+                }
+                if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
+                    Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
+                    BlankNode blank = model.addExpression(pos.x, pos.y+getHeight()/2);
+                    model.addBlock(text,blank.getExpression()).moveInto(blank);
+                }
             }
         });
     }
