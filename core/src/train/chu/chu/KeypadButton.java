@@ -39,10 +39,12 @@ public class KeypadButton extends Container<TextButton> implements Block{
             }
         });
         Main.dragAndDrop.addSource(new DragAndDrop.Source(this) {
+            public Label clone;
+
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
-                Label clone = new Label(text, Main.skin);
+                clone = new Label(text, Main.skin);
                 clone.setFontScale(BlockCreator.FONT_SCALE);
                 clone.setColor(Color.BLACK);
                 Container<Label> dragActor = new Container<>(clone);
@@ -61,7 +63,7 @@ public class KeypadButton extends Container<TextButton> implements Block{
                 }
                 if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
                     Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
-                    BlankNode blank = model.addExpression(pos.x, pos.y+getHeight()/2);
+                    BlankNode blank = model.addExpression(pos.x,pos.y-clone.getMinHeight()/4);
                     model.addBlock(text,blank.getExpression()).moveInto(blank);
                 }
             }

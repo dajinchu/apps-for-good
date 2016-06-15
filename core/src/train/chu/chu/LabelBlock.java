@@ -84,7 +84,7 @@ public class LabelBlock extends Container<Label> implements Block {//TODO clean 
             LabelBlock.this.setVisible(true);
             if(getStage().hit(event.getStageX(),event.getStageY(),true)==null){
                 Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
-                BlankNode blank = model.addExpression(pos.x, pos.y+getHeight()/2);
+                BlankNode blank = model.addExpression(pos.x, pos.y-getMinHeight()/4);
                 node.moveInto(blank);
             }
         }

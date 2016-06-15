@@ -1,6 +1,5 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -46,7 +45,6 @@ public class ActorGestureResizer extends ActorGestureListener {
         previousInitial = initialDistance;
     }
     public void panCam(float deltaX, float deltaY) {
-        Gdx.app.log("Controller",deltaX+", "+deltaY);
         actor.moveBy(-deltaX, deltaY);
         clamp();
     }

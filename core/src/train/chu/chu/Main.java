@@ -473,7 +473,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             setup();
         } else {
             //Wipe the screen clean with a white clear color
-            Gdx.gl.glClearColor(1, 1, 1, 1);
+            Gdx.gl.glClearColor(.9294f, .9294f, .9294f, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
             //Scene2d. Step forward the world and draw the scene
@@ -554,10 +554,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
 
     public void keyPadGenerator(String[][] keys) {
-
         //Clear the existing keypad
         keypad.clear();
-
 
         //Keypad generator
         for (int x = 0; x < keys.length; x++) {
@@ -585,8 +583,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
     }
 
-
-
     private void syncWithModel(){
         Bench.start("sync model");
         calcZone.clear();
@@ -599,7 +595,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
             calcZone.addActor(expression);
             expression.row.clearChildren();
-            expression.setPosition(exp.getX(),exp.getY());
             for(BaseNode node : exp.getChildren()){
                 LabelBlock block = blockMap.get(node);
                 if(block==null){
@@ -620,6 +615,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 }
             }
             expression.setResult(exp.getResult());
+            expression.setPosition(exp.getX()-expression.getPrefWidth()/2,exp.getY()-expression.getPrefHeight()/2);
         }
         //Change the color of the redo/undo button to gray if stack is empty.
         if (model.canRedo()) {
