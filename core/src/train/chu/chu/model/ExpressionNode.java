@@ -32,6 +32,11 @@ public class ExpressionNode implements Positioned {
         model.update();
     }
 
+    public void remove(){
+        model.getExpressions().removeValue(this,true);
+        model.update();
+    }
+
     @Override
     public float getX() {
         return x;

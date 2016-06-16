@@ -120,9 +120,6 @@ public class Model {
         update();
         return blankNode;
     }
-    public void removeExpression(ExpressionNode remove){
-
-    }
     public void undo(){
 
     }

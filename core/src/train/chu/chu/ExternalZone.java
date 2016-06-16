@@ -16,7 +16,7 @@ public class ExternalZone extends Container<Label>{
     private final Side side;
     private boolean dragging = false;
     private double dragTime;
-    private Block hoverActor;
+    private BlockSource hoverSource;
 
     public ExternalZone(Side side, ExpressionNode expression){
         this.expression = expression;
@@ -27,11 +27,11 @@ public class ExternalZone extends Container<Label>{
         Main.dragAndDrop.addTarget(new DragAndDrop.Target(this) {
             @Override
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                if(!(source.getActor() instanceof Block)){
+                if(!(source instanceof BlockSource)){
                     return false;
                 }
                 dragging = true;
-                hoverActor = (Block)source.getActor();
+                hoverSource = (BlockSource) source;
                 return true;
             }
 
@@ -61,9 +61,7 @@ public class ExternalZone extends Container<Label>{
                 case LEFT : relative = expression.getChildren().get(0);break;
                 case RIGHT : relative = expression.getChildren().get(expression.getChildren().size-1);break;
             }
-            if(relative != hoverActor){
-                hoverActor.move(relative, side);
-            }
+            hoverSource.move(relative, side);
             dragging = false;
             dragTime = 0;
         }
