@@ -53,6 +53,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private Table rootTable;
     private ImageButton redo;
     private ImageButton undo;
+    private ImageButton parenthesize;
+    private ImageButton addExpression;
     private Table keypad;
     private Table keyPadTabs;
     private int tabNum;
@@ -78,7 +80,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private int prevtabNum;
     private Model model;
     private boolean landscape;
-    private Label parenthesize;
+
 
     private HashMap<BaseNode, LabelBlock> blockMap = new HashMap<>();
     private HashMap<ExpressionNode, Expression> expressionMap = new HashMap<>();
@@ -109,17 +111,27 @@ public class Main extends ApplicationAdapter implements ModelListener{
         Drawable redoImg;
         final Drawable keytogsUp;
         final Drawable keytogsDown;
+        Drawable parenthesis;
+        Drawable expression;
         if (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) < 1000) {
             undoImg = new Image(new Texture("undo.png")).getDrawable();
             redoImg = new Image(new Texture("redo.png")).getDrawable();
             keytogsDown = new Image(new Texture("upArrow.png")).getDrawable();
             keytogsUp = new Image(new Texture("downArrow.png")).getDrawable();
+            parenthesis= new Image(new Texture("parenthesis.png")).getDrawable();
+            parenthesis.setMinWidth(70);
+            parenthesis.setMinHeight(75);
+            expression = new Image(new Texture("newExp.png")).getDrawable();
             skin.add("delete", new Texture("delete.png"));
         } else {
             undoImg = new Image(new Texture("undoLarge.png")).getDrawable();
             redoImg = new Image(new Texture("redoLarge.png")).getDrawable();
             keytogsDown = new Image(new Texture("upArrowLarge.png")).getDrawable();
             keytogsUp = new Image(new Texture("downArrowLarge.png")).getDrawable();
+            parenthesis= new Image(new Texture("parenthesis.png")).getDrawable();
+            parenthesis.setMinWidth(125);
+            parenthesis.setMinHeight(135);
+            expression = new Image(new Texture("newExpLarge.png")).getDrawable();
             skin.add("delete", new Texture("deleteLarge.png"));
         }
 
@@ -306,7 +318,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
         trashCan.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                //TODO
+                model.getExpressions().clear();
+                syncWithModel();
             }
         });
 
@@ -330,6 +343,13 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
         });
 
+        addExpression=new ImageButton(expression);
+        addExpression.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                model.addExpression(50, 50);
+            }
+        });
         //Key Pad toggle button
 
         final ImageButton keyPadToggle = new ImageButton(keytogsUp, keytogsDown, keytogsDown);
@@ -357,9 +377,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
         });
 
-        parenthesize = new Label("()",skin);
-        parenthesize.setColor(Color.BLACK);
-        parenthesize.setFontScale(.5f);
+
+        parenthesize= new ImageButton(parenthesis);
+
         parenthesize.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -370,6 +390,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         //Create the toolbar, keypad toggle, undo/redo buttons
         toolbar = new HorizontalGroup();
         toolbar.addActor((parenthesize));
+        toolbar.addActor(addExpression);
         toolbar.addActor(keyPadToggle);
         toolbar.addActor(undo);
         toolbar.addActor(redo);
@@ -630,6 +651,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         }
         parenthesize.setVisible(model.getSelection().size>0);
         Bench.end("sync model");
+
     }
 
     @Override

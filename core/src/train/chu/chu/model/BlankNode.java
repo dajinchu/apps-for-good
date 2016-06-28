@@ -5,6 +5,6 @@ package train.chu.chu.model;
  */
 public class BlankNode extends BaseNode {
     protected BlankNode(ExpressionNode expressionNode, Model model){
-        super(" ",expressionNode,model);
+        super("",expressionNode,model);
     }
 }
