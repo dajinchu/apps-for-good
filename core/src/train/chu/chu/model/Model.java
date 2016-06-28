@@ -20,11 +20,7 @@ public class Model {
     public Model(ModelListener listener){
         expressions = new Array<>();
         this.listener = listener;
-        ExpressionNode expressionNode = new ExpressionNode(0, 0, this);
-        new BaseNode("6",expressionNode,this);
-        new BaseNode("*",expressionNode,this);
-        new BaseNode("7",expressionNode,this);
-        expressions.add(expressionNode);
+
     }
 
     public Array<ExpressionNode> getExpressions(){

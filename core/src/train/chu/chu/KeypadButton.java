@@ -35,7 +35,7 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             public void clicked(InputEvent event, float z, float y) {
                 if(model.getExpressions().size==0){
-                    model.addExpression(50,50);
+                    model.addExpression(0,0);
 
                 }
                 model.addBlock(text,model.getExpressions().first());
