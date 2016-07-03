@@ -17,14 +17,15 @@ public class Model {
     private Array<BaseNode> selected = new Array<>();
     private ExpressionNode selectedExpression;
 
+    private InsertionPoint insertionPoint;
+
     public Model(ModelListener listener){
         expressions = new Array<>();
         this.listener = listener;
         ExpressionNode expressionNode = new ExpressionNode(0, 0, this);
-        new BaseNode("6",expressionNode,this);
-        new BaseNode("*",expressionNode,this);
-        new BaseNode("7",expressionNode,this);
         expressions.add(expressionNode);
+        insertionPoint = new InsertionPoint(expressionNode, this);
+
     }
 
     public Array<ExpressionNode> getExpressions(){
@@ -33,17 +34,18 @@ public class Model {
     public Array<BaseNode> getSelection(){
         return selected;
     }
+    public InsertionPoint getInsertionPoint(){
+        return insertionPoint;
+    }
 
     public BaseNode addBlock(String data, ExpressionNode target){
-        BaseNode baseNode = new BaseNode(data, target, this);
-        update();
+        BaseNode baseNode = insertBlock(data,target,insertionPoint,Side.LEFT);
         return baseNode;
     }
 
     public BaseNode insertBlock(String data, ExpressionNode target, BaseNode to, Side side){
         BaseNode baseNode = new BaseNode(data, target, this);
         baseNode.move(to,side);
-        update();
         return baseNode;
     }
 
@@ -90,7 +92,7 @@ public class Model {
             to.getExpression().getChildren().insert(toIndex, selected.get(i));
             selected.get(i).expression = to.getExpression();
         }
-        update();
+        insertionPoint.move(selected.get(selected.size-1),Side.RIGHT);
     }
     public void moveSelectedInto(BlankNode into){
         moveSelected(into,Side.RIGHT);
@@ -117,7 +119,7 @@ public class Model {
         ExpressionNode expressionNode = new ExpressionNode(x, y, this);
         BlankNode blankNode = new BlankNode(expressionNode, this);
         expressions.add(expressionNode);
-        update();
+        insertionPoint.move(blankNode,Side.RIGHT);
         return blankNode;
     }
     public void undo(){

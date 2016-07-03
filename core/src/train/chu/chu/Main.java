@@ -41,6 +41,7 @@ import java.util.HashMap;
 
 import train.chu.chu.model.BaseNode;
 import train.chu.chu.model.ExpressionNode;
+import train.chu.chu.model.InsertionPoint;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.ModelListener;
 
@@ -596,6 +597,10 @@ public class Main extends ApplicationAdapter implements ModelListener{
             calcZone.addActor(expression);
             expression.row.clearChildren();
             for(BaseNode node : exp.getChildren()){
+                if(node instanceof InsertionPoint){
+                    expression.row.addActor(new Cursor());
+                    continue;
+                }
                 LabelBlock block = blockMap.get(node);
                 if(block==null){
                     block = BlockCreator.BlockCreator(node, model);
