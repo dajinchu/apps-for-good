@@ -131,15 +131,12 @@ public class Main extends ApplicationAdapter implements ModelListener{
         this.model = new Model(this);
         selectedBlock = new SelectedBlock(model);
 
+        dragAndDrop.setDragTime(500);
+
         //Instantiate Stage for scene2d management
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
 
-
-        //Add a root table.
-        rootTable = new Table();
-        rootTable.setFillParent(true);
-        stage.addActor(rootTable);
         //Add a root table.
         rootTable = new Table();
         rootTable.setFillParent(true);
@@ -149,7 +146,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         calcZone.setFillParent(true);
         calcZone.setTouchable(Touchable.childrenOnly);
 
-        stage.addListener(new ActorGestureResizer(stage.getCamera(), calcZone, new Vector2(1000, 1000)));
+        stage.addListener(new ActorGestureResizer(stage, calcZone, new Vector2(1000, 1000)));
         stage.addActor(calcZone);
 
         stage.addListener(new ClickListener() {
