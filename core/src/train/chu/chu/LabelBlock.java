@@ -1,9 +1,11 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
@@ -74,7 +76,7 @@ public class LabelBlock extends Container<Label> {
     };
 
 
-    public LabelBlock(final BaseNode node, Model model) {
+    public LabelBlock(final BaseNode node, final Model model) {
         this.dad = Main.dragAndDrop;
         this.model = model;
         this.node = node;
@@ -99,6 +101,17 @@ public class LabelBlock extends Container<Label> {
                 node.remove();
             }
         };
+
+        addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if(x<getWidth()/2){
+                    model.getInsertionPoint().move(node,Side.LEFT);
+                }else{
+                    model.getInsertionPoint().move(node,Side.RIGHT);
+                }
+            }
+        });
     }
 
     @Override

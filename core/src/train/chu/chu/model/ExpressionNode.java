@@ -1,5 +1,6 @@
 package train.chu.chu.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StringBuilder;
 
@@ -35,6 +36,18 @@ public class ExpressionNode implements Positioned {
     public void remove(){
         model.getExpressions().removeValue(this,true);
         model.update();
+
+        //Insertion point should always be somewhere
+        //It may be a good idea to move this to model.update, but this is the only known point where
+        // insertionPoint can be trashed
+        Gdx.app.log("Insert",model.getExpressions().first().getResult());
+        boolean insertionInExistence = model.getExpressions().contains(model.getInsertionPoint().getExpression(), true);
+        if(!insertionInExistence) {
+            model.getInsertionPoint().move(model.getExpressions().first().getChildren().peek(), Side.RIGHT);
+        }
+
+        //Additionally, trashing the whole expression can leave the selection on non-existent things
+        model.deselect();
     }
 
     @Override

@@ -32,7 +32,7 @@ public class BaseNode implements Node {
         int toIndex = to.getExpression().getChildren().indexOf(to, true)+side.getOffset();
         to.getExpression().getChildren().insert(toIndex,this);
         this.expression = to.getExpression();
-        model.update();
+        model.getInsertionPoint().move(this,Side.RIGHT);
     }
 
     @Override
