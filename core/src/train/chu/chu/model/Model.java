@@ -148,7 +148,4 @@ public class Model {
         }
     }
 
-    public void saveModel(){
-
-    }
 }
