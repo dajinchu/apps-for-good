@@ -56,6 +56,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private ImageButton undo;
     private ImageButton parenthesize;
     private ImageButton addExpression;
+    private ImageButton backSpace;
     private Table keypad;
     private Table keyPadTabs;
     private int tabNum;
@@ -82,6 +83,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private Model model;
     private boolean landscape;
 
+    private HorizontalGroup toolbarLeft;
 
     private HashMap<BaseNode, LabelBlock> blockMap = new HashMap<>();
     private HashMap<ExpressionNode, Expression> expressionMap = new HashMap<>();
@@ -114,6 +116,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         final Drawable keytogsDown;
         Drawable parenthesis;
         Drawable expression;
+        Drawable backspaceImg;
         if (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) < 1000) {
             undoImg = new Image(new Texture("undo.png")).getDrawable();
             redoImg = new Image(new Texture("redo.png")).getDrawable();
@@ -123,6 +126,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             parenthesis.setMinWidth(70);
             parenthesis.setMinHeight(75);
             expression = new Image(new Texture("newExp.png")).getDrawable();
+            backspaceImg=new Image(new Texture("backspace.png")).getDrawable();
             skin.add("delete", new Texture("delete.png"));
         } else {
             undoImg = new Image(new Texture("undoLarge.png")).getDrawable();
@@ -133,6 +137,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             parenthesis.setMinWidth(125);
             parenthesis.setMinHeight(135);
             expression = new Image(new Texture("newExpLarge.png")).getDrawable();
+            backspaceImg=new Image(new Texture("backspaceLarge.png")).getDrawable();
             skin.add("delete", new Texture("deleteLarge.png"));
         }
 
@@ -322,6 +327,22 @@ public class Main extends ApplicationAdapter implements ModelListener{
         });
 
 
+        //Creates backspace button
+        backSpace= new ImageButton(backspaceImg);
+        backSpace.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float z, float y) {
+                if(model.getInsertionPoint().getIndex()>0){
+                    model.getInsertionPoint().getExpression().getChildren().removeIndex(model.getInsertionPoint().getIndex()-1);
+
+                    update();
+                }
+            }
+        });
+
+        toolbarLeft=new HorizontalGroup();
+        toolbarLeft.addActor(trashCan);
+        toolbarLeft.addActor(backSpace);
         //Creates the redo button
         redo = new ImageButton(redoImg);
 
@@ -466,7 +487,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
         rootTable.setZIndex(998);
         calcZone.setZIndex(1);
         //Populate rootTable
-        rootTable.add(trashCan).expandX().left().top().expandY().top();
+        rootTable.add(toolbarLeft).expandX().left().top().expandY().top();
+
         rootTable.add(toolbar).expandX().right().top().expandY().top();
         rootTable.row();
         rootTable.add(keyPadTabs).expandX().right().colspan(2);

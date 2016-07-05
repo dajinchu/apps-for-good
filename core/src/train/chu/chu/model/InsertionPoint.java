@@ -5,6 +5,7 @@ package train.chu.chu.model;
  */
 public class InsertionPoint extends BaseNode{
 
+    private int index;
     protected InsertionPoint(ExpressionNode expression, Model model) {
         super("", expression, model);
     }
@@ -14,6 +15,7 @@ public class InsertionPoint extends BaseNode{
         if(to==this)return;
         expression.getChildren().removeValue(this, true);
         int toIndex = to.getExpression().getChildren().indexOf(to, true)+side.getOffset();
+        index=toIndex;
         to.getExpression().getChildren().insert(toIndex,this);
         this.expression = to.getExpression();
         model.update();
@@ -27,5 +29,9 @@ public class InsertionPoint extends BaseNode{
     @Override
     public void remove() {
 
+    }
+
+    public int getIndex(){
+        return index;
     }
 }
