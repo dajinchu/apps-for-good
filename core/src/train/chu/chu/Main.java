@@ -44,6 +44,7 @@ import train.chu.chu.model.ExpressionNode;
 import train.chu.chu.model.InsertionPoint;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.ModelListener;
+import train.chu.chu.model.Side;
 
 public class Main extends ApplicationAdapter implements ModelListener{
     public static AnalyticsProvider analytics;
@@ -333,9 +334,20 @@ public class Main extends ApplicationAdapter implements ModelListener{
             @Override
             public void clicked(InputEvent event, float z, float y) {
                 if(model.getInsertionPoint().getIndex()>0){
-                    model.getInsertionPoint().getExpression().getChildren().removeIndex(model.getInsertionPoint().getIndex()-1);
+                    int cursorIndex=model.getInsertionPoint().getIndex();
+                    if(cursorIndex==0){
+                        return;
+                    }
+                    model.getInsertionPoint().getExpression().getChildren().removeIndex(cursorIndex-1);
+                    System.out.println("Cursor Index: "+ (cursorIndex-1));
+                    if(cursorIndex>1) {
+                        cursorIndex-=2;
+                    }else if(cursorIndex==1){
+                        cursorIndex-=1;
+                    }
+                        model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(cursorIndex), Side.RIGHT);
+                        update();
 
-                    update();
                 }
             }
         });
