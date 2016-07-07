@@ -107,9 +107,3 @@ project(":core") {
 tasks.eclipse.doLast {
     delete ".project"
 }
-android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.3'
-}
-dependencies {
-}
