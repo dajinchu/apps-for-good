@@ -3,7 +3,9 @@ package train.chu.chu;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+
+import train.chu.chu.model.BaseNode;
+import train.chu.chu.model.Model;
 
 /**
  * Created by Arun on 4/6/2016.
@@ -12,34 +14,25 @@ public class BlockCreator {
     public static final float FONT_SCALE = 0.5f;
     /**
      * Takes a string and a skin and returns a block with a label attached
-     * @param str the str for the block
-     * @param skin the skin
-     * @return Block, the block
-     */
-    public static Block BlockCreator(String str, Skin skin){
+     *
+     **/
+    public static LabelBlock BlockCreator(BaseNode node, Model model){
 
-        String name=ButtonCreator.generateString(str);
+        String name=node.getData();
 
         //Creates Block
-        Block block;
+        LabelBlock block;
         switch(name){
-            case "(":
-                block = new ParenthesisBlock(ParenthesisBlock.Side.OPENING);
-                break;
-            case ")":
-                block = new ParenthesisBlock(ParenthesisBlock.Side.CLOSING);
-                break;
             default:
-                block = new Block();
+                block = new LabelBlock(node,model);
         }
         block.setTouchable(Touchable.enabled);
         //Creates Label
-        Label second = new Label(name,skin);
+        Label second = new Label(name,Main.skin);
         second.setFontScale(FONT_SCALE);
         second.setTouchable(Touchable.disabled);
         second.setColor(Color.BLACK);
-        block.addActor(second);
-
+        block.setActor(second);
         //Returns Block
         return block;
     }

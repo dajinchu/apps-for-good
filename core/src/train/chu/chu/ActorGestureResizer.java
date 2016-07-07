@@ -1,11 +1,11 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 
 /**
@@ -16,18 +16,21 @@ public class ActorGestureResizer extends ActorGestureListener {
     private final Vector2 worldSize;
     private final Actor actor;
     private final Camera cam;
+    private final Stage stage;
     Vector3 delta = new Vector3();
     float previousDistance, previousInitial;
+    private boolean validPinch = false;
 
     //Save RAM by instantiating all Vectors as fields and setting them, rather than instantiating new ones
     private Vector3 previousPointer1= new Vector3(), previousInitial2 = new Vector3(), previousInitial1 = new Vector3(), previousPointer2 = new Vector3();
     private Vector3 initialPointer1=new Vector3(), initialPointer2=new Vector3(),pointer1=new Vector3(),pointer2=new Vector3();
     private Vector3 tmp1 =  new Vector3(), tmp2 = new Vector3();
 
-    public ActorGestureResizer(Camera stageCamera, Actor actor, Vector2 worldSize){
+    public ActorGestureResizer(Stage stage, Actor actor, Vector2 worldSize){
         //Camera is just used for unprojecting touch events
-        this.cam = stageCamera;
+        this.cam = stage.getCamera();
         this.actor = actor;
+        this.stage = stage;
         this.worldSize = worldSize;
         clamp();
     }
@@ -46,7 +49,6 @@ public class ActorGestureResizer extends ActorGestureListener {
         previousInitial = initialDistance;
     }
     public void panCam(float deltaX, float deltaY) {
-        Gdx.app.log("Controller",deltaX+", "+deltaY);
         actor.moveBy(-deltaX, deltaY);
         clamp();
     }
@@ -70,7 +72,13 @@ public class ActorGestureResizer extends ActorGestureListener {
             //Just make previous initial to avoid jumpiness from the previous gesture's values carrying over
             previousPointer1 = initialPointer1;
             previousPointer2 = initialPointer2;
+            //Get actors, using i1 & i2 to access stage coords
+            Actor a1 = stage.hit(i1.x,i1.y,true);
+            Actor a2 = stage.hit(i2.x,i2.y,true);
+            validPinch = isValidActor(a1) && isValidActor(a2);
         }
+
+        if(!validPinch)return;
 
         zoomCam(initialPointer1.dst(initialPointer2), pointer1.dst(pointer2));
         tmp1.set(previousPointer1);
@@ -92,5 +100,9 @@ public class ActorGestureResizer extends ActorGestureListener {
         cam.position.y = MathUtils.clamp(cam.position.y, 0, worldSize.y);
         cam.update();*/
         //Gdx.app.log("GESTURES",cam.viewportWidth+" "+cam.zoom);
+    }
+
+    private boolean isValidActor(Actor a){
+        return a==null||a instanceof LabelBlock;
     }
 }

@@ -1,5 +1,6 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 /**
@@ -15,5 +16,10 @@ public class ScaleUtils {
             scale = scale.getParent();
         }
         return scale.getScaleX();
+    }
+
+    public static Vector2 positionWithin(Actor calcZone, float stageX, float stageY){
+        return new Vector2((stageX-calcZone.getX())/calcZone.getScaleX(),
+                (stageY-calcZone.getY())/calcZone.getScaleX());
     }
 }

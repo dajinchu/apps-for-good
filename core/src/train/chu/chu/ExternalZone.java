@@ -1,34 +1,37 @@
 package train.chu.chu;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+
+import train.chu.chu.model.BaseNode;
+import train.chu.chu.model.ExpressionNode;
+import train.chu.chu.model.Side;
 
 /**
  * Created by Da-Jin on 5/20/2016.
  */
-public class GhostBlock extends Container<Label>{
-    private final HorizontalGroup expression;
-    private final MoveCommand.Side side;
+public class ExternalZone extends Container<Label>{
+    private final ExpressionNode expression;
+    private final Side side;
     private boolean dragging = false;
     private double dragTime;
-    private Block hoverActor;
+    private BlockSource hoverSource;
 
-    public GhostBlock(MoveCommand.Side side, HorizontalGroup expression){
+    public ExternalZone(Side side, ExpressionNode expression){
         this.expression = expression;
         this.side = side;
-        Label label = new Label("g", Main.skin);
+        Label label = new Label(" ", Main.skin);
         label.setFontScale(BlockCreator.FONT_SCALE);
         setActor(label);
         Main.dragAndDrop.addTarget(new DragAndDrop.Target(this) {
             @Override
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                if(!(source.getActor() instanceof Block)){
+                if(!(source instanceof BlockSource)){
                     return false;
                 }
                 dragging = true;
-                hoverActor = (Block)source.getActor();
+                hoverSource = (BlockSource) source;
                 return true;
             }
 
@@ -52,15 +55,13 @@ public class GhostBlock extends Container<Label>{
         if(dragging){
             dragTime+=delta;
         }
-        if(dragTime>=Block.HOVER_TIME){
-            Block relative = null;
+        if(dragTime>= LabelBlock.HOVER_TIME){
+            BaseNode relative = null;
             switch (side){
-                case LEFT : relative = (Block) expression.getChildren().get(0);break;
-                case RIGHT : relative = (Block) expression.getChildren().get(expression.getChildren().size-1);break;
+                case LEFT : relative = expression.getChildren().get(0);break;
+                case RIGHT : relative = expression.getChildren().get(expression.getChildren().size-1);break;
             }
-            if(relative != hoverActor){
-                hoverActor.moveRelative(relative, side);
-            }
+            hoverSource.move(relative, side);
             dragging = false;
             dragTime = 0;
         }
