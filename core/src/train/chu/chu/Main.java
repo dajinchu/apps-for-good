@@ -333,22 +333,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         backSpace.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                if(model.getInsertionPoint().getIndex()>0){
-                    int cursorIndex=model.getInsertionPoint().getIndex();
-                    if(cursorIndex==0){
-                        return;
-                    }
-                    model.getInsertionPoint().getExpression().getChildren().removeIndex(cursorIndex-1);
-                    System.out.println("Cursor Index: "+ (cursorIndex-1));
-                    if(cursorIndex>1) {
-                        cursorIndex-=2;
-                    }else if(cursorIndex==1){
-                        cursorIndex-=1;
-                    }
-                        model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(cursorIndex), Side.RIGHT);
-                        update();
-
-                }
+                model.backspace();
             }
         });
 

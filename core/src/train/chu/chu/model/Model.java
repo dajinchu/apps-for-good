@@ -135,6 +135,24 @@ public class Model {
         return false;
     }
 
+    public void backspace(){
+        if(getInsertionPoint().getExpression().getChildren().indexOf(insertionPoint,true)>0){
+            int cursorIndex=getInsertionPoint().getExpression().getChildren().indexOf(insertionPoint,true);
+            if(cursorIndex==0){
+                return;
+            }
+            getInsertionPoint().getExpression().getChildren().removeIndex(cursorIndex-1);
+            System.out.println("Cursor Index: "+ (cursorIndex-1));
+            if(cursorIndex>1) {
+                cursorIndex-=2;
+            }else if(cursorIndex==1){
+                cursorIndex-=1;
+            }
+            getInsertionPoint().move(getInsertionPoint().getExpression().getChildren().get(cursorIndex), Side.RIGHT);
+            update();
+        }
+
+    }
     protected void update(){
         validate();
         listener.update();
