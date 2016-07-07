@@ -6,6 +6,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.DelaunayTriangulator;
@@ -44,7 +45,6 @@ import train.chu.chu.model.ExpressionNode;
 import train.chu.chu.model.InsertionPoint;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.ModelListener;
-import train.chu.chu.model.Side;
 
 public class Main extends ApplicationAdapter implements ModelListener{
     public static AnalyticsProvider analytics;
@@ -83,6 +83,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private int prevtabNum;
     private Model model;
     private boolean landscape;
+
+    private static int GRAPHWIDTH = 50;
 
     private HorizontalGroup toolbarLeft;
 
@@ -160,7 +162,28 @@ public class Main extends ApplicationAdapter implements ModelListener{
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
 
-        calcZone = new WidgetGroup();
+        calcZone = new WidgetGroup(){
+            public int thickness;
+            public Vector2 min, max;
+
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                min = ScaleUtils.positionWithin(this,0,0);
+                max = ScaleUtils.positionWithin(this,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+
+                thickness = (int) (Math.ceil(2/getScaleX()));
+                batch.setColor(Color.valueOf("29B6F6"));
+                applyTransform(batch, computeTransform());
+                for(int i = (int) (min.x/GRAPHWIDTH)*GRAPHWIDTH; i < max.x; i+=GRAPHWIDTH) {
+                    BatchShapeUtils.drawLine(batch, i, min.y, i, max.y, thickness);
+                }
+                for(int i = (int) (min.y/GRAPHWIDTH)*GRAPHWIDTH; i < max.y; i+=GRAPHWIDTH) {
+                    BatchShapeUtils.drawLine(batch, min.x, i, max.x, i, thickness);
+                }
+                resetTransform(batch);
+                super.draw(batch, parentAlpha);
+            }
+        };
         calcZone.setFillParent(true);
         calcZone.setTouchable(Touchable.childrenOnly);
 
@@ -659,6 +682,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             expression.setResult(exp.getResult());
             expression.setPosition(exp.getX()-expression.getPrefWidth()/2,exp.getY()-expression.getPrefHeight()/2);
         }
+        if(model.getSelection().size==0)selectedBlock.setVisible(true);
         //Change the color of the redo/undo button to gray if stack is empty.
         if (model.canRedo()) {
             redo.getImage().setColor(Color.GRAY);
