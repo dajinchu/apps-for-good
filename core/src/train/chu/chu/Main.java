@@ -386,7 +386,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 } else {
                     //Bring up keypad, set to down arrow
                     keyToggle = 0;
-                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), size * 4, 0.5f, Interpolation.swingOut));
+                    keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), (size * 4)+2, 0.5f, Interpolation.swingOut));
                     keypad.addAction(Actions.moveTo(keypad.getX(), 0, 0.5f, Interpolation.swingOut));
                     keyPadToggle.setChecked(false);
                 }
@@ -462,17 +462,33 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
         //KeyPad tab generator, generates 10 different tabs
         keyPadTabs = new Table();
-        for (int i = 1; i <= 10; i++) {
 
-            TextButton inputButton = new TextButton("" + i, skin);
-            inputButton.getLabel().setFontScale(.5f);
-            keyPadTabs.add(inputButton).width(size / 2).height(size / 2).colspan(i);
+        for (int i = 1; i <= 2; i++) {
+
+            String text="";
+            if(i==1){
+                text="Classic";
+            }else if(i==2){
+                text="Scientific";
+            }
+            final TextButton inputButton = new TextButton(text, skin);
+            inputButton.getLabel().setFontScale(.25f);
+            keyPadTabs.add(inputButton).width((int)(size*2.5)).height((int)(size / 2.5)).colspan(i);
+            if(i==1){
+                inputButton.setColor(230,74,25,0.75f);
+            }
             final int valueof = i;
             inputButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float z, float y) {
                     tabNum = valueof;
                     tabChooser();
+                    for(int x=0; x<keyPadTabs.getChildren().size; x++){
+                        keyPadTabs.getChildren().get(x).setColor(230,74,25,1);
+
+                    }
+                    inputButton.setColor(230,74,25,0.75f);
+
                 }
             });
         }
@@ -481,6 +497,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         keypad = new Table();
         tabChooser();
 
+
         rootTable.setZIndex(998);
         calcZone.setZIndex(1);
         //Populate rootTable
@@ -488,10 +505,10 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
         rootTable.add(toolbar).expandX().right().top().expandY().top();
         rootTable.row();
-        rootTable.add(keyPadTabs).expandX().right().colspan(2);
+        rootTable.add(keyPadTabs).expandX().right().colspan(2).padBottom(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
-        keyPadTabs.setVisible(false);
+        keyPadTabs.setVisible(true);
     }
 
     @Override
@@ -568,9 +585,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 break;
             case 2:
                 keys = new String[][]{
-                        {"2", "2", "2", "+", "N"},
-                        {"4", "5", "6", "-", "N"},
-                        {"1", "2", "3", "*", "N"},
+                        {"sin()", "sin()", "2", "+", "N"},
+                        {"cos()", "cos()", "6", "-", "N"},
+                        {"tan()", "tan()", "3", "*", "N"},
                         {"0", "0", ".", "/", "N"}
 
                 };
