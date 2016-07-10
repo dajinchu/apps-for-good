@@ -605,6 +605,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
         //Generate the keypad
         keyPadGenerator(keys);
+
     }
 
 
@@ -640,8 +641,11 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
     private void syncWithModel(){
         Bench.start("sync model");
+
         calcZone.clear();
         selectedBlock.clearChildren();
+
+
         for(ExpressionNode exp : model.getExpressions()){
             Expression expression = expressionMap.get(exp);
             if(expression==null) {

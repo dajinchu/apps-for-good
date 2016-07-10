@@ -38,13 +38,21 @@ public class KeypadButton extends Container<TextButton> {
                     model.addExpression(0,0);
 
                 }
-                model.addBlock(text,model.getExpressions().first());
+                if(text.contains("sin")||text.contains("cos")||text.contains("tan")){
+                    model.addBlock(text.substring(0,4),model.getExpressions().first());
+                    model.addBlock(")",model.getExpressions().first());
+                    int indexLast=model.getInsertionPoint().getIndex();
+                    model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast-2),Side.RIGHT);
+                }else {
+                    model.addBlock(text, model.getExpressions().first());
+                }
             }
         });
         Main.dragAndDrop.addSource(new BlockSource(this,model){
             @Override
             protected WidgetGroup getDupe() {
                 KeypadButton.this.setVisible(true);
+                System.out.println("Run CLONE");
 
                 Label clone = new Label(text, Main.skin);
                 clone.setFontScale(BlockCreator.FONT_SCALE);
@@ -55,6 +63,7 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             public void move(BaseNode to, Side side) {
                 //This means the payload has been dragged somewhere
+                System.out.println("Run MOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 if(insert ==null){
                     insert = model.insertBlock(text, to.getExpression(),to,side);
                 } else {
@@ -65,7 +74,14 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             public void moveInto(BlankNode into) {
 
-                model.addBlock(text,into.getExpression()).moveInto(into);
+                if(text.contains("sin")||text.contains("cos")||text.contains("tan")) {
+                    model.addBlock(text.substring(0, 4), into.getExpression()).moveInto(into);
+                    model.addBlock(")", model.getExpressions().first());
+                    int indexLast = model.getInsertionPoint().getIndex();
+                    model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast - 2), Side.RIGHT);
+                }else{
+                    model.addBlock(text, into.getExpression()).moveInto(into);
+                }
             }
 
             @Override
