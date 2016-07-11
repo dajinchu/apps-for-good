@@ -23,7 +23,7 @@ public class KeypadButton extends Container<TextButton> {
     private final String text;
     private Node insert;
 
-    public KeypadButton(final String text, final Model model){
+    public KeypadButton(final String text, final Model model) {
         this.model = model;
         this.text = text;
         TextButton tmp = new TextButton(text, Main.skin);
@@ -34,21 +34,21 @@ public class KeypadButton extends Container<TextButton> {
         addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                if(model.getExpressions().size==0){
-                    model.addExpression(0,0);
+                if (model.getExpressions().size == 0) {
+                    model.addExpression(0, 0);
 
                 }
-                if(text.contains("sin")||text.contains("cos")||text.contains("tan")){
-                    model.addBlock(text.substring(0,4),model.getExpressions().first());
-                    model.addBlock(")",model.getExpressions().first());
-                    int indexLast=model.getInsertionPoint().getIndex();
-                    model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast-2),Side.RIGHT);
-                }else {
+                if (testSpecial(text).equals("trig")) {
+                    model.addBlock(text.substring(0, 4), model.getExpressions().first());
+                    model.addBlock(")", model.getExpressions().first());
+                    int indexLast = model.getInsertionPoint().getIndex();
+                    model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast - 2), Side.RIGHT);
+                } else {
                     model.addBlock(text, model.getExpressions().first());
                 }
             }
         });
-        Main.dragAndDrop.addSource(new BlockSource(this,model){
+        Main.dragAndDrop.addSource(new BlockSource(this, model) {
             @Override
             protected WidgetGroup getDupe() {
                 KeypadButton.this.setVisible(true);
@@ -63,23 +63,22 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             public void move(BaseNode to, Side side) {
                 //This means the payload has been dragged somewhere
-                System.out.println("Run MOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                if(insert ==null){
-                    insert = model.insertBlock(text, to.getExpression(),to,side);
+                if (insert == null) {
+                    insert = model.insertBlock(text, to.getExpression(), to, side);
                 } else {
-                    insert.move(to,side);
+                    insert.move(to, side);
                 }
             }
 
             @Override
             public void moveInto(BlankNode into) {
 
-                if(text.contains("sin")||text.contains("cos")||text.contains("tan")) {
+                if (testSpecial(text).equals("trig")) {
                     model.addBlock(text.substring(0, 4), into.getExpression()).moveInto(into);
                     model.addBlock(")", model.getExpressions().first());
                     int indexLast = model.getInsertionPoint().getIndex();
                     model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast - 2), Side.RIGHT);
-                }else{
+                } else {
                     model.addBlock(text, into.getExpression()).moveInto(into);
                 }
             }
@@ -89,5 +88,18 @@ public class KeypadButton extends Container<TextButton> {
                 //Do nothing
             }
         });
+
+
+    }
+
+    private String testSpecial(String test) {
+        String returnThis = "";
+
+        if (test.contains("sin") || test.contains("cos") || test.contains("tan") || test.contains("arc") || test.contains("sec") || test.contains("cot")) {
+            returnThis = "trig";
+        } else {
+            returnThis = " ";
+        }
+        return returnThis;
     }
 }

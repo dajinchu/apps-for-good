@@ -585,9 +585,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 break;
             case 2:
                 keys = new String[][]{
-                        {"sin()", "sin()", "2", "+", "N"},
-                        {"cos()", "cos()", "6", "-", "N"},
-                        {"tan()", "tan()", "3", "*", "N"},
+                        {"sin()", "sin()", "cot()", "cot()", "N"},
+                        {"cos()", "cos()", "sec()", "sec()", "N"},
+                        {"tan()", "tan()", "arc()", "arc()", "N"},
                         {"0", "0", ".", "/", "N"}
 
                 };
