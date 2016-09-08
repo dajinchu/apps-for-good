@@ -1,34 +1,57 @@
 package train.chu.chu.model;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Stack;
 
 /**
  * Created by Da-Jin on 6/5/2016.
  * The model operates on the data and exposes it to the view
  * It is also responsible for saving and restoring state
  */
-public class Model {
+public enum Model {
 
-    private final ModelListener listener;
-    private Array<ExpressionNode> expressions;
+    INSTANCE;
+
+    private ModelListener listener;
+    private ArrayList<ExpressionNode> expressions = new ArrayList<ExpressionNode>();
 
     private Array<BaseNode> selected = new Array<>();
     private ExpressionNode selectedExpression;
 
     private InsertionPoint insertionPoint;
 
-    public Model(ModelListener listener){
-        expressions = new Array<>();
-        this.listener = listener;
-        ExpressionNode expressionNode = new ExpressionNode(0, 0, this);
-        expressions.add(expressionNode);
-        insertionPoint = new InsertionPoint(expressionNode, this);
+    private Stack<byte[]> history = new Stack<>();
+    private Stack<byte[]> future = new Stack<>();
+    private FileHandle handle = Gdx.files.local("savestate");
 
+    Model(){
+        if(handle.exists()){
+            //Load from save file if it exists
+            load();
+        } else {
+            ExpressionNode expressionNode = new ExpressionNode(0, 0);
+            expressions.add(expressionNode);
+            insertionPoint = new InsertionPoint(expressionNode);
+        }
     }
 
-    public Array<ExpressionNode> getExpressions(){
+    public void setListener(ModelListener listener){
+        this.listener = listener;
+    }
+
+    public ArrayList<ExpressionNode> getExpressions(){
         return expressions;
     }
     public Array<BaseNode> getSelection(){
@@ -39,12 +62,13 @@ public class Model {
     }
 
     public BaseNode addBlock(String data, ExpressionNode target){
+        Gdx.app.log("Model","adding block");
         BaseNode baseNode = insertBlock(data,target,insertionPoint,Side.LEFT);
         return baseNode;
     }
 
     public BaseNode insertBlock(String data, ExpressionNode target, BaseNode to, Side side){
-        BaseNode baseNode = new BaseNode(data, target, this);
+        BaseNode baseNode = new BaseNode(data, target);
         baseNode.move(to,side);
         return baseNode;
     }
@@ -59,7 +83,7 @@ public class Model {
             //Make sure they are from the same expression
             //Also get the left and right most nodes
             selectedExpression = selections.first().getExpression();
-            int leftest = selectedExpression.getChildren().size - 1;
+            int leftest = selectedExpression.getChildren().size() - 1;
             int rightest = 0;
             for (BaseNode node : selections) {
                 if (node.getExpression() != selectedExpression) {
@@ -67,7 +91,7 @@ public class Model {
                     return;
                 }
                 //Check node expands the selection range by being more right or left
-                int index = selectedExpression.getChildren().indexOf(node, true);
+                int index = selectedExpression.getChildren().indexOf(node);
                 if (index < leftest) {
                     leftest = index;
                 }
@@ -87,9 +111,9 @@ public class Model {
     public void moveSelected(BaseNode to, Side side){
         if(selected.contains(to, true))return;
         for(Node node : selected)node.remove();
-        int toIndex = to.getExpression().getChildren().indexOf(to, true)+side.getOffset();
+        int toIndex = to.getExpression().getChildren().indexOf(to)+side.getOffset();
         for(int i = selected.size-1; i >= 0; i--) {
-            to.getExpression().getChildren().insert(toIndex, selected.get(i));
+            to.getExpression().getChildren().add(toIndex, selected.get(i));
             selected.get(i).expression = to.getExpression();
         }
         insertionPoint.move(selected.get(selected.size-1),Side.RIGHT);
@@ -108,22 +132,25 @@ public class Model {
     }
     public void parenthesizeSelected(){
         if(selected.size==0)return;
-        int firstNodeIndex = selectedExpression.getChildren().indexOf(selected.first(), true);
+        int firstNodeIndex = selectedExpression.getChildren().indexOf(selected.first());
         Array<BaseNode> nselected = new Array<>(selected);
-        nselected.add(new BaseNode("(",selectedExpression,firstNodeIndex, this));
-        nselected.add(new BaseNode(")",selectedExpression, firstNodeIndex+nselected.size, this));
+        nselected.add(new BaseNode("(",selectedExpression,firstNodeIndex));
+        nselected.add(new BaseNode(")",selectedExpression, firstNodeIndex+nselected.size));
         selectBlocks(nselected);
         update();
     }
     public BlankNode addExpression(float x, float y) {
-        ExpressionNode expressionNode = new ExpressionNode(x, y, this);
-        BlankNode blankNode = new BlankNode(expressionNode, this);
+        ExpressionNode expressionNode = new ExpressionNode(x, y);
+        BlankNode blankNode = new BlankNode(expressionNode);
         expressions.add(expressionNode);
         insertionPoint.move(blankNode,Side.RIGHT);
         return blankNode;
     }
     public void undo(){
-
+        //Go back in time
+        future.push(history.pop());
+        loadFromStream(new ByteArrayInputStream(history.peek()));
+        update();
     }
     public void redo(){
 
@@ -136,12 +163,12 @@ public class Model {
     }
 
     public void backspace(){
-        if(getInsertionPoint().getExpression().getChildren().indexOf(insertionPoint,true)>0){
-            int cursorIndex=getInsertionPoint().getExpression().getChildren().indexOf(insertionPoint,true);
+        if(getInsertionPoint().getExpression().getChildren().indexOf(insertionPoint)>0){
+            int cursorIndex=getInsertionPoint().getExpression().getChildren().indexOf(insertionPoint);
             if(cursorIndex==0){
                 return;
             }
-            getInsertionPoint().getExpression().getChildren().removeIndex(cursorIndex-1);
+            getInsertionPoint().getExpression().getChildren().remove(cursorIndex-1);
             System.out.println("Cursor Index: "+ (cursorIndex-1));
             if(cursorIndex>1) {
                 cursorIndex-=2;
@@ -160,10 +187,49 @@ public class Model {
     private void validate(){
         Iterator<ExpressionNode> iterator = expressions.iterator();
         while(iterator.hasNext()){
-            if(iterator.next().getChildren().size==0){
+            ExpressionNode next = iterator.next();
+            if(next.getChildren().size()==0){
                 iterator.remove();
+            }
+            for(BaseNode node : next.getChildren()){
+                if(node instanceof InsertionPoint && node != insertionPoint){
+                    Gdx.app.error("ISSUES", node +" is insertion point but not the same as "+ insertionPoint);
+                }
             }
         }
     }
 
+    public void addToHistory() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        saveToStream(out);
+        history.add(out.toByteArray());
+    }
+
+    public void save(){
+        saveToStream(handle.write(false));
+    }
+
+    public void load(){
+        loadFromStream(handle.read());
+    }
+
+    private void saveToStream(OutputStream out){
+        try {
+            ObjectOutputStream writer = new ObjectOutputStream(out);
+            writer.writeObject(insertionPoint);
+            writer.writeObject(expressions);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadFromStream(InputStream in) {
+        try {
+            ObjectInputStream reader = new ObjectInputStream(in);
+            insertionPoint = (InsertionPoint) reader.readObject();
+            expressions = (ArrayList<ExpressionNode>) reader.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -34,11 +34,11 @@ public class KeypadButton extends Container<TextButton> {
         addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                if(model.getExpressions().size==0){
+                if(model.getExpressions().size()==0){
                     model.addExpression(0,0);
 
                 }
-                model.addBlock(text,model.getExpressions().first());
+                model.addBlock(text,model.getExpressions().get(0));
             }
         });
         Main.dragAndDrop.addSource(new BlockSource(this,model){

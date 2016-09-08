@@ -148,7 +148,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
         skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
         skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
 
-        this.model = new Model(this);
+        Model.INSTANCE.setListener(this);
+        this.model = Model.INSTANCE;
         selectedBlock = new SelectedBlock(model);
 
         dragAndDrop.setDragTime(500);
@@ -566,6 +567,17 @@ public class Main extends ApplicationAdapter implements ModelListener{
         }
     }
 
+    @Override
+    public void pause() {
+        model.save();
+    }
+
+    @Override
+    public void resume() {
+        model.load();
+    }
+
+    @Override
     public void dispose() {
         //When the app is destroyed, don't leave any memory leaks behind
         stage.dispose();

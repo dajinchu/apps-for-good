@@ -1,24 +1,26 @@
 package train.chu.chu.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Da-Jin on 6/15/2016.
  */
-public class InsertionPoint extends BaseNode{
+public class InsertionPoint extends BaseNode implements Serializable{
 
     private int index;
-    protected InsertionPoint(ExpressionNode expression, Model model) {
-        super("", expression, model);
+    protected InsertionPoint(ExpressionNode expression) {
+        super("", expression);
     }
 
     @Override
     public void move(BaseNode to, Side side) {
         if(to==this)return;
-        expression.getChildren().removeValue(this, true);
-        int toIndex = to.getExpression().getChildren().indexOf(to, true)+side.getOffset();
+        expression.getChildren().remove(this);
+        int toIndex = to.getExpression().getChildren().indexOf(to)+side.getOffset();
         index=toIndex;
-        to.getExpression().getChildren().insert(toIndex,this);
+        to.getExpression().getChildren().add(toIndex,this);
         this.expression = to.getExpression();
-        model.update();
+        Model.INSTANCE.update();
     }
 
     //Do nothing
