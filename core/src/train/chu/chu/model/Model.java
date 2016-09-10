@@ -32,7 +32,7 @@ public enum Model {
 
     private InsertionPoint insertionPoint;
 
-    private Stack<byte[]> history = new Stack<>();
+    private Stack<byte[]> history = new Stack<>(); //Top of history stack is current state
     private Stack<byte[]> future = new Stack<>();
     private FileHandle handle = Gdx.files.local("savestate");
 
@@ -148,18 +148,24 @@ public enum Model {
     }
     public void undo(){
         //Go back in time
-        future.push(history.pop());
-        loadFromStream(new ByteArrayInputStream(history.peek()));
-        update();
+        if(canUndo()) {
+            future.push(history.pop());
+            loadFromStream(new ByteArrayInputStream(history.peek()));
+            update();
+        }
     }
     public void redo(){
-
+        if(canRedo()) {
+            history.push(future.pop());
+            loadFromStream(new ByteArrayInputStream(history.peek()));
+            update();
+        }
     }
     public boolean canUndo(){
-        return false;
+        return history.size() >= 2;
     }
     public boolean canRedo(){
-        return false;
+        return !future.empty();
     }
 
     public void backspace(){
@@ -211,6 +217,8 @@ public enum Model {
 
     public void load(){
         loadFromStream(handle.read());
+        history.clear();
+        addToHistory();
     }
 
     private void saveToStream(OutputStream out){

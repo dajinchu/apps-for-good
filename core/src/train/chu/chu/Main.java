@@ -700,14 +700,14 @@ public class Main extends ApplicationAdapter implements ModelListener{
         if(model.getSelection().size==0)selectedBlock.setVisible(true);
         //Change the color of the redo/undo button to gray if stack is empty.
         if (model.canRedo()) {
-            redo.getImage().setColor(Color.GRAY);
-        } else {
             redo.getImage().setColor(Color.BLACK);
+        } else {
+            redo.getImage().setColor(Color.GRAY);
         }
         if (model.canUndo()) {
-            undo.getImage().setColor(Color.GRAY);
-        } else {
             undo.getImage().setColor(Color.BLACK);
+        } else {
+            undo.getImage().setColor(Color.GRAY);
         }
         parenthesize.setVisible(model.getSelection().size>0);
         Bench.end("sync model");
