@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 
 import train.chu.chu.model.ExpressionNode;
+import train.chu.chu.model.Model;
 import train.chu.chu.model.Side;
 
 /**
@@ -81,6 +82,7 @@ public class Expression extends Stack {
             Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
             Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
             expressionNode.move(pos.x,pos.y);
+            Model.INSTANCE.addToHistory();
         }
         @Override
         public void trash(){

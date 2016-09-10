@@ -347,6 +347,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             @Override
             public void clicked(InputEvent event, float z, float y) {
                 model.getExpressions().clear();
+                model.addToHistory();
                 syncWithModel();
             }
         });
@@ -358,6 +359,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             @Override
             public void clicked(InputEvent event, float z, float y) {
                 model.backspace();
+                model.addToHistory();
             }
         });
 
@@ -424,6 +426,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 model.parenthesizeSelected();
+                model.addToHistory();
             }
         });
 

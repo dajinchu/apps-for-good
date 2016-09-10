@@ -36,9 +36,11 @@ public class KeypadButton extends Container<TextButton> {
             public void clicked(InputEvent event, float z, float y) {
                 if(model.getExpressions().size()==0){
                     model.addExpression(0,0);
+                    model.addToHistory();
 
                 }
                 model.addBlock(text,model.getExpressions().get(0));
+                model.addToHistory();
             }
         });
         Main.dragAndDrop.addSource(new BlockSource(this,model){
@@ -57,8 +59,10 @@ public class KeypadButton extends Container<TextButton> {
                 //This means the payload has been dragged somewhere
                 if(insert ==null){
                     insert = model.insertBlock(text, to.getExpression(),to,side);
+                    model.addToHistory();
                 } else {
                     insert.move(to,side);
+                    model.addToHistory();
                 }
             }
 
@@ -66,6 +70,7 @@ public class KeypadButton extends Container<TextButton> {
             public void moveInto(BlankNode into) {
 
                 model.addBlock(text,into.getExpression()).moveInto(into);
+                model.addToHistory();
             }
 
             @Override
