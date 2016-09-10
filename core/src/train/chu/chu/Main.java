@@ -84,7 +84,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private Model model;
     private boolean landscape;
 
-    private static int GRAPHWIDTH = 50;
+    private static final int GRAPHWIDTH = 50;
+    private static final float dragSquareSize = 20;
 
     private HorizontalGroup toolbarLeft;
 
@@ -152,7 +153,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
         this.model = Model.INSTANCE;
         selectedBlock = new SelectedBlock(model);
 
-        dragAndDrop.setDragTime(500);
+        dragAndDrop.setTapSquareSize(dragSquareSize);
 
         //Instantiate Stage for scene2d management
         stage = new Stage();
