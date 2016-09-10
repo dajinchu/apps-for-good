@@ -34,18 +34,22 @@ public class KeypadButton extends Container<TextButton> {
         addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
-                if (model.getExpressions().size == 0) {
-                    model.addExpression(0, 0);
+                if(model.getExpressions().size()==0){
+                    model.addExpression(0,0);
+                    model.addToHistory();
 
                 }
-                if (testSpecial(text).equals("trig")) {
-                    model.addBlock(text.substring(0, 4), model.getExpressions().first());
-                    model.addBlock(")", model.getExpressions().first());
-                    int indexLast = model.getInsertionPoint().getIndex();
-                    model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast - 2), Side.RIGHT);
-                } else {
+                model.addBlock(text,model.getExpressions().get(0));
+                model.addToHistory();
+                if(text.contains("sin")||text.contains("cos")||text.contains("tan")){
+                    model.addBlock(text.substring(0,4),model.getExpressions().first());
+                    model.addBlock(")",model.getExpressions().first());
+                    int indexLast=model.getInsertionPoint().getIndex();
+                    model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast-2),Side.RIGHT);
+                }else {
                     model.addBlock(text, model.getExpressions().first());
                 }
+                model.addToHistory();
             }
         });
         Main.dragAndDrop.addSource(new BlockSource(this, model) {
@@ -63,10 +67,13 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             public void move(BaseNode to, Side side) {
                 //This means the payload has been dragged somewhere
-                if (insert == null) {
-                    insert = model.insertBlock(text, to.getExpression(), to, side);
+                System.out.println("Run MOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                if(insert ==null){
+                    insert = model.insertBlock(text, to.getExpression(),to,side);
+                    model.addToHistory();
                 } else {
-                    insert.move(to, side);
+                    insert.move(to,side);
+                    model.addToHistory();
                 }
             }
 
@@ -81,6 +88,7 @@ public class KeypadButton extends Container<TextButton> {
                 } else {
                     model.addBlock(text, into.getExpression()).moveInto(into);
                 }
+                model.addToHistory();
             }
 
             @Override

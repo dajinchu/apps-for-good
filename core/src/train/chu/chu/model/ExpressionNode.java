@@ -1,11 +1,13 @@
 package train.chu.chu.model;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StringBuilder;
 
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+
+import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by Da-Jin on 6/5/2016.
@@ -13,41 +15,39 @@ import net.objecthunter.exp4j.ExpressionBuilder;
  * Calculates final result
  * Stores its position in sandbox world
  */
-public class ExpressionNode implements Positioned {
+public class ExpressionNode implements Positioned, Serializable {
 
-    private final Model model;
     private float x;
     private float y;
-    private Array<BaseNode> children;
+    private ArrayList<BaseNode> children;
 
-    protected ExpressionNode(float x, float y, Model model) {
+    protected ExpressionNode(float x, float y) {
         this.x = x;
         this.y = y;
-        this.model = model;
-        this.children = new Array<>();
+        this.children = new ArrayList<>();
     }
 
     public void move(float x, float y){
         this.x=x;
         this.y=y;
-        model.update();
+        Model.INSTANCE.update();
     }
 
     public void remove(){
-        model.getExpressions().removeValue(this,true);
-        model.update();
+        Model.INSTANCE.getExpressions().remove(this);
+        Model.INSTANCE.update();
 
         //Insertion point should always be somewhere
         //It may be a good idea to move this to model.update, but this is the only known point where
         // insertionPoint can be trashed
-        Gdx.app.log("Insert",model.getExpressions().first().getResult());
-        boolean insertionInExistence = model.getExpressions().contains(model.getInsertionPoint().getExpression(), true);
+        Gdx.app.log("Insert",Model.INSTANCE.getExpressions().get(0).getResult());
+        boolean insertionInExistence = Model.INSTANCE.getExpressions().contains(Model.INSTANCE.getInsertionPoint().getExpression());
         if(!insertionInExistence) {
-            model.getInsertionPoint().move(model.getExpressions().first().getChildren().peek(), Side.RIGHT);
+            Model.INSTANCE.getInsertionPoint().move(Model.INSTANCE.getExpressions().get(0).getChildren().get(0), Side.RIGHT);
         }
 
         //Additionally, trashing the whole expression can leave the selection on non-existent things
-        model.deselect();
+        Model.INSTANCE.deselect();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ExpressionNode implements Positioned {
         this.y = y;
     }
 
-    public Array<BaseNode> getChildren() {
+    public ArrayList<BaseNode> getChildren() {
         return children;
     }
 

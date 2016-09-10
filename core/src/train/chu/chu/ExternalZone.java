@@ -59,7 +59,7 @@ public class ExternalZone extends Container<Label>{
             BaseNode relative = null;
             switch (side){
                 case LEFT : relative = expression.getChildren().get(0);break;
-                case RIGHT : relative = expression.getChildren().get(expression.getChildren().size-1);break;
+                case RIGHT : relative = expression.getChildren().get(expression.getChildren().size()-1);break;
             }
             hoverSource.move(relative, side);
             dragging = false;
