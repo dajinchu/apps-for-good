@@ -39,15 +39,13 @@ public class KeypadButton extends Container<TextButton> {
                     model.addToHistory();
 
                 }
-                model.addBlock(text,model.getExpressions().get(0));
-                model.addToHistory();
                 if(text.contains("sin")||text.contains("cos")||text.contains("tan")){
-                    model.addBlock(text.substring(0,4),model.getExpressions().first());
-                    model.addBlock(")",model.getExpressions().first());
+                    model.addBlock(text.substring(0,4),model.getExpressions().get(0));
+                    model.addBlock(")",model.getExpressions().get(0));
                     int indexLast=model.getInsertionPoint().getIndex();
                     model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast-2),Side.RIGHT);
                 }else {
-                    model.addBlock(text, model.getExpressions().first());
+                    model.addBlock(text, model.getExpressions().get(0));
                 }
                 model.addToHistory();
             }
@@ -82,7 +80,7 @@ public class KeypadButton extends Container<TextButton> {
 
                 if(text.contains("sin")||text.contains("cos")||text.contains("tan")) {
                     model.addBlock(text.substring(0, 4), into.getExpression()).moveInto(into);
-                    model.addBlock(")", model.getExpressions().first());
+                    model.addBlock(")", model.getExpressions().get(0));
                     int indexLast = model.getInsertionPoint().getIndex();
                     model.getInsertionPoint().move(model.getInsertionPoint().getExpression().getChildren().get(indexLast - 2), Side.RIGHT);
                 }else{
