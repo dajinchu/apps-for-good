@@ -15,6 +15,6 @@ public class AndroidLauncher extends AndroidApplication {
 		super.onCreate(savedInstanceState);
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new Main(new AndroidFirebaseAnalytics(firebaseAnalytics)), config);
+		initialize(new ScreenManager(new AndroidFirebaseAnalytics(firebaseAnalytics)), config);
 	}
 }
