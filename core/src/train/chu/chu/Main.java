@@ -297,7 +297,7 @@ public class Main implements Screen, ModelListener{
         });
         //Key Pad toggle button
 
-        keyPadToggle = new Image(skin.getDrawable("upArrow"));
+        keyPadToggle = new Image(skin.getDrawable("downArrow"));
         keyPadToggle.setScaling(Scaling.fit);
         //Toggle the keypad on and off
         keyPadToggle.addListener(new ClickListener() {
