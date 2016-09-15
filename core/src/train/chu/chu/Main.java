@@ -12,14 +12,12 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -29,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
@@ -42,24 +41,26 @@ import train.chu.chu.model.Model;
 import train.chu.chu.model.ModelListener;
 
 public class Main implements Screen, ModelListener{
+    private static final float TOOLBAR_HEIGHT = 56*Gdx.graphics.getDensity();//Following material spec, toolbar is 56 density independent pixels
     public static AnalyticsProvider analytics;
     private Stage stage;
     public static Skin skin;
     private Expression row;
     private Label result;
     private Table rootTable;
-    private ImageButton redo;
-    private ImageButton undo;
-    private ImageButton parenthesize;
-    private ImageButton addExpression;
-    private ImageButton backSpace;
+    private Image redo;
+    private Image undo;
+    private Image parenthesize;
+    private Image addExpression;
+    private Image backSpace;
+    private Image keyPadToggle;
     private Table keypad;
     private Table keyPadTabs;
     private int tabNum;
     private int keyToggle;
     private int size;
     private TrashCan trashCan = null;
-    private Group toolbar;
+    private Table toolbar;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
@@ -79,7 +80,7 @@ public class Main implements Screen, ModelListener{
     private static final int GRAPHWIDTH = 50;
     private static final float dragSquareSize = 20;
 
-    private HorizontalGroup toolbarLeft;
+    private Table toolbarLeft;
 
     private HashMap<BaseNode, LabelBlock> blockMap = new HashMap<>();
     private HashMap<ExpressionNode, Expression> expressionMap = new HashMap<>();
@@ -257,7 +258,7 @@ public class Main implements Screen, ModelListener{
 
 
         //Creates backspace button
-        backSpace= new ImageButton(skin.getDrawable("backspace"));
+        backSpace= new Image(skin.getDrawable("backspace"));
         backSpace.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -266,12 +267,9 @@ public class Main implements Screen, ModelListener{
             }
         });
 
-        toolbarLeft=new HorizontalGroup();
-        toolbarLeft.addActor(trashCan);
-        toolbarLeft.addActor(backSpace);
         //Creates the redo button
-        redo = new ImageButton(skin.getDrawable("redo"));
-
+        redo = new Image(skin.getDrawable("redo"));
+        redo.setScaling(Scaling.fit);
         redo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -280,7 +278,8 @@ public class Main implements Screen, ModelListener{
         });
 
         //creates the undo button
-        undo = new ImageButton(skin.getDrawable("undo"));
+        undo = new Image(skin.getDrawable("undo"));
+        undo.setScaling(Scaling.fit);
         undo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -288,7 +287,8 @@ public class Main implements Screen, ModelListener{
             }
         });
 
-        addExpression=new ImageButton(skin.getDrawable("newExp"));
+        addExpression=new Image(skin.getDrawable("newExp"));
+        addExpression.setScaling(Scaling.fit);
         addExpression.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -297,8 +297,8 @@ public class Main implements Screen, ModelListener{
         });
         //Key Pad toggle button
 
-        final ImageButton keyPadToggle = new ImageButton(skin.getDrawable("upArrow"), skin.getDrawable("downArrow"), skin.getDrawable("downArrow"));
-
+        keyPadToggle = new Image(skin.getDrawable("upArrow"));
+        keyPadToggle.setScaling(Scaling.fit);
         //Toggle the keypad on and off
         keyPadToggle.addListener(new ClickListener() {
             @Override
@@ -309,7 +309,7 @@ public class Main implements Screen, ModelListener{
                     keyToggle = 1;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), -100, 0.5f, Interpolation.swingIn));
                     keypad.addAction(Actions.moveTo(keypad.getX(), -(size * 4 + 100), 0.5f, Interpolation.swingIn));
-                    keyPadToggle.setChecked(true);
+                    keyPadToggle.setDrawable(skin.getDrawable("upArrow"));
 
 
                 } else {
@@ -317,14 +317,14 @@ public class Main implements Screen, ModelListener{
                     keyToggle = 0;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), (size * 4)+2, 0.5f, Interpolation.swingOut));
                     keypad.addAction(Actions.moveTo(keypad.getX(), 0, 0.5f, Interpolation.swingOut));
-                    keyPadToggle.setChecked(false);
+                    keyPadToggle.setDrawable(skin.getDrawable("downArrow"));
                 }
             }
         });
 
 
-        parenthesize= new ImageButton(skin.getDrawable("parenthesis"));
-
+        parenthesize= new Image(skin.getDrawable("parenthesis"));
+        parenthesize.setScaling(Scaling.fit);
         parenthesize.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -333,14 +333,20 @@ public class Main implements Screen, ModelListener{
             }
         });
 
-        //Create the toolbar, keypad toggle, undo/redo buttons
-        toolbar = new HorizontalGroup();
-        toolbar.addActor((parenthesize));
-        toolbar.addActor(addExpression);
-        toolbar.addActor(keyPadToggle);
-        toolbar.addActor(undo);
-        toolbar.addActor(redo);
+        //Left side of toolbar
+        toolbarLeft=new Table();
+        toolbarLeft.defaults().size(TOOLBAR_HEIGHT);
+        toolbarLeft.add(trashCan);
+        toolbarLeft.add(backSpace);
 
+        //Create the toolbar, keypad toggle, undo/redo buttons
+        toolbar = new Table();
+        toolbar.defaults().size(TOOLBAR_HEIGHT);
+        toolbar.add(parenthesize);
+        toolbar.add(addExpression);
+        toolbar.add(keyPadToggle);
+        toolbar.add(undo);
+        toolbar.add(redo);
 
         //Debugger
         debug = new Label("", skin);
@@ -428,9 +434,9 @@ public class Main implements Screen, ModelListener{
         rootTable.setZIndex(998);
         calcZone.setZIndex(1);
         //Populate rootTable
-        rootTable.add(toolbarLeft).expandX().left().top().expandY().top();
-
-        rootTable.add(toolbar).expandX().right().top().expandY().top();
+        rootTable.row().top();
+        rootTable.add(toolbarLeft);
+        rootTable.add(toolbar).expand().right();
         rootTable.row();
         rootTable.add(keyPadTabs).expandX().right().colspan(2).padBottom(2);
         rootTable.row();
@@ -593,15 +599,15 @@ public class Main implements Screen, ModelListener{
         }
         if(model.getSelection().size==0)selectedBlock.setVisible(true);
         //Change the color of the redo/undo button to gray if stack is empty.
-        if (model.canRedo()) {
-            redo.getImage().setColor(Color.BLACK);
+        if(model.canUndo()){
+            undo.setColor(Color.BLACK);
         } else {
-            redo.getImage().setColor(Color.GRAY);
+            undo.setColor(Color.GRAY);
         }
-        if (model.canUndo()) {
-            undo.getImage().setColor(Color.BLACK);
+        if(model.canRedo()) {
+            redo.setColor(Color.BLACK);
         } else {
-            undo.getImage().setColor(Color.GRAY);
+            redo.setColor(Color.GRAY);
         }
         parenthesize.setVisible(model.getSelection().size>0);
         Bench.end("sync model");
