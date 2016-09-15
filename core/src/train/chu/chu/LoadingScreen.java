@@ -24,6 +24,7 @@ public class LoadingScreen implements Screen {
     private Texture logo;
     private SpriteBatch batch;
 
+    private int logoX, logoY, logoSize, progressY, progressMargin;
 
     //These are the file names of all textures we need with .png redacted
     //They will also be the names of the styles stored in skin
@@ -70,16 +71,23 @@ public class LoadingScreen implements Screen {
             screenManager.startMain(skin);
         }
         batch.begin();
-        batch.draw(logo, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 2 - Gdx.graphics.getWidth() / 4, Gdx.graphics.getWidth() / 2, Gdx.graphics.getWidth() / 2);
+        batch.draw(logo, logoX, logoY, logoSize, logoSize);
+        batch.setColor(1,1,1,.5f);
+        BatchShapeUtils.drawLine(batch, progressMargin, progressY, Gdx.graphics.getWidth() - progressMargin, progressY, 5);
         batch.setColor(Color.WHITE);
-        BatchShapeUtils.drawLine(batch,50,Gdx.graphics.getHeight()/4,50+manager.getProgress()*(Gdx.graphics.getWidth()-100),Gdx.graphics.getHeight()/4,5);
-        Gdx.app.log("loading screen",manager.getProgress()+"");
+        BatchShapeUtils.drawLine(batch, progressMargin, progressY, progressMargin+manager.getProgress()*(Gdx.graphics.getWidth()-progressMargin*2), progressY, 5);
         batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
-
+        //Logo is half the length of the shorter screen side
+        logoSize = Math.min(width, height)/2;
+        logoX = (width - logoSize) / 2;
+        logoY = (height - logoSize) / 2;
+        //3/4 of the way between the bottom of screen to bottom of logo
+        progressY = logoY*3/4;
+        progressMargin = (int) (width*.1);
     }
 
     @Override
