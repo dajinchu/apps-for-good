@@ -188,7 +188,9 @@ public enum Model {
     }
     protected void update(){
         validate();
-        listener.update();
+        if(listener != null) {
+            listener.update();
+        }
     }
     private void validate(){
         Iterator<ExpressionNode> iterator = expressions.iterator();
@@ -209,6 +211,8 @@ public enum Model {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         saveToStream(out);
         history.add(out.toByteArray());
+        future.clear();
+        update();
     }
 
     public void save(){
