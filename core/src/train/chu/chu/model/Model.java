@@ -62,7 +62,6 @@ public enum Model {
     }
 
     public BaseNode addBlock(String data, ExpressionNode target){
-        Gdx.app.log("Model","adding block");
         BaseNode baseNode = insertBlock(data,target,insertionPoint,Side.LEFT);
         return baseNode;
     }
@@ -175,7 +174,6 @@ public enum Model {
                 return;
             }
             getInsertionPoint().getExpression().getChildren().remove(cursorIndex-1);
-            System.out.println("Cursor Index: "+ (cursorIndex-1));
             if(cursorIndex>1) {
                 cursorIndex-=2;
             }else if(cursorIndex==1){
@@ -240,6 +238,8 @@ public enum Model {
             ObjectInputStream reader = new ObjectInputStream(in);
             insertionPoint = (InsertionPoint) reader.readObject();
             expressions = (ArrayList<ExpressionNode>) reader.readObject();
+            selected.clear();
+            selectedExpression = null;
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

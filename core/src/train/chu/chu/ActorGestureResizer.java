@@ -1,6 +1,5 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -35,7 +34,6 @@ public class ActorGestureResizer extends ActorGestureListener {
         this.stage = stage;
         this.worldSize = worldSize;
         clamp();
-        actor.setDebug(true);
     }
 
     //Moving camera around, zoomCam and panCam are calcs used by pinch gesture
@@ -69,13 +67,11 @@ public class ActorGestureResizer extends ActorGestureListener {
         initialPointer2.set(i2,0);
         pointer1.set(f1,0);
         pointer2.set(f2,0);
-        Gdx.app.log("resizer","before cam"+pointer1.toString());
         //unproject using cam to get the screen coordinates.
         cam.unproject(initialPointer1);
         cam.unproject(initialPointer2);
         cam.unproject(pointer1);
         cam.unproject(pointer2);
-        Gdx.app.log("resizer","after cam"+pointer1.toString());
         if(!previousInitial1.equals(initialPointer1)&&!previousInitial2.equals(initialPointer2)){
             //Starting a new gesture
             //Just make previous initial to avoid jumpiness from the previous gesture's values carrying over

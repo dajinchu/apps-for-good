@@ -146,7 +146,6 @@ public class Main implements Screen, ModelListener{
                 boolean hitNothing = hit == null;
                 boolean hitUnselectedBlock = hit instanceof LabelBlock && !((LabelBlock)hit).getNode().isSelected();
                 boolean hitKeypad = hit instanceof KeypadButton;
-                if(hit !=null)Gdx.app.log("Main", hit.toString());
                 if(hitNothing || hitUnselectedBlock || hitKeypad){
                     model.deselect();
                 }
@@ -378,18 +377,15 @@ public class Main implements Screen, ModelListener{
         if (Gdx.graphics.getWidth() > Gdx.graphics.getHeight()) {
             landscape = true;
             size = Gdx.graphics.getWidth() / 10;
-            System.out.println("landscape:" + size);
             calcZone.setPosition((float) ((Gdx.graphics.getWidth() - ((size * 5))) / 2), (height - calcZone.getHeight()) / 2 + 50);
 
         } else {
             landscape = false;
             size = Gdx.graphics.getWidth() / 5;
-            System.out.println("portrait:" + size);
             calcZone.setPosition((width - calcZone.getWidth()) / 2, (float) (Gdx.graphics.getHeight() - ((size * 4.5) / 4)));
 
 
         }
-        System.out.println("Run");
         //KeyPad
         tabNum = 1;
 
@@ -488,7 +484,6 @@ public class Main implements Screen, ModelListener{
     public void tabChooser() {
 
         //Choose between the 10 different tabs
-        System.out.println(tabNum);
         String[][] keys;
 
         //The arrays for the 10 different tabs (Only the first tab is real right now, N is a placeholder).

@@ -1,6 +1,5 @@
 package train.chu.chu.model;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.StringBuilder;
 
 import net.objecthunter.exp4j.Expression;
@@ -40,7 +39,6 @@ public class ExpressionNode implements Positioned, Serializable {
         //Insertion point should always be somewhere
         //It may be a good idea to move this to model.update, but this is the only known point where
         // insertionPoint can be trashed
-        Gdx.app.log("Insert",Model.INSTANCE.getExpressions().get(0).getResult());
         boolean insertionInExistence = Model.INSTANCE.getExpressions().contains(Model.INSTANCE.getInsertionPoint().getExpression());
         if(!insertionInExistence) {
             Model.INSTANCE.getInsertionPoint().move(Model.INSTANCE.getExpressions().get(0).getChildren().get(0), Side.RIGHT);

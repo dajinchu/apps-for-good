@@ -36,8 +36,6 @@ public class KeypadButton extends Container<TextButton> {
             public void clicked(InputEvent event, float z, float y) {
                 if(model.getExpressions().size()==0){
                     model.addExpression(0,0);
-                    model.addToHistory();
-
                 }
                 if(text.contains("sin")||text.contains("cos")||text.contains("tan")){
                     model.addBlock(text.substring(0,4),model.getExpressions().get(0));
@@ -54,7 +52,6 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             protected WidgetGroup getDupe() {
                 KeypadButton.this.setVisible(true);
-                System.out.println("Run CLONE");
 
                 Label clone = new Label(text, Main.skin);
                 clone.setFontScale(BlockCreator.FONT_SCALE);
@@ -65,7 +62,6 @@ public class KeypadButton extends Container<TextButton> {
             @Override
             public void move(BaseNode to, Side side) {
                 //This means the payload has been dragged somewhere
-                System.out.println("Run MOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 if(insert ==null){
                     insert = model.insertBlock(text, to.getExpression(),to,side);
                     model.addToHistory();
