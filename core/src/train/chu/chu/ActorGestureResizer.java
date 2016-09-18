@@ -1,5 +1,6 @@
 package train.chu.chu;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -25,6 +26,7 @@ public class ActorGestureResizer extends ActorGestureListener {
     private Vector3 previousPointer1= new Vector3(), previousInitial2 = new Vector3(), previousInitial1 = new Vector3(), previousPointer2 = new Vector3();
     private Vector3 initialPointer1=new Vector3(), initialPointer2=new Vector3(),pointer1=new Vector3(),pointer2=new Vector3();
     private Vector3 tmp1 =  new Vector3(), tmp2 = new Vector3();
+    private float zoomfactor;
 
     public ActorGestureResizer(Stage stage, Actor actor, Vector2 worldSize){
         //Camera is just used for unprojecting touch events
@@ -33,6 +35,7 @@ public class ActorGestureResizer extends ActorGestureListener {
         this.stage = stage;
         this.worldSize = worldSize;
         clamp();
+        actor.setDebug(true);
     }
 
     //Moving camera around, zoomCam and panCam are calcs used by pinch gesture
@@ -42,7 +45,11 @@ public class ActorGestureResizer extends ActorGestureListener {
             //Just make previousDistance initial to avoid jumpiness from the previous gesture's values carrying over
             previousDistance=initialDistance;
         }
-        actor.setScale(actor.getScaleX()*distance/previousDistance);
+        zoomfactor = distance/previousDistance;
+        tmp1.set(pointer1).lerp(pointer2,.5f);
+        cam.unproject(tmp1);
+        actor.setScale(actor.getScaleX()*zoomfactor);
+        panCam(-(1-zoomfactor)*(tmp1.x-actor.getX()), (1-zoomfactor)*(tmp1.y-actor.getY()));
         clamp();
         //Set previous, as this frame has ended
         previousDistance = distance;
@@ -62,11 +69,13 @@ public class ActorGestureResizer extends ActorGestureListener {
         initialPointer2.set(i2,0);
         pointer1.set(f1,0);
         pointer2.set(f2,0);
+        Gdx.app.log("resizer","before cam"+pointer1.toString());
         //unproject using cam to get the screen coordinates.
         cam.unproject(initialPointer1);
         cam.unproject(initialPointer2);
         cam.unproject(pointer1);
         cam.unproject(pointer2);
+        Gdx.app.log("resizer","after cam"+pointer1.toString());
         if(!previousInitial1.equals(initialPointer1)&&!previousInitial2.equals(initialPointer2)){
             //Starting a new gesture
             //Just make previous initial to avoid jumpiness from the previous gesture's values carrying over
