@@ -39,7 +39,8 @@ public class ExpressionNode implements Positioned, Serializable {
         //Insertion point should always be somewhere
         //It may be a good idea to move this to model.update, but this is the only known point where
         // insertionPoint can be trashed
-        System.out.println(Model.INSTANCE.getExpressions().size());
+
+        //Check if number of expressions
         if(Model.INSTANCE.getExpressions().size()> 0) {
             boolean insertionInExistence = Model.INSTANCE.getExpressions().contains(Model.INSTANCE.getInsertionPoint().getExpression());
             if (!insertionInExistence) {
