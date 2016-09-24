@@ -1,29 +1,23 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -32,8 +26,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
@@ -46,25 +40,27 @@ import train.chu.chu.model.InsertionPoint;
 import train.chu.chu.model.Model;
 import train.chu.chu.model.ModelListener;
 
-public class Main extends ApplicationAdapter implements ModelListener{
+public class Main implements Screen, ModelListener{
+    private static final float TOOLBAR_HEIGHT = 56*Gdx.graphics.getDensity();//Following material spec, toolbar is 56 density independent pixels
     public static AnalyticsProvider analytics;
     private Stage stage;
     public static Skin skin;
     private Expression row;
     private Label result;
     private Table rootTable;
-    private ImageButton redo;
-    private ImageButton undo;
-    private ImageButton parenthesize;
-    private ImageButton addExpression;
-    private ImageButton backSpace;
+    private Image redo;
+    private Image undo;
+    private Image parenthesize;
+    private Image addExpression;
+    private Image backSpace;
+    private Image keyPadToggle;
     private Table keypad;
     private Table keyPadTabs;
     private int tabNum;
     private int keyToggle;
     private int size;
     private TrashCan trashCan = null;
-    private Group toolbar;
+    private Table toolbar;
 
     public static DragAndDrop dragAndDrop = new DragAndDrop();
     private Label debug;
@@ -76,9 +72,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private float[] boundVertices;
     private Polygon wholebound;
     private Array<Polygon> bounds;
-    private SpriteBatch load;
-    private boolean firstTime;
-    private boolean secondTime;
     private Texture logo;
     private int prevtabNum;
     private Model model;
@@ -87,68 +80,19 @@ public class Main extends ApplicationAdapter implements ModelListener{
     private static final int GRAPHWIDTH = 50;
     private static final float dragSquareSize = 20;
 
-    private HorizontalGroup toolbarLeft;
+    private Table toolbarLeft;
 
     private HashMap<BaseNode, LabelBlock> blockMap = new HashMap<>();
     private HashMap<ExpressionNode, Expression> expressionMap = new HashMap<>();
     private SelectedBlock selectedBlock;
 
-    public Main(AnalyticsProvider analytics) {
+    public Main(AnalyticsProvider analytics, Skin skin) {
         this.analytics = analytics;
+        this.skin = skin;
     }
 
     @Override
-    public void create() {
-        load = new SpriteBatch();
-        logo = new Texture("finalLogo.png");
-        firstTime = true;
-    }
-
-    public void setup() {
-
-        //Generate bitmap font from TrueType Font
-        SmartFontGenerator fontGen = new SmartFontGenerator();
-        FileHandle exoFile = Gdx.files.internal("Roboto-Light.ttf");
-        BitmapFont roboto = fontGen.createFont(exoFile, "exo-large", (int) Math.min(480, (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * .25)));
-
-        //Load skin with images and styles for use in scene2d ui elements
-        Drawable green = new Image(new Texture("green.png")).getDrawable();
-        skin = new Skin();
-        Drawable undoImg;
-        Drawable redoImg;
-        final Drawable keytogsUp;
-        final Drawable keytogsDown;
-        Drawable parenthesis;
-        Drawable expression;
-        Drawable backspaceImg;
-        if (Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) < 1000) {
-            undoImg = new Image(new Texture("undo.png")).getDrawable();
-            redoImg = new Image(new Texture("redo.png")).getDrawable();
-            keytogsDown = new Image(new Texture("upArrow.png")).getDrawable();
-            keytogsUp = new Image(new Texture("downArrow.png")).getDrawable();
-            parenthesis= new Image(new Texture("parenthesis.png")).getDrawable();
-            parenthesis.setMinWidth(70);
-            parenthesis.setMinHeight(75);
-            expression = new Image(new Texture("newExp.png")).getDrawable();
-            backspaceImg=new Image(new Texture("backspace.png")).getDrawable();
-            skin.add("delete", new Texture("delete.png"));
-        } else {
-            undoImg = new Image(new Texture("undoLarge.png")).getDrawable();
-            redoImg = new Image(new Texture("redoLarge.png")).getDrawable();
-            keytogsDown = new Image(new Texture("upArrowLarge.png")).getDrawable();
-            keytogsUp = new Image(new Texture("downArrowLarge.png")).getDrawable();
-            parenthesis= new Image(new Texture("parenthesis.png")).getDrawable();
-            parenthesis.setMinWidth(125);
-            parenthesis.setMinHeight(135);
-            expression = new Image(new Texture("newExpLarge.png")).getDrawable();
-            backspaceImg=new Image(new Texture("backspaceLarge.png")).getDrawable();
-            skin.add("delete", new Texture("deleteLarge.png"));
-        }
-
-
-        skin.add("default", new Label.LabelStyle(roboto, Color.WHITE));
-        skin.add("default", new TextButton.TextButtonStyle(green, green, green, roboto));
-
+    public void show() {
         Model.INSTANCE.setListener(this);
         this.model = Model.INSTANCE;
         selectedBlock = new SelectedBlock(model);
@@ -202,7 +146,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 boolean hitNothing = hit == null;
                 boolean hitUnselectedBlock = hit instanceof LabelBlock && !((LabelBlock)hit).getNode().isSelected();
                 boolean hitKeypad = hit instanceof KeypadButton;
-                if(hit !=null)Gdx.app.log("Main", hit.toString());
                 if(hitNothing || hitUnselectedBlock || hitKeypad){
                     model.deselect();
                 }
@@ -283,47 +226,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
                             selection.add(block.getNode());
                         }
                         model.selectBlocks(selection);
-                        /*if (overlaps.size() > 1) {
-                            HashMap<Block, Float> parentAreas = new HashMap<>();
-                            Block parent;
-                            for (Map.Entry<Block, Float> entry : overlaps.entrySet()) {
-                                if (entry.getKey().getParent() instanceof Block) {
-                                    parent = (Block) entry.getKey().getParent();
-                                    if (!parentAreas.containsKey(parent)) {
-                                        //Add this parent if it isn't already in there, and give it area of the current entry
-                                        parentAreas.put(parent, entry.getValue());
-                                    } else {
-                                        //add area of current entry to parent's area sum
-                                        parentAreas.put(parent, parentAreas.get(parent) + entry.getValue());
-                                    }
-                                }
-                            }
-                            //Get parent with max area
-                            Float max = 0f;
-                            Block parentWithLargestArea = null;
-                            for (Map.Entry<Block, Float> entry : parentAreas.entrySet()) {
-                                if (entry.getValue() > max) {
-                                    max = entry.getValue();
-                                    parentWithLargestArea = entry.getKey();
-                                }
-                            }
-                            if (parentWithLargestArea != null) {
-                                SnapshotArray<Actor> childrenList = parentWithLargestArea.getChildren();
-                                int leftmost = childrenList.size - 1, rightmost = 0, tmp;
-                                Block left = null, right = null;
-                                for (Block b : overlaps.keySet()) {
-                                    tmp = childrenList.indexOf(b, true);
-                                    if (tmp < leftmost) {
-                                        leftmost = tmp;
-                                        left = b;
-                                    }
-                                    if (tmp > rightmost) {
-                                        rightmost = tmp;
-                                        right = b;
-                                    }
-                                }
-                            }
-                        }*/
                     }
                     Bench.end("touchup");
                 }
@@ -355,7 +257,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
 
         //Creates backspace button
-        backSpace= new ImageButton(backspaceImg);
+        backSpace= new Image(skin.getDrawable("backspace"));
         backSpace.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -364,12 +266,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
         });
 
-        toolbarLeft=new HorizontalGroup();
-        toolbarLeft.addActor(trashCan);
-        toolbarLeft.addActor(backSpace);
         //Creates the redo button
-        redo = new ImageButton(redoImg);
-
+        redo = new Image(skin.getDrawable("redo"));
+        redo.setScaling(Scaling.fit);
         redo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -378,7 +277,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
         });
 
         //creates the undo button
-        undo = new ImageButton(undoImg);
+        undo = new Image(skin.getDrawable("undo"));
+        undo.setScaling(Scaling.fit);
         undo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -386,7 +286,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
         });
 
-        addExpression=new ImageButton(expression);
+        addExpression=new Image(skin.getDrawable("newExp"));
+        addExpression.setScaling(Scaling.fit);
         addExpression.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float z, float y) {
@@ -395,8 +296,8 @@ public class Main extends ApplicationAdapter implements ModelListener{
         });
         //Key Pad toggle button
 
-        final ImageButton keyPadToggle = new ImageButton(keytogsUp, keytogsDown, keytogsDown);
-
+        keyPadToggle = new Image(skin.getDrawable("downArrow"));
+        keyPadToggle.setScaling(Scaling.fit);
         //Toggle the keypad on and off
         keyPadToggle.addListener(new ClickListener() {
             @Override
@@ -407,7 +308,7 @@ public class Main extends ApplicationAdapter implements ModelListener{
                     keyToggle = 1;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), -100, 0.5f, Interpolation.swingIn));
                     keypad.addAction(Actions.moveTo(keypad.getX(), -(size * 4 + 100), 0.5f, Interpolation.swingIn));
-                    keyPadToggle.setChecked(true);
+                    keyPadToggle.setDrawable(skin.getDrawable("upArrow"));
 
 
                 } else {
@@ -415,14 +316,14 @@ public class Main extends ApplicationAdapter implements ModelListener{
                     keyToggle = 0;
                     keyPadTabs.addAction(Actions.moveTo(keyPadTabs.getX(), (size * 4)+2, 0.5f, Interpolation.swingOut));
                     keypad.addAction(Actions.moveTo(keypad.getX(), 0, 0.5f, Interpolation.swingOut));
-                    keyPadToggle.setChecked(false);
+                    keyPadToggle.setDrawable(skin.getDrawable("downArrow"));
                 }
             }
         });
 
 
-        parenthesize= new ImageButton(parenthesis);
-
+        parenthesize= new Image(skin.getDrawable("parenthesis"));
+        parenthesize.setScaling(Scaling.fit);
         parenthesize.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -431,14 +332,20 @@ public class Main extends ApplicationAdapter implements ModelListener{
             }
         });
 
-        //Create the toolbar, keypad toggle, undo/redo buttons
-        toolbar = new HorizontalGroup();
-        toolbar.addActor((parenthesize));
-        toolbar.addActor(addExpression);
-        toolbar.addActor(keyPadToggle);
-        toolbar.addActor(undo);
-        toolbar.addActor(redo);
+        //Left side of toolbar
+        toolbarLeft=new Table();
+        toolbarLeft.defaults().size(TOOLBAR_HEIGHT);
+        toolbarLeft.add(trashCan);
+        toolbarLeft.add(backSpace);
 
+        //Create the toolbar, keypad toggle, undo/redo buttons
+        toolbar = new Table();
+        toolbar.defaults().size(TOOLBAR_HEIGHT);
+        toolbar.add(parenthesize);
+        toolbar.add(addExpression);
+        toolbar.add(keyPadToggle);
+        toolbar.add(undo);
+        toolbar.add(redo);
 
         //Debugger
         debug = new Label("", skin);
@@ -457,9 +364,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
     @Override
     public void resize(int width, int height) {
-        if (firstTime) {
-            return;
-        }
         //Handle resize. This is still important on static windows (eg. Android) because it is
         // called once in the beginning of the app lifecycle, so instead of handling sizing in create,
         // it's clearer to do it here, and avoids doing it twice (create and resize are both called initially)
@@ -473,18 +377,15 @@ public class Main extends ApplicationAdapter implements ModelListener{
         if (Gdx.graphics.getWidth() > Gdx.graphics.getHeight()) {
             landscape = true;
             size = Gdx.graphics.getWidth() / 10;
-            System.out.println("landscape:" + size);
             calcZone.setPosition((float) ((Gdx.graphics.getWidth() - ((size * 5))) / 2), (height - calcZone.getHeight()) / 2 + 50);
 
         } else {
             landscape = false;
             size = Gdx.graphics.getWidth() / 5;
-            System.out.println("portrait:" + size);
             calcZone.setPosition((width - calcZone.getWidth()) / 2, (float) (Gdx.graphics.getHeight() - ((size * 4.5) / 4)));
 
 
         }
-        System.out.println("Run");
         //KeyPad
         tabNum = 1;
 
@@ -529,9 +430,9 @@ public class Main extends ApplicationAdapter implements ModelListener{
         rootTable.setZIndex(998);
         calcZone.setZIndex(1);
         //Populate rootTable
-        rootTable.add(toolbarLeft).expandX().left().top().expandY().top();
-
-        rootTable.add(toolbar).expandX().right().top().expandY().top();
+        rootTable.row().top();
+        rootTable.add(toolbarLeft);
+        rootTable.add(toolbar).expand().right();
         rootTable.row();
         rootTable.add(keyPadTabs).expandX().right().colspan(2).padBottom(2);
         rootTable.row();
@@ -540,52 +441,24 @@ public class Main extends ApplicationAdapter implements ModelListener{
     }
 
     @Override
-    public void render() {
+    public void render(float delta) {
+        //Wipe the screen clean with a white clear color
+        Gdx.gl.glClearColor(.9294f, .9294f, .9294f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (firstTime) {
-            Gdx.gl.glClearColor(230 / 255f, 74 / 255f, 25 / 255f, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-            load.begin();
-            load.draw(logo, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 2 - Gdx.graphics.getWidth() / 4, Gdx.graphics.getWidth() / 2, Gdx.graphics.getWidth() / 2);
-            load.end();
-            firstTime = false;
-            secondTime = true;
+        //Scene2d. Step forward the world and draw the scene
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
+        //stage.setDebugAll(true);
 
-        } else if (secondTime) {
-            secondTime = false;
-            setup();
-        } else {
-            //Wipe the screen clean with a white clear color
-            Gdx.gl.glClearColor(.9294f, .9294f, .9294f, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-            //Scene2d. Step forward the world and draw the scene
-            stage.act(Gdx.graphics.getDeltaTime());
-            stage.draw();
-            //stage.setDebugAll(true);
-
-            stage.getBatch().begin();
-            stage.getBatch().setColor(Color.BLACK);
-            for (int i = 0; i < circle.size() - 1; i++) {
-                p1 = circle.get(i);
-                p2 = circle.get(i + 1);
-                BatchShapeUtils.drawLine(stage.getBatch(), p1[0], p1[1], p2[0], p2[1], 2);
-            }
-            stage.getBatch().end();
-/*
-        if(boundVertices!=null) {
-            psg.begin();
-            psg.setTransformMatrix(stage.getBatch().getTransformMatrix());
-            for(Polygon p : bounds) {
-                psg.draw(new PolygonRegion(poly, p.getVertices(), new short[]{0,1,2}), 0, 0);
-            }
-            psg.end();
-            stage.getBatch().begin();
-            stage.getBatch().setColor(Color.BLUE);
-            stage.getBatch().draw(poly, wholebound.getBoundingRectangle().getX(),wholebound.getBoundingRectangle().getY(),wholebound.getBoundingRectangle().width,wholebound.getBoundingRectangle().height);
-            stage.getBatch().end();
-        }*/
+        stage.getBatch().begin();
+        stage.getBatch().setColor(Color.BLACK);
+        for (int i = 0; i < circle.size() - 1; i++) {
+            p1 = circle.get(i);
+            p2 = circle.get(i + 1);
+            BatchShapeUtils.drawLine(stage.getBatch(), p1[0], p1[1], p2[0], p2[1], 2);
         }
+        stage.getBatch().end();
     }
 
     @Override
@@ -605,10 +478,12 @@ public class Main extends ApplicationAdapter implements ModelListener{
         skin.dispose();
     }
 
+    @Override
+    public void hide(){}
+
     public void tabChooser() {
 
         //Choose between the 10 different tabs
-        System.out.println(tabNum);
         String[][] keys;
 
         //The arrays for the 10 different tabs (Only the first tab is real right now, N is a placeholder).
@@ -662,7 +537,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
                 //Look for repeated keys
                 while (y < keys[0].length - 1 && buttonTxt.equals(keys[x][y + i])) {
                     i++;
-
                 }
 
                 //Skip forward to avoid repetition
@@ -683,7 +557,6 @@ public class Main extends ApplicationAdapter implements ModelListener{
 
         calcZone.clear();
         selectedBlock.clearChildren();
-
 
         for(ExpressionNode exp : model.getExpressions()){
             Expression expression = expressionMap.get(exp);
@@ -721,15 +594,15 @@ public class Main extends ApplicationAdapter implements ModelListener{
         }
         if(model.getSelection().size==0)selectedBlock.setVisible(true);
         //Change the color of the redo/undo button to gray if stack is empty.
-        if (model.canRedo()) {
-            redo.getImage().setColor(Color.BLACK);
+        if(model.canUndo()){
+            undo.setColor(Color.BLACK);
         } else {
-            redo.getImage().setColor(Color.GRAY);
+            undo.setColor(Color.GRAY);
         }
-        if (model.canUndo()) {
-            undo.getImage().setColor(Color.BLACK);
+        if(model.canRedo()) {
+            redo.setColor(Color.BLACK);
         } else {
-            undo.getImage().setColor(Color.GRAY);
+            redo.setColor(Color.GRAY);
         }
         parenthesize.setVisible(model.getSelection().size>0);
         Bench.end("sync model");

@@ -8,6 +8,6 @@ import train.chu.chu.*;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new Main(new BlankAnalytics()), config);
+		new LwjglApplication(new ScreenManager(new BlankAnalytics()), config);
 	}
 }

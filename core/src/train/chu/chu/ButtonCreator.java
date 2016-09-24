@@ -3,7 +3,6 @@ package train.chu.chu;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -22,7 +21,7 @@ public class ButtonCreator {
      * Creates a Button
      * @param str takes the string for the button
      * @param skin the skin for the Skin
-     * @return an ImageButton or TextButton
+     * @return an Button or TextButton
      */
     public static Button ButtonCreator(String str, Skin skin){
 
@@ -61,7 +60,7 @@ public class ButtonCreator {
     /**
      * Takes the string and returns the appropriate image.
      * @param str the string id
-     * @return the image for the ImageButton
+     * @return the image for the Button
      */
     public static Button imageButtonCreator(String str){
         Button button;
@@ -70,11 +69,11 @@ public class ButtonCreator {
         switch (str){
             case "sqrt":
                 pic=new Image(new Texture("delete.png")).getDrawable();
-                button = new ImageButton(pic);
+                button = new Button(pic);
                 break;
             default:
                 pic=new Image(new Texture("green.png")).getDrawable();
-                button = new ImageButton(pic);
+                button = new Button(pic);
         }
         return button;
     }

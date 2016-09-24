@@ -44,8 +44,8 @@ public abstract class BlockSource extends DragAndDrop.Source implements Trashabl
             Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
             BlankNode blank = model.addExpression(pos.x, pos.y-dragActor.getPrefHeight()/4);
             moveInto(blank);
-            model.addToHistory();
         }
+        Model.INSTANCE.addToHistory();
     }
 
     protected abstract WidgetGroup getDupe();

@@ -1,6 +1,5 @@
 package train.chu.chu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -33,7 +32,7 @@ public class Expression extends Stack {
     private final HorizontalGroup resultGroup;
     HorizontalGroup row;
     private Label result;
-    NinePatchDrawable patch = new NinePatchDrawable(new NinePatch(new Texture("card.png"),15,15,15,15));
+    NinePatchDrawable patch = new NinePatchDrawable(new NinePatch(new Texture("card.png"),15,15,7,22));
 
     private class ExpressionSource extends DragAndDrop.Source implements Trashable {
         public ExpressionSource(Actor actor) {
@@ -79,7 +78,6 @@ public class Expression extends Stack {
         @Override
         public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
             setVisible(true);
-            Gdx.app.log("Expression",event.getStageX()+" , "+event.getStageY());
             Vector2 pos = ScaleUtils.positionWithin(Main.calcZone, event.getStageX(), event.getStageY());
             expressionNode.move(pos.x,pos.y);
             Model.INSTANCE.addToHistory();
@@ -140,7 +138,6 @@ public class Expression extends Stack {
         pack();
         back.size(content.getPrefWidth(),content.getPrefHeight());
         super.layout();
-        Gdx.app.log("expression","layout"+ content.getPrefWidth()+","+content.getPrefHeight()+"  "+getWidth()+","+getHeight());
     }
 
 
