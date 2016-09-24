@@ -97,7 +97,7 @@ public class KeypadButton extends Container<TextButton> {
     private String testSpecial(String test) {
         String returnThis = "";
 
-        if (test.contains("sin") || test.contains("cos") || test.contains("tan") || test.contains("arc") || test.contains("sec") || test.contains("cot")) {
+        if (test.contains("sin") || test.contains("cos") || test.contains("tan") || test.contains("csc") || test.contains("sec") || test.contains("cot")) {
             returnThis = "trig";
         } else {
             returnThis = " ";

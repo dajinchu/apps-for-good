@@ -499,10 +499,10 @@ public class Main implements Screen, ModelListener{
                 break;
             case 2:
                 keys = new String[][]{
-                        {"sin()", "sin()", "cot()", "cot()", "N"},
-                        {"cos()", "cos()", "sec()", "sec()", "N"},
-                        {"tan()", "tan()", "arc()", "arc()", "N"},
-                        {"0", "0", ".", "/", "N"}
+                        {"sin()", "sin()", "csc()", "csc()", "arcsin"},
+                        {"cos()", "cos()", "sec()", "sec()", "arccos"},
+                        {"tan()", "tan()", "cot()", "cot()", "arctan"},
+                        {"0", "0", ".", "/", "N", "N"}
 
                 };
                 break;
