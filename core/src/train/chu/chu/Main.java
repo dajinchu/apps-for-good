@@ -381,7 +381,7 @@ public class Main implements Screen, ModelListener{
 
         } else {
             landscape = false;
-            size = Gdx.graphics.getWidth() / 5;
+            size = (int)(Gdx.graphics.getWidth() / 5);
             calcZone.setPosition((width - calcZone.getWidth()) / 2, (float) (Gdx.graphics.getHeight() - ((size * 4.5) / 4)));
 
 
@@ -437,7 +437,7 @@ public class Main implements Screen, ModelListener{
         rootTable.add(keyPadTabs).expandX().right().colspan(2).padBottom(2);
         rootTable.row();
         rootTable.add(keypad).expandX().right().colspan(2);
-        keyPadTabs.setVisible(true);
+        keyPadTabs.setVisible(false);
     }
 
     @Override
